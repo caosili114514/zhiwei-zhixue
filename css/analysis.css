@@ -761,3 +761,38 @@
   .ana-student-bar.is-slim .ana-student-select { flex: 1 1 220px; }
   .ana-student-bar.is-slim .ana-student-perm { margin-left: 0; justify-content: flex-start; }
 }
+
+/* ============================================================
+   Batch 3C · 教学助理：输入为主焦点、欢迎区压缩、侧栏折叠
+   ============================================================ */
+.ana-assistant .ana-welcome {
+  gap: var(--s-2);
+  padding: var(--s-3) var(--s-4);
+  border-color: var(--border);
+  background: var(--surface-2);
+}
+.ana-assistant .ana-welcome-title { font-size: var(--fs-sm); }
+.ana-assistant .ana-welcome-sub { font-size: var(--fs-sm); }
+.ana-assistant .ana-composer-wrap {
+  gap: var(--s-3);
+  padding: var(--s-3) var(--s-4) var(--s-4);
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+.ana-assistant .ana-quick-bar { gap: 6px; }
+.ana-assistant .ana-composer-input { min-height: 56px; }
+.ana-assistant .ana-composer-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-50);
+}
+.ana-assistant .ana-side .disclosure { margin-top: 0; }
+.ana-assistant .ana-assistant-disclaimer { padding-top: var(--s-2); }
+@media (max-width: 1024px) {
+  .ana-assistant .ana-chat-card { min-height: 0; }
+}
+
+/* 空会话时不撑出大块留白；输入区右侧提示不换行 */
+.ana-assistant .ana-chat-card { min-height: 0; }
+.ana-assistant .ana-chat-list { min-height: 160px; }
+.ana-assistant .ana-composer-side { min-width: 104px; }
+.ana-assistant .ana-composer-side .tiny { white-space: nowrap; line-height: 1.5; }

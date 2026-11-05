@@ -1,4 +1,4 @@
-/* ============================================================
+﻿/* ============================================================
    知微·智学 · 教学助理（教师端学情工作台 + 智能分析面板）
    ------------------------------------------------------------
    - 左侧：提问 + 分析卡片流；右侧：班级实时摘要 + 快捷跳转；
@@ -44,35 +44,13 @@
 
   /* ---------------- 欢迎区 ---------------- */
   function renderWelcome(state, classId) {
-    var overview = sel.classOverview(state, classId);
-    var cls = sel.classById(state, classId);
-    var kps = sel.kpAnalysis(state, classId);
-    var covered = kps.filter(function (r) { return r.records > 0; }).length;
-    var quick = assistant.teacherQuickAsks;
-
     return html`<div class="ana-welcome">
       <div class="ana-welcome-head">
-        <span class="ana-ai-avatar">${ui.icon('bot', 18)}</span>
+        <span class="ana-ai-avatar">${ui.icon('bot', 17)}</span>
         <div>
           <div class="ana-welcome-title">你好，我是班级学情教学助理</div>
-          <div class="ana-welcome-sub">基于当前班级数据做规则分析，每条建议都会说明依据与适用条件；最终教学决定由你作出。</div>
+          <div class="ana-welcome-sub">可以询问本班薄弱知识点、错误类型、阶段变化，或某位学生的学情摘要；回答附数据依据与适用条件。</div>
         </div>
-      </div>
-      <div class="ana-welcome-facts">
-        ${ui.badge((cls ? cls.name : '当前班级') + ' · ' + overview.studentCount + ' 名学生', 'primary')}
-        ${ui.badge('可判读记录 ' + overview.judged + ' / ' + overview.records + ' 条', 'teal')}
-        ${ui.badge('覆盖知识点 ' + covered + ' / ' + kps.length + ' 个', covered >= kps.length ? 'teal' : 'warn')}
-        ${ui.badge('待复核批阅 ' + overview.pendingGrades + ' 条', overview.pendingGrades ? 'warn' : 'neutral')}
-        ${ui.badge('待确认诊断 ' + overview.pendingDiagnoses + ' 项', overview.pendingDiagnoses ? 'warn' : 'neutral')}
-      </div>
-      <div class="ana-welcome-tip">${ui.icon('spark', 13)}<span>可以问我班级薄弱知识点、错误类型集中情况、阶段变化、数据覆盖，或某位学生的学情摘要。</span></div>
-      <div class="ana-quick-asks">
-        ${quick.map(function (q) {
-          return ui.chip(q, { attrs: 'data-ask="' + esc(q) + '"' });
-        })}
-      </div>
-      <div class="tiny muted ana-welcome-note">
-        规则应答 · 未接入真实大模型 · 分析只基于当前演示数据，不替代教师的教学判断。
       </div>
     </div>`;
   }
@@ -146,53 +124,41 @@
     })}`;
   }
 
-  /* 空会话提示：避免首屏对话区留白过大，让人误以为没有加载 */
-  function renderChatHint() {
-    if (MESSAGES.length) return '';
-    return html`<div class="ana-chat-hint">
-      <span class="ana-chat-hint-icon">${ui.icon('search', 18)}</span>
-      <span>可以直接点下方快捷提问，或输入你的问题，例如“本班目前最需要关注哪些知识点？”</span>
-    </div>`;
-  }
-
   function renderChat(state, classId) {
     var quick = assistant.teacherQuickAsks;
     return html`<section class="card ana-chat-card">
       <div class="card-head">
         <div class="card-head-main">
-          <div class="card-title">${ui.icon('message', 16)}学情工作台</div>
-          <div class="card-desc">用自然语言查询班级 / 个体学情，回答以分析卡片呈现，包含依据与适用条件</div>
+          <div class="card-title">提问</div>
         </div>
         <div class="card-actions">
-          ${ui.badge('本地规则应答', 'neutral')}
           ${ui.button({ label: '清空会话', icon: 'refresh', size: 'sm', tone: 'ghost', attrs: 'data-act="clear"' })}
         </div>
       </div>
       <div class="card-body ana-chat-body">
         <div class="ana-chat-list" id="ana-chat-list">
-          ${renderWelcome(state, classId)}
+          ${MESSAGES.length ? '' : renderWelcome(state, classId)}
           ${renderMessages()}
-          ${renderChatHint()}
         </div>
       </div>
       <div class="card-foot ana-composer-wrap">
+        <div class="ana-quick-bar">
+          <span class="tiny muted">快捷提问</span>
+          ${quick.map(function (q) {
+            return ui.chip(q, { attrs: 'data-ask="' + esc(q) + '"' });
+          })}
+        </div>
         <div class="ana-composer">
           <textarea class="textarea ana-composer-input" id="ana-input" rows="2"
-            placeholder="例如：本班目前最需要关注哪些知识点？">${INPUT_TEXT}</textarea>
+            placeholder="输入问题，例如：本班目前最需要关注哪些知识点？">${INPUT_TEXT}</textarea>
           <div class="ana-composer-side">
             ${ui.button({ label: '发送', icon: 'arrowRight', tone: 'primary', attrs: 'data-act="send"' })}
             <div class="tiny muted">Enter 发送<br>Shift+Enter 换行</div>
           </div>
         </div>
-        <div class="ana-quick-bar">
-          <span class="tiny muted">快捷提问：</span>
-          ${quick.map(function (q) {
-            return ui.chip(q, { attrs: 'data-ask="' + esc(q) + '"' });
-          })}
-        </div>
         <div class="ana-assistant-disclaimer">
           ${ui.icon('shield', 13)}
-          <span>本助手为本地规则应答，<b>未接入真实大模型</b>；分析结论仅供参考，不替代教师的教学判断与最终决定。数据为虚构模拟数据。</span>
+          <span>本地规则应答，未接入真实大模型；建议仅供参考，不替代教师判断。数据为虚构模拟。</span>
         </div>
       </div>
     </section>`;
@@ -223,8 +189,7 @@
       <section class="card">
         <div class="card-head">
           <div class="card-head-main">
-            <div class="card-title">班级实时摘要</div>
-            <div class="card-desc">按“仍需巩固占比”排序 · 数据随作答与复核实时更新</div>
+            <div class="card-title">班级摘要</div>
           </div>
         </div>
         <div class="card-body">
@@ -240,43 +205,32 @@
             <div class="ana-side-stat"><span>待确认诊断</span><b class="num warn-text">${overview.pendingDiagnoses}</b></div>
             <div class="ana-side-stat"><span>最近作答</span><b class="num">${overview.lastActivity ? fmt.shortDate(overview.lastActivity) : '—'}</b></div>
           </div>
-          <div class="tiny muted mt-2">口径：可判读 = 已判分或教师已复核；待复核记录不计入掌握率与错误分布。</div>
+          <div class="tiny muted mt-2">口径：可判读 = 已判分或教师已复核；待复核不计入掌握率与错误分布。</div>
         </div>
       </section>
 
-      <section class="card">
-        <div class="card-head">
-          <div class="card-head-main">
-            <div class="card-title">快捷跳转</div>
-            <div class="card-desc">从分析到处理，直接进入对应工作区</div>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="ana-jump-grid">
-            ${ui.button({ label: '班级学情分析', icon: 'chart', size: 'sm', tone: 'secondary', attrs: 'data-hash="#/teacher/analysis"' })}
-            ${ui.button({ label: '个体学情档案', icon: 'user', size: 'sm', tone: 'secondary', attrs: 'data-hash="#/teacher/profile"' })}
-            ${ui.button({ label: '复核中心', icon: 'shield', size: 'sm', tone: 'secondary', attrs: 'data-hash="#/teacher/review"' })}
-            ${ui.button({ label: '作业批阅', icon: 'clipboard', size: 'sm', tone: 'secondary', attrs: 'data-hash="#/teacher/grading"' })}
-            ${ui.button({ label: '数据与报告', icon: 'database', size: 'sm', tone: 'secondary', attrs: 'data-hash="#/teacher/data"' })}
-          </div>
-        </div>
-      </section>
+      ${ui.disclosure({
+        summary: '快捷跳转',
+        count: '5 个入口',
+        body: html`<div class="ana-jump-grid">
+          ${ui.button({ label: '班级学情分析', icon: 'chart', size: 'sm', tone: 'secondary', attrs: 'data-hash="#/teacher/analysis"' })}
+          ${ui.button({ label: '个体学情档案', icon: 'user', size: 'sm', tone: 'secondary', attrs: 'data-hash="#/teacher/profile"' })}
+          ${ui.button({ label: '复核中心', icon: 'shield', size: 'sm', tone: 'secondary', attrs: 'data-hash="#/teacher/review"' })}
+          ${ui.button({ label: '作业批阅', icon: 'clipboard', size: 'sm', tone: 'secondary', attrs: 'data-hash="#/teacher/grading"' })}
+          ${ui.button({ label: '数据与报告', icon: 'database', size: 'sm', tone: 'secondary', attrs: 'data-hash="#/teacher/data"' })}
+        </div>`
+      })}
 
-      <section class="card">
-        <div class="card-head">
-          <div class="card-head-main">
-            <div class="card-title">使用说明</div>
-          </div>
-        </div>
-        <div class="card-body">
-          <ul class="ana-bullets small">
-            <li>每条分析都附“数据依据”与“适用条件”，请结合课堂观察判断。</li>
-            <li>记录不足或存在待复核时，助理会明确说明“暂无法判断”或标注初步。</li>
-            <li>回复中的按钮可直接跳转到对应页面继续处理。</li>
-            <li>会话内容仅保存在当前页面，刷新浏览器后清空。</li>
-          </ul>
-        </div>
-      </section>
+      ${ui.disclosure({
+        summary: '使用说明与能力边界',
+        count: '4 条',
+        body: html`<ul class="ana-bullets small">
+          <li>每条分析都附“数据依据”与“适用条件”，请结合课堂观察判断。</li>
+          <li>记录不足或存在待复核时，助理会明确说明“暂无法判断”或标注初步。</li>
+          <li>回复中的按钮可直接跳转到对应页面继续处理。</li>
+          <li>会话内容仅保存在当前页面，刷新浏览器后清空。</li>
+        </ul>`
+      })}
     </div>`;
   }
 
@@ -305,9 +259,8 @@
   function paint(root, ctx) {
     var list = root.querySelector('#ana-chat-list');
     if (list) {
-      list.innerHTML = renderWelcome(ctx.state, classIdOf(ctx)).value +
-        (MESSAGES.length ? renderMessages().value : '') +
-        (MESSAGES.length ? '' : renderChatHint().value);
+      list.innerHTML = (MESSAGES.length ? '' : renderWelcome(ctx.state, classIdOf(ctx)).value) +
+        (MESSAGES.length ? renderMessages().value : '');
       list.scrollTop = list.scrollHeight;
     }
     var input = root.querySelector('#ana-input');
@@ -340,21 +293,17 @@
     render: function (ctx) {
       var state = ctx.state;
       var classId = classIdOf(ctx);
-      var cls = sel.classById(state, classId);
       var overview = sel.classOverview(state, classId);
 
       return html`<div class="page ana-assistant">
         <div class="page-head">
           <div class="page-head-main">
             <div class="page-title">教学助理</div>
-            <div class="page-desc">
-              学情工作台 + 智能分析面板：可以查询 ${cls ? cls.name : '当前班级'} 的薄弱知识点、错误类型、阶段变化与学生个体情况。
-              回答为分析卡片（含数据依据与适用条件），不是普通聊天；助理不替教师作决定。
-            </div>
+            <div class="page-desc">用自然语言查询班级或个体学情；回答包含数据依据与适用条件，辅助教学判断。</div>
           </div>
           <div class="page-actions">
             ${ui.button({ label: '班级学情分析', icon: 'chart', tone: 'secondary', attrs: 'data-hash="#/teacher/analysis"' })}
-            ${ui.button({ label: '复核中心', icon: 'shield', tone: 'primary', attrs: 'data-hash="#/teacher/review"' })}
+            ${ui.button({ label: '复核中心', icon: 'shield', tone: 'ghost', attrs: 'data-hash="#/teacher/review"' })}
           </div>
         </div>
 
@@ -438,3 +387,4 @@
     }
   });
 })();
+
