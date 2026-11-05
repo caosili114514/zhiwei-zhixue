@@ -1,0 +1,15 @@
+﻿所属文件,字段名,类型,必填,含义,关联 ID,缺失表示,数据来源,示例
+task1_learning_requirements,themeId,string,是,学习主题编号,chapters.id,不允许,课程要求.csv,T01
+task1_learning_requirements,indicatorId,string,是,观察指标编号,knowledgePoints.id,不允许,课程要求.csv,T01I1
+task1_learning_requirements,standardRef,string,否,课标整理编号,课程要求.csv,空字符串,课程要求.csv,CR01
+task1_learning_requirements,textbookPages,string,否,教材页码,题目与材料.csv,空字符串,课程要求.csv,上册68—109
+task2_individual_analysis,studentId,string,是,模拟学生编号,users.id,不允许,模拟学生.csv,D01
+task2_individual_analysis,indicatorId,string,是,观察指标,knowledgePoints.id,不允许,课程要求.csv,T01I1
+task2_individual_analysis,scoreRate,number,否,得分率=得分合计/满分合计（仅有效记录）,作答记录.csv,null,派生,0.72
+task2_individual_analysis,evidenceIds,string,是,证据记录 ID（| 分隔）,作答记录.记录编号,空字符串,作答记录.csv,DR0012|DR0034
+task3_learning_recommendations,studentId,string,是,学生编号,users.id,不允许,模拟学生.csv,D07
+task3_learning_recommendations,materials.learningCard,object,否,学习卡材料,materials.id (L01–L03),null,题目与材料.csv,"{""id"":""L01""}"
+task3_learning_recommendations,materials.practiceQuestions,array,是,练习题目,questions.id (Q001–Q054),空数组,题目与材料.csv,"[""Q007"",""Q013""]"
+data_quality_report,recordId,string,是,原始记录编号,作答记录.记录编号,不允许,作答记录.csv,DR0361
+data_quality_report,type,string,是,问题类型,-,不允许,派生,score_out_of_range
+data_quality_report,inStats,boolean,是,是否进入统计,-,不允许,派生,false

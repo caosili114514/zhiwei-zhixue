@@ -1,0 +1,228 @@
+{
+  "dataset": {
+    "source": "主办方《【赛题材料】智慧学伴》公开模拟学情数据（4_赛题数据/模拟学情数据）",
+    "version": "2026-11-05",
+    "mode": "competition"
+  },
+  "themes": [
+    {
+      "themeId": "T01",
+      "themeName": "代数式与整式运算",
+      "goal": "能用代数式表示简单数量关系、代入求值，并进行整式加减与解释。",
+      "standardRef": "CR01",
+      "standardPages": "62／55",
+      "textbookPages": "上册68—109",
+      "indicators": [
+        {
+          "indicatorId": "T01I1",
+          "indicatorName": "表示数量关系并代入求值",
+          "standardRef": "CR01",
+          "standardPages": "62／55",
+          "textbookPages": "上册68—109",
+          "questionIds": [
+            "Q001",
+            "Q002",
+            "Q006",
+            "Q007",
+            "Q013",
+            "Q014"
+          ],
+          "learningCards": [
+            "L01"
+          ],
+          "textbookSlices": [
+            "B05"
+          ]
+        },
+        {
+          "indicatorId": "T01I2",
+          "indicatorName": "识别同类项、去括号并化简",
+          "standardRef": "CR01",
+          "standardPages": "62／55",
+          "textbookPages": "上册68—109",
+          "questionIds": [
+            "Q003",
+            "Q004",
+            "Q005",
+            "Q008",
+            "Q009",
+            "Q010",
+            "Q012",
+            "Q015",
+            "Q016",
+            "Q017"
+          ],
+          "learningCards": [
+            "L01"
+          ],
+          "textbookSlices": [
+            "B05"
+          ]
+        },
+        {
+          "indicatorId": "T01I3",
+          "indicatorName": "用整式解释具体问题",
+          "standardRef": "CR01",
+          "standardPages": "62／55",
+          "textbookPages": "上册68—109",
+          "questionIds": [
+            "Q011",
+            "Q018"
+          ],
+          "learningCards": [
+            "L01"
+          ],
+          "textbookSlices": [
+            "B05"
+          ]
+        }
+      ]
+    },
+    {
+      "themeId": "T02",
+      "themeName": "方程与方程组",
+      "goal": "能解一元一次方程和二元一次方程组，依据等量关系建立模型并检验答案。",
+      "standardRef": "CR02",
+      "standardPages": "63／56",
+      "textbookPages": "上册110—148；下册87—119",
+      "indicators": [
+        {
+          "indicatorId": "T02I1",
+          "indicatorName": "运用等式性质解一元一次方程",
+          "standardRef": "CR02",
+          "standardPages": "63／56",
+          "textbookPages": "上册110—148；下册87—119",
+          "questionIds": [
+            "Q019",
+            "Q020",
+            "Q021",
+            "Q022",
+            "Q023",
+            "Q024",
+            "Q025",
+            "Q026"
+          ],
+          "learningCards": [
+            "L02"
+          ],
+          "textbookSlices": [
+            "B06"
+          ]
+        },
+        {
+          "indicatorId": "T02I2",
+          "indicatorName": "用消元法解二元一次方程组",
+          "standardRef": "CR02",
+          "standardPages": "63／56",
+          "textbookPages": "上册110—148；下册87—119",
+          "questionIds": [
+            "Q028",
+            "Q029",
+            "Q030",
+            "Q031",
+            "Q032",
+            "Q035"
+          ],
+          "learningCards": [
+            "L02"
+          ],
+          "textbookSlices": [
+            "B06"
+          ]
+        },
+        {
+          "indicatorId": "T02I3",
+          "indicatorName": "列方程或方程组解决简单实际问题并检验",
+          "standardRef": "CR02",
+          "standardPages": "63／56",
+          "textbookPages": "上册110—148；下册87—119",
+          "questionIds": [
+            "Q027",
+            "Q033",
+            "Q034",
+            "Q036"
+          ],
+          "learningCards": [
+            "L02"
+          ],
+          "textbookSlices": [
+            "B06"
+          ]
+        }
+      ]
+    },
+    {
+      "themeId": "T03",
+      "themeName": "不等式与不等式组",
+      "goal": "能解一元一次不等式及简单不等式组，表示解集，并解决范围约束问题。",
+      "standardRef": "CR03",
+      "standardPages": "63／56",
+      "textbookPages": "下册120—145",
+      "indicators": [
+        {
+          "indicatorId": "T03I1",
+          "indicatorName": "运用不等式性质求解，负数乘除时正确改变方向",
+          "standardRef": "CR03",
+          "standardPages": "63／56",
+          "textbookPages": "下册120—145",
+          "questionIds": [
+            "Q037",
+            "Q038",
+            "Q039",
+            "Q040",
+            "Q041",
+            "Q042",
+            "Q043"
+          ],
+          "learningCards": [
+            "L03"
+          ],
+          "textbookSlices": [
+            "B02"
+          ]
+        },
+        {
+          "indicatorId": "T03I2",
+          "indicatorName": "求两个一元一次不等式解集的交集",
+          "standardRef": "CR03",
+          "standardPages": "63／56",
+          "textbookPages": "下册120—145",
+          "questionIds": [
+            "Q044",
+            "Q045",
+            "Q046",
+            "Q047",
+            "Q048",
+            "Q049",
+            "Q053"
+          ],
+          "learningCards": [
+            "L03"
+          ],
+          "textbookSlices": [
+            "B02"
+          ]
+        },
+        {
+          "indicatorId": "T03I3",
+          "indicatorName": "根据实际限制列不等式并解释取值范围",
+          "standardRef": "CR03",
+          "standardPages": "63／56",
+          "textbookPages": "下册120—145",
+          "questionIds": [
+            "Q050",
+            "Q051",
+            "Q052",
+            "Q054"
+          ],
+          "learningCards": [
+            "L03"
+          ],
+          "textbookSlices": [
+            "B02"
+          ]
+        }
+      ]
+    }
+  ]
+}

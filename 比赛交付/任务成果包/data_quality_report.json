@@ -1,0 +1,285 @@
+{
+  "datasetVersion": "2026-11-05",
+  "importedAt": "2026-11-05T12:50:11.099Z",
+  "source": "主办方《【赛题材料】智慧学伴》公开模拟学情数据（4_赛题数据/模拟学情数据）",
+  "rawRows": 806,
+  "analysisRecords": 799,
+  "revisionEvents": 7,
+  "statusCounts": {
+    "已评分": 790,
+    "待评分": 4,
+    "未作答": 5
+  },
+  "analysisStatusCounts": {
+    "已评分": 790,
+    "待评分": 4,
+    "未作答": 5
+  },
+  "rawStatusCounts": {
+    "已评分": 795,
+    "待评分": 6,
+    "未作答": 5
+  },
+  "excludedCount": 4,
+  "issues": [
+    {
+      "type": "revision_version",
+      "recordId": "DR0023",
+      "eventId": "D01-N02-Q043",
+      "rawValue": "共 2 个版本，最新 v2",
+      "rule": "同一作答事件取最新修订版本参与统计，历史版本保留",
+      "status": "自动取最新版",
+      "inStats": true,
+      "needsReview": false,
+      "linked": "DR0023"
+    },
+    {
+      "type": "revision_version",
+      "recordId": "DR0082",
+      "eventId": "D04-N01-Q015",
+      "rawValue": "共 2 个版本，最新 v2",
+      "rule": "同一作答事件取最新修订版本参与统计，历史版本保留",
+      "status": "自动取最新版",
+      "inStats": true,
+      "needsReview": false,
+      "linked": "DR0082"
+    },
+    {
+      "type": "point_sum_mismatch",
+      "recordId": "DR0133",
+      "eventId": "D07-N01-Q015",
+      "rawValue": "评分点合计 2 ≠ 总分 3",
+      "rule": "point_sum_mismatch",
+      "status": "已标记（未自动修正）",
+      "inStats": false,
+      "needsReview": true,
+      "linked": "DR0133"
+    },
+    {
+      "type": "revision_version",
+      "recordId": "DR0210",
+      "eventId": "D10-N01-Q015",
+      "rawValue": "共 2 个版本，最新 v2",
+      "rule": "同一作答事件取最新修订版本参与统计，历史版本保留",
+      "status": "自动取最新版",
+      "inStats": true,
+      "needsReview": false,
+      "linked": "DR0210"
+    },
+    {
+      "type": "revision_version",
+      "recordId": "DR0237",
+      "eventId": "D11-N02-Q001",
+      "rawValue": "共 2 个版本，最新 v2",
+      "rule": "同一作答事件取最新修订版本参与统计，历史版本保留",
+      "status": "自动取最新版",
+      "inStats": true,
+      "needsReview": false,
+      "linked": "DR0237"
+    },
+    {
+      "type": "revision_version",
+      "recordId": "DR0264",
+      "eventId": "D12-N02-Q029",
+      "rawValue": "共 2 个版本，最新 v2",
+      "rule": "同一作答事件取最新修订版本参与统计，历史版本保留",
+      "status": "自动取最新版",
+      "inStats": true,
+      "needsReview": false,
+      "linked": "DR0264"
+    },
+    {
+      "type": "score_out_of_range",
+      "recordId": "DR0361",
+      "eventId": "D16-N02-Q044",
+      "rawValue": "得分 10 超出满分 1",
+      "rule": "score_out_of_range",
+      "status": "已标记（未自动修正）",
+      "inStats": false,
+      "needsReview": true,
+      "linked": "DR0361"
+    },
+    {
+      "type": "point_sum_mismatch",
+      "recordId": "DR0361",
+      "eventId": "D16-N02-Q044",
+      "rawValue": "评分点合计 1 ≠ 总分 10",
+      "rule": "point_sum_mismatch",
+      "status": "已标记（未自动修正）",
+      "inStats": false,
+      "needsReview": true,
+      "linked": "DR0361"
+    },
+    {
+      "type": "revision_version",
+      "recordId": "DR0446",
+      "eventId": "D22-N01-Q025",
+      "rawValue": "共 2 个版本，最新 v2",
+      "rule": "同一作答事件取最新修订版本参与统计，历史版本保留",
+      "status": "自动取最新版",
+      "inStats": true,
+      "needsReview": false,
+      "linked": "DR0446"
+    },
+    {
+      "type": "node_question_mismatch",
+      "recordId": "DR0515",
+      "eventId": "D25-N01-Q038",
+      "rawValue": "题目 Q038 不在节点 N01 可用题目中",
+      "rule": "node_question_mismatch",
+      "status": "已标记（未自动修正）",
+      "inStats": false,
+      "needsReview": true,
+      "linked": "DR0515"
+    },
+    {
+      "type": "score_out_of_range",
+      "recordId": "DR0535",
+      "eventId": "D26-N02-Q034",
+      "rawValue": "得分 4 超出满分 3",
+      "rule": "score_out_of_range",
+      "status": "已标记（未自动修正）",
+      "inStats": false,
+      "needsReview": true,
+      "linked": "DR0535"
+    },
+    {
+      "type": "point_sum_mismatch",
+      "recordId": "DR0535",
+      "eventId": "D26-N02-Q034",
+      "rawValue": "评分点合计 3 ≠ 总分 4",
+      "rule": "point_sum_mismatch",
+      "status": "已标记（未自动修正）",
+      "inStats": false,
+      "needsReview": true,
+      "linked": "DR0535"
+    },
+    {
+      "type": "revision_version",
+      "recordId": "DR0558",
+      "eventId": "D27-N02-Q049",
+      "rawValue": "共 2 个版本，最新 v2",
+      "rule": "同一作答事件取最新修订版本参与统计，历史版本保留",
+      "status": "自动取最新版",
+      "inStats": true,
+      "needsReview": false,
+      "linked": "DR0558"
+    },
+    {
+      "type": "unanswered",
+      "recordId": "DR0017",
+      "eventId": "D01-N02-Q029",
+      "rawValue": "未作答（无得分）",
+      "rule": "未作答不等于答错；不进入错误率/掌握率分母",
+      "status": "保留原状",
+      "inStats": false,
+      "needsReview": false,
+      "linked": "DR0017"
+    },
+    {
+      "type": "unanswered",
+      "recordId": "DR0034",
+      "eventId": "D02-N02-Q010",
+      "rawValue": "未作答（无得分）",
+      "rule": "未作答不等于答错；不进入错误率/掌握率分母",
+      "status": "保留原状",
+      "inStats": false,
+      "needsReview": false,
+      "linked": "DR0034"
+    },
+    {
+      "type": "pending_score",
+      "recordId": "DR0223",
+      "eventId": "D11-N01-Q025",
+      "rawValue": "待评分（无得分）",
+      "rule": "待评分不等于错误；不进入错误率/掌握率分母",
+      "status": "保持待评分",
+      "inStats": false,
+      "needsReview": true,
+      "linked": "DR0223"
+    },
+    {
+      "type": "pending_score",
+      "recordId": "DR0275",
+      "eventId": "D13-N01-Q007",
+      "rawValue": "待评分（无得分）",
+      "rule": "待评分不等于错误；不进入错误率/掌握率分母",
+      "status": "保持待评分",
+      "inStats": false,
+      "needsReview": true,
+      "linked": "DR0275"
+    },
+    {
+      "type": "unanswered",
+      "recordId": "DR0332",
+      "eventId": "D15-N01-Q016",
+      "rawValue": "未作答（无得分）",
+      "rule": "未作答不等于答错；不进入错误率/掌握率分母",
+      "status": "保留原状",
+      "inStats": false,
+      "needsReview": false,
+      "linked": "DR0332"
+    },
+    {
+      "type": "pending_score",
+      "recordId": "DR0411",
+      "eventId": "D20-N01-Q018",
+      "rawValue": "待评分（无得分）",
+      "rule": "待评分不等于错误；不进入错误率/掌握率分母",
+      "status": "保持待评分",
+      "inStats": false,
+      "needsReview": true,
+      "linked": "DR0411"
+    },
+    {
+      "type": "unanswered",
+      "recordId": "DR0497",
+      "eventId": "D24-N02-Q029",
+      "rawValue": "未作答（无得分）",
+      "rule": "未作答不等于答错；不进入错误率/掌握率分母",
+      "status": "保留原状",
+      "inStats": false,
+      "needsReview": false,
+      "linked": "DR0497"
+    },
+    {
+      "type": "pending_score",
+      "recordId": "DR0532",
+      "eventId": "D26-N02-Q052",
+      "rawValue": "待评分（无得分）",
+      "rule": "待评分不等于错误；不进入错误率/掌握率分母",
+      "status": "保持待评分",
+      "inStats": false,
+      "needsReview": true,
+      "linked": "DR0532"
+    },
+    {
+      "type": "unanswered",
+      "recordId": "DR0744",
+      "eventId": "D38-N01-Q009",
+      "rawValue": "未作答（无得分）",
+      "rule": "未作答不等于答错；不进入错误率/掌握率分母",
+      "status": "保留原状",
+      "inStats": false,
+      "needsReview": false,
+      "linked": "DR0744"
+    }
+  ],
+  "tableCounts": {
+    "courseRequirements": 9,
+    "materials": 65,
+    "questions": 54,
+    "students": 40,
+    "nodes": 2,
+    "answers": 806
+  },
+  "rawCounts": {
+    "students": 40,
+    "classes": 2,
+    "courseRequirements": 9,
+    "materials": 65,
+    "questions": 54,
+    "nodes": 2,
+    "answers": 806
+  }
+}

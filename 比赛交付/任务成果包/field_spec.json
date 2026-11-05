@@ -1,0 +1,156 @@
+[
+  {
+    "file": "task1_learning_requirements",
+    "field": "themeId",
+    "type": "string",
+    "required": true,
+    "meaning": "学习主题编号",
+    "relatesTo": "chapters.id",
+    "missing": "不允许",
+    "source": "课程要求.csv",
+    "example": "T01"
+  },
+  {
+    "file": "task1_learning_requirements",
+    "field": "indicatorId",
+    "type": "string",
+    "required": true,
+    "meaning": "观察指标编号",
+    "relatesTo": "knowledgePoints.id",
+    "missing": "不允许",
+    "source": "课程要求.csv",
+    "example": "T01I1"
+  },
+  {
+    "file": "task1_learning_requirements",
+    "field": "standardRef",
+    "type": "string",
+    "required": false,
+    "meaning": "课标整理编号",
+    "relatesTo": "课程要求.csv",
+    "missing": "空字符串",
+    "source": "课程要求.csv",
+    "example": "CR01"
+  },
+  {
+    "file": "task1_learning_requirements",
+    "field": "textbookPages",
+    "type": "string",
+    "required": false,
+    "meaning": "教材页码",
+    "relatesTo": "题目与材料.csv",
+    "missing": "空字符串",
+    "source": "课程要求.csv",
+    "example": "上册68—109"
+  },
+  {
+    "file": "task2_individual_analysis",
+    "field": "studentId",
+    "type": "string",
+    "required": true,
+    "meaning": "模拟学生编号",
+    "relatesTo": "users.id",
+    "missing": "不允许",
+    "source": "模拟学生.csv",
+    "example": "D01"
+  },
+  {
+    "file": "task2_individual_analysis",
+    "field": "indicatorId",
+    "type": "string",
+    "required": true,
+    "meaning": "观察指标",
+    "relatesTo": "knowledgePoints.id",
+    "missing": "不允许",
+    "source": "课程要求.csv",
+    "example": "T01I1"
+  },
+  {
+    "file": "task2_individual_analysis",
+    "field": "scoreRate",
+    "type": "number",
+    "required": false,
+    "meaning": "得分率=得分合计/满分合计（仅有效记录）",
+    "relatesTo": "作答记录.csv",
+    "missing": "null",
+    "source": "派生",
+    "example": "0.72"
+  },
+  {
+    "file": "task2_individual_analysis",
+    "field": "evidenceIds",
+    "type": "string",
+    "required": true,
+    "meaning": "证据记录 ID（| 分隔）",
+    "relatesTo": "作答记录.记录编号",
+    "missing": "空字符串",
+    "source": "作答记录.csv",
+    "example": "DR0012|DR0034"
+  },
+  {
+    "file": "task3_learning_recommendations",
+    "field": "studentId",
+    "type": "string",
+    "required": true,
+    "meaning": "学生编号",
+    "relatesTo": "users.id",
+    "missing": "不允许",
+    "source": "模拟学生.csv",
+    "example": "D07"
+  },
+  {
+    "file": "task3_learning_recommendations",
+    "field": "materials.learningCard",
+    "type": "object",
+    "required": false,
+    "meaning": "学习卡材料",
+    "relatesTo": "materials.id (L01–L03)",
+    "missing": "null",
+    "source": "题目与材料.csv",
+    "example": "{\"id\":\"L01\"}"
+  },
+  {
+    "file": "task3_learning_recommendations",
+    "field": "materials.practiceQuestions",
+    "type": "array",
+    "required": true,
+    "meaning": "练习题目",
+    "relatesTo": "questions.id (Q001–Q054)",
+    "missing": "空数组",
+    "source": "题目与材料.csv",
+    "example": "[\"Q007\",\"Q013\"]"
+  },
+  {
+    "file": "data_quality_report",
+    "field": "recordId",
+    "type": "string",
+    "required": true,
+    "meaning": "原始记录编号",
+    "relatesTo": "作答记录.记录编号",
+    "missing": "不允许",
+    "source": "作答记录.csv",
+    "example": "DR0361"
+  },
+  {
+    "file": "data_quality_report",
+    "field": "type",
+    "type": "string",
+    "required": true,
+    "meaning": "问题类型",
+    "relatesTo": "-",
+    "missing": "不允许",
+    "source": "派生",
+    "example": "score_out_of_range"
+  },
+  {
+    "file": "data_quality_report",
+    "field": "inStats",
+    "type": "boolean",
+    "required": true,
+    "meaning": "是否进入统计",
+    "relatesTo": "-",
+    "missing": "不允许",
+    "source": "派生",
+    "example": "false"
+  }
+]

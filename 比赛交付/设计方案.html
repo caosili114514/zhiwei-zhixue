@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>知微·智学 · 比赛设计方案</title>
+<style>
+  @page { size: A4; margin: 15mm 14mm 14mm; }
+  * { box-sizing: border-box; }
+  body { font-family: "Microsoft YaHei", "PingFang SC", sans-serif; color: #1c2434; font-size: 10.3pt; line-height: 1.62; margin: 0; }
+  h1 { font-size: 21pt; color: #17346b; margin: 0 0 4px; }
+  h2 { font-size: 14pt; color: #17346b; margin: 16px 0 6px; border-left: 4px solid #2f6fed; padding-left: 8px; }
+  h3 { font-size: 11.5pt; color: #17346b; margin: 10px 0 4px; }
+  p { margin: 5px 0; }
+  .meta { color: #5b6577; font-size: 9pt; margin-bottom: 12px; }
+  .lead { background: #f2f6ff; border: 1px solid #cfe0ff; padding: 9px 12px; border-radius: 6px; margin: 8px 0 12px; }
+  table { width: 100%; border-collapse: collapse; margin: 6px 0 9px; font-size: 8.9pt; }
+  th, td { border: 1px solid #d5dce8; padding: 4px 6px; vertical-align: top; text-align: left; }
+  th { background: #edf3fd; color: #17346b; font-weight: 600; }
+  ul, ol { margin: 4px 0 8px 18px; padding: 0; }
+  li { margin: 2px 0; }
+  .tag { display: inline-block; background: #e8f2ff; color: #2159c9; border-radius: 3px; padding: 0 5px; font-size: 8.4pt; }
+  .warn { background: #fff8ea; border: 1px solid #f2d49a; padding: 8px 10px; border-radius: 6px; }
+  .two { display: flex; gap: 14px; }
+  .two > div { flex: 1; }
+  .shot { width: 100%; border: 1px solid #d5dce8; border-radius: 5px; margin: 6px 0; }
+  .foot { margin-top: 12px; border-top: 1px solid #d5dce8; padding-top: 6px; color: #6b7485; font-size: 8.2pt; }
+  .page-break { page-break-before: always; }
+  code { background: #f2f4f8; padding: 0 3px; border-radius: 2px; font-family: Consolas, monospace; font-size: 8.8pt; }
+</style>
+</head>
+<body>
+
+<h1>知微·智学：七年级数学学情诊断与个性化学习智能体</h1>
+<div class="meta">比赛设计方案（Task 1 / Task 2 / Task 3 + 典型案例 + 系统实现） · 基于主办方《【赛题材料】智慧学伴》公开模拟学情数据 · 版本 1.0 · 2026-11-05</div>
+
+<div class="lead">
+本方案直接对应赛题三项核心任务：<b>学习内容与要求梳理</b>、<b>个体与群体学情分析</b>、<b>个性化学习建议</b>；正式展示包含 <b>3 名代表性模拟学生</b>与 <b>DC01 / DC02 两个模拟班</b>的对比。所有结论可回溯到具体题目、作答记录、修订版本、评分点与 Q/L/B 材料。
+</div>
+
+<h2>1. 问题理解与总体思路</h2>
+<p>赛题要求智能体把“课程要求—学习材料—学生表现—学习建议”连接起来。我们的核心判断是：<b>先保证数据与证据可靠，再谈分析表达与建议质量</b>。因此系统遵循四条原则：</p>
+<ul>
+  <li><b>原始数据只读</b>：官方 CSV 原样保留，清洗、修订选择、异常标记全部有记录，不静默修正。</li>
+  <li><b>证据优先</b>：每个诊断与建议都关联 <code>recordId</code>（作答记录）、<code>Q/L/B</code>（题目/学习卡/教材切片）与观察指标。</li>
+  <li><b>不确定性优先</b>：未作答、待评分、异常记录不进入错误/掌握率分母；数据不足时明确“暂无法判断”。</li>
+  <li><b>不追求技术堆叠</b>：以规则与数据驱动完成三项任务；未接入真实 OCR/大模型的能力在界面中如实标注。</li>
+</ul>
+
+<h2>2. 官方数据与质量处理</h2>
+<div class="two">
+  <div>
+    <table>
+      <tr><th>数据</th><th>规模</th></tr>
+      <tr><td>模拟学生</td><td>40 名（DC01 21 / DC02 19）</td></tr>
+      <tr><td>作答记录</td><td>806 行（已评分 795 / 待评分 6 / 未作答 5）</td></tr>
+      <tr><td>题目</td><td>54 道（填空 33 / 解答 18 / 选择 3）</td></tr>
+      <tr><td>材料</td><td>65 行（54 题 + 3 学习卡 + 8 教材切片）</td></tr>
+      <tr><td>课程要求</td><td>9 条（3 主题 × 3 观察指标）</td></tr>
+      <tr><td>测验节点</td><td>2 个（N01 / N02）</td></tr>
+    </table>
+  </div>
+  <div>
+    <table>
+      <tr><th>质量处理</th><th>结果</th></tr>
+      <tr><td>同一事件多版本</td><td>7 个事件（v1/v2）；取最新版参与分析</td></tr>
+      <tr><td>分析记录</td><td>806 → 799（7 个 v1 作为历史保留）</td></tr>
+      <tr><td>未作答 / 待评分</td><td>5 / 6（原始），不判错、不进入分母</td></tr>
+      <tr><td>分数异常</td><td>2 条越界 + 3 条评分点合计不一致</td></tr>
+      <tr><td>节点越界</td><td>1 条（Q038 出现在 N01）</td></tr>
+      <tr><td>异常排除</td><td>4 条（保留原值、标记、待人工确认）</td></tr>
+    </table>
+  </div>
+</div>
+<p><b>处理规则：</b>同一 <code>作答事件编号</code>按 <code>修订版本</code> 取最大值（如版本冲突按提交时间与异常策略处理）；<code>未作答</code>映射为缺失、<code>待评分</code>映射为待定，二者不计入错误率/掌握率；分数越界、评分点合计不一致、题目不在节点可用列表的记录进入质量报告并排除正式统计；所有原始记录保留在源 CSV 与质量报告中。</p>
+<div class="warn"><b>已发现的真实异常（不静默修正）：</b><code>DR0133</code>（Q015 总分 3 / 评分点合计 2）、<code>DR0361</code>（Q044 满分 1 / 得分 10）、<code>DR0535</code>（Q034 满分 3 / 得分 4）、<code>DR0515</code>（Q038 不属于 N01 节点）。另有 D17 无 N02 记录（4 条 N01 记录），按“记录不足”处理，不解释为未掌握。</div>
+
+<h2>3. Task 1：学习内容与要求梳理</h2>
+<p>系统将官方《课程要求》转为 3 个学习主题与 9 个观察指标，并为每个指标维护：主题目标、课标整理编号（CR01–CR03）、课标文件页/正文页、教材正文页、对应题目 Q、学习卡 L、教材切片 B。这样 Task 1 的“内容—要求—出处”能在 Task 2 分析与 Task 3 建议中被直接引用，而不是单独一份文档。</p>
+<table>
+  <tr><th>主题</th><th>观察指标（示例）</th><th>课标/教材出处</th><th>题目</th><th>材料</th></tr>
+  <tr><td>T01 代数式与整式运算</td><td>T01I1 表示数量关系并代入求值；T01I2 识别同类项、去括号并化简；T01I3 用整式解释具体问题</td><td>CR01；课标 62/55；教材上册 68—109</td><td>Q001–Q018（18 题）</td><td>L01；B05</td></tr>
+  <tr><td>T02 方程与方程组</td><td>T02I1 运用等式性质解一元一次方程；T02I2 用消元法解二元一次方程组；T02I3 列方程解决实际问题</td><td>CR02；课标 63/56；教材上册 110—148、下册 87—119</td><td>Q019–Q036（18 题）</td><td>L02；B06</td></tr>
+  <tr><td>T03 不等式与不等式组</td><td>T03I1 运用不等式性质求解并注意反向；T03I2 求解集交集；T03I3 根据实际限制列不等式</td><td>CR03；课标 63/56；教材下册 120—145</td><td>Q037–Q054（18 题）</td><td>L03；B02</td></tr>
+</table>
+<p>成果样例见 <code>task1_learning_requirements.json/csv</code>：每个指标列出题目 ID、学习卡与教材切片，既满足“材料出处”，也便于 Task 3 的建议直接引用。</p>
+
+<h2>4. Task 2：个体与群体学情分析</h2>
+<p>分析按“主题 → 观察指标 → 题目/评分点 → 作答记录（含修订版本）→ 诊断状态”链路组织。诊断不只看总分：解答题读取 <b>评分点得分</b>，定位具体失分步骤；未作答、待评分、异常记录均有独立标记并说明是否进入统计。</p>
+<table>
+  <tr><th>班级</th><th>学生</th><th>分析记录</th><th>有效记录</th><th>得分率</th><th>待评分</th><th>未作答</th><th>异常排除</th></tr>
+  <tr><td>DC01</td><td>21</td><td>427</td><td>419</td><td>58.5%</td><td>3</td><td>3</td><td>2</td></tr>
+  <tr><td>DC02</td><td>19</td><td>372</td><td>367</td><td>55.0%</td><td>1</td><td>2</td><td>2</td></tr>
+</table>
+<p><b>口径：</b>得分率 = 有效记录得分合计 / 满分合计；有效记录 = 已给分且非异常记录；未作答、待评分、异常记录不进入分母。诊断状态分为“证据充分 / 初步判断 / 待复核 / 暂无法判断”，记录数不足或异常时降级，不给出确定结论。</p>
+<p><b>证据示例（D04，部分得分案例）：</b>解答题 <code>DR0093</code>（Q015，3 分题）得分 2/3，评分点 Q015P1/P2 得 1、P3 失分 → 诊断“部分掌握 / 初步判断”，证据记录 ID 写入 <code>task2_individual_analysis.csv</code>。</p>
+
+<h2>5. Task 3：个性化学习建议</h2>
+<p>建议不是泛泛的“多练习”，而是按指标生成：先回顾学习卡 L（方法关键词），再由教师用例题演示关键步骤，随后完成同指标的 2 道 Q 练习（优先选择未作答或失分的题目），最后用新记录复核。每条建议包含：</p>
+<ul>
+  <li><b>对应材料：</b>学习卡 L01/L02/L03、教材切片 B02/B05/B06、练习题目 Q；</li>
+  <li><b>选择理由：</b>记录不足、部分得分或得分率低于参考线；</li>
+  <li><b>实施顺序：</b>回顾材料 → 例题演示（提示不直接给答案）→ 练习 → 复核；</li>
+  <li><b>调整条件：</b>连续 3 条同类题得分率 ≥80% 再进入下一指标；仍 &lt;60% 改为教材例题讲解 + 教师面批；</li>
+  <li><b>后续观察：</b>同类题得分率、部分得分比例、对应评分点是否稳定得分。</li>
+</ul>
+
+<h2>6. 三名典型案例与双班比较</h2>
+<table>
+  <tr><th>案例</th><th>类型</th><th>数据依据</th><th>建议重点</th></tr>
+  <tr><td>D04 · DC01</td><td>部分得分</td><td>24 条分析记录，得分率 65.0%；T01I2“仍需巩固/证据充分”，多条解答题部分得分（如 Q015）</td><td>按失分评分点（去括号/合并同类项）回归学习卡 L01，再用 Q009/Q015 变式练习</td></tr>
+  <tr><td>D14 · DC01</td><td>表现较好</td><td>26 条记录，得分率 99.0%；部分指标仍为“独立完成/初步判断”</td><td>保持优势，局部指标做变式/迁移任务；不因整体高分跳过局部观察</td></tr>
+  <tr><td>D17 · DC01</td><td>记录不足</td><td>仅 4 条记录（无 N02），T01I3/T02I1/T02I2 为“记录不足/暂无法判断”</td><td>补充观察与基础练习，不将缺记录解释为未掌握；记录足够后再下结论</td></tr>
+</table>
+<p><b>双班比较：</b>DC01 得分率 58.5%、DC02 55.0%；两班在 T03 上的差异与样本量、题目覆盖有关，仅作教学参考，不将小样本差异写成因果结论。两班比较的详细指标见 <code>task2_group_analysis.csv</code> 与 <code>case_studies.json</code>。</p>
+
+<h2>7. 系统实现与证据链</h2>
+<ul>
+  <li><b>双模式隔离：</b>保留原演示数据（11 人/206 条）作为 Demo；新增“赛题数据”模式（官方 40 人/806 条），独立存储键，可在用户菜单切换，互不污染。</li>
+  <li><b>数据适配层：</b><code>js/data/official.js</code> 将官方 5 张表转换为现有 <code>store</code> 兼容 state；不修改原始 CSV；修订、状态、异常写入 <code>dataQuality</code>。</li>
+  <li><b>服务层：</b><code>js/services/competition.js</code> 负责 Task1/2/3、数据质量、案例、成果包；<code>diagnosis.js</code> 扩展评分点/未作答/部分掌握；<code>selectors.js</code> 排除异常与未作答。</li>
+  <li><b>页面：</b>新增“赛题成果”页（Task1 表 / Task2 班级与个体 / 三名案例 / 成果包导出），复用现有 UI 组件；原 12 个页面保留。</li>
+  <li><b>证据链：</b>每个诊断/建议关联 <code>recordId</code>、<code>questionId</code>、<code>indicatorId</code>、<code>materialId</code>；成果包字段 <code>field_spec</code> 说明关联关系。</li>
+</ul>
+<img class="shot" src="screenshots/contest-task1.png" alt="赛题成果页（Task 1）" />
+
+<h2>8. 验证与结果</h2>
+<table>
+  <tr><th>验证项</th><th>结果</th></tr>
+  <tr><td>官方数据导入计数对账</td><td>40 学生 / 806 原始行 / 54 题 / 65 材料 / 2 节点；分析记录 799（7 修订事件合并）</td></tr>
+  <tr><td>数据质量</td><td>原始 795/6/5；3 条分数异常、1 条节点越界、7 修订事件全部报告；4 条异常排除</td></tr>
+  <tr><td>诊断/建议证据</td><td>案例与建议均可回溯到 recordId 与 Q/L/B；建议材料均存在</td></tr>
+  <tr><td>成果包</td><td>Task1/2/3 JSON/CSV、案例、质量报告、字段说明、manifest 齐全</td></tr>
+  <tr><td>回归</td><td>原有 53 项数据自检、12 路由、权限 2/2、打印 3/3 保持通过；新增官方数据 13 项自检通过</td></tr>
+  <tr><td>独立数据适配</td><td>构建器不依赖固定 40/806；5 人子集可重新构建</td></tr>
+</table>
+
+<h2>9. 局限、适用边界与合规</h2>
+<ul>
+  <li>官方数据为模拟数据，<b>不用于证明真实教学成效</b>；结论仅对当前数据范围负责。</li>
+  <li>无真实 OCR/大模型：试卷导入为模拟解析，助手为本地规则应答；界面明确标注，不冒充真实模型能力。</li>
+  <li>独立评测数据/成果包模板/教师身份/指定案例名单等赛方未明确事项，需赛前确认；本系统已按“数据结构可配置”实现，避免硬编码。</li>
+  <li>数据安全：仅使用主办方模拟数据，不含真实学生个人信息；源数据只读、导出带来源与版本；赛后按赛方要求删除。</li>
+  <li>原创与许可：仅使用项目自研代码与官方提供材料；未引入第三方模型/组件；引用课程标准与教材切片时标注来源。</li>
+</ul>
+
+<h2>10. 复现与附件</h2>
+<ul>
+  <li>运行：<code>node server.mjs</code>，访问 <code>http://127.0.0.1:5178/</code>；教师端入口 <code>?role=teacher&amp;data=official#/teacher/contest</code>。</li>
+  <li>自检：<code>node tests/check-data.mjs</code>（既有 53 项）、<code>node tests/check-official.mjs</code>（官方数据 13 项）、<code>node tests/smoke.mjs</code>、<code>node tests/smoke.mjs --print</code>。</li>
+  <li>成果包：<code>_dsh_work/比赛交付/任务成果包/</code>；复现脚本 <code>_dsh_work/gen-outcomes.mjs</code>。</li>
+</ul>
+
+<div class="foot">本方案由项目现有代码与官方模拟数据实际运行生成；数据与结论均可复跑核对。文档中不包含真实学生个人信息。</div>
+
+</body>
+</html>

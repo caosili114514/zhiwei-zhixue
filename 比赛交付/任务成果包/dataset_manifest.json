@@ -1,0 +1,85 @@
+{
+  "dataset": "官方模拟学情数据",
+  "datasetVersion": "2026-11-05",
+  "dataMode": "competition",
+  "source": "主办方《【赛题材料】智慧学伴》公开模拟学情数据（4_赛题数据/模拟学情数据）",
+  "generatedAt": "2026-11-05T12:50:11.144Z",
+  "tables": {
+    "courseRequirements": 9,
+    "materials": 65,
+    "questions": 54,
+    "students": 40,
+    "nodes": 2,
+    "answers": 806
+  },
+  "rawAnswers": 806,
+  "analysisRecords": 799,
+  "revisionEvents": 7,
+  "statusCounts": {
+    "已评分": 790,
+    "待评分": 4,
+    "未作答": 5
+  },
+  "excludedCount": 4,
+  "issues": 22,
+  "fields": 14,
+  "files": [
+    "task1_learning_requirements.json/csv",
+    "task2_individual_analysis.json/csv",
+    "task2_group_analysis.json/csv",
+    "task3_learning_recommendations.json/csv",
+    "case_studies.json",
+    "data_quality_report.json/csv",
+    "field_spec.json/csv",
+    "dataset_manifest.json",
+    "README.md"
+  ],
+  "sourceFiles": [
+    {
+      "file": "data/official/作答记录.csv",
+      "bytes": 102089,
+      "sha256": "fb055bdcb0e83524f6e02c42713c9cf580a8c490a7fa609c31ab7b3ec43cf2be"
+    },
+    {
+      "file": "data/official/字段说明.csv",
+      "bytes": 4902,
+      "sha256": "4771809373818fd5a729e111fd7e70e2cdccb85c1631ea75adc2707e57455966"
+    },
+    {
+      "file": "data/official/模拟学生.csv",
+      "bytes": 523,
+      "sha256": "fc497cd9e4e731b695ec6f300916e17c154243abeef9af43b456aa1ae9d7964b"
+    },
+    {
+      "file": "data/official/测验节点.csv",
+      "bytes": 812,
+      "sha256": "4eba902326d9e22582b162f345f67abfe1c6dc3efae1e208717c0cc8e782ff0b"
+    },
+    {
+      "file": "data/official/课程要求.csv",
+      "bytes": 1998,
+      "sha256": "1a2e43dad2d9741e2c30268a56b4ae1d0905fa63e5ced871e138ea921a02cf11"
+    },
+    {
+      "file": "data/official/题目与材料.csv",
+      "bytes": 13386,
+      "sha256": "787147c2610c6cee7a4424af46e6fa469c3dd7d496392fe139becd8f433acb19"
+    }
+  ],
+  "analysisScope": {
+    "rawAnswerRows": 806,
+    "analysisRecords": 799,
+    "revisionEvents": 7,
+    "rawStatusCounts": {
+      "已评分": 795,
+      "待评分": 6,
+      "未作答": 5
+    },
+    "analysisStatusCounts": {
+      "已评分": 790,
+      "待评分": 4,
+      "未作答": 5
+    },
+    "excludedCount": 4
+  }
+}

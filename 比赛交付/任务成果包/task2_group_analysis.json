@@ -1,0 +1,214 @@
+[
+  {
+    "classId": "DC01",
+    "className": "DC01 模拟班",
+    "students": 21,
+    "records": 427,
+    "judged": 419,
+    "pending": 3,
+    "unanswered": 3,
+    "excluded": 2,
+    "scoreRate": 0.5853314527503526,
+    "themes": [
+      {
+        "themeId": "T01",
+        "themeName": "代数式与整式运算",
+        "scoreRate": 0.5504008729741839,
+        "indicators": [
+          {
+            "indicatorId": "T01I1",
+            "indicatorName": "表示数量关系并代入求值",
+            "scoreRate": 0.4645669291338583,
+            "judged": 69,
+            "records": 70,
+            "status": "preliminary"
+          },
+          {
+            "indicatorId": "T01I2",
+            "indicatorName": "识别同类项、去括号并化简",
+            "scoreRate": 0.6793893129770993,
+            "judged": 93,
+            "records": 96,
+            "status": "preliminary"
+          },
+          {
+            "indicatorId": "T01I3",
+            "indicatorName": "用整式解释具体问题",
+            "scoreRate": 0.5072463768115942,
+            "judged": 23,
+            "records": 24,
+            "status": "preliminary"
+          }
+        ]
+      },
+      {
+        "themeId": "T02",
+        "themeName": "方程与方程组",
+        "scoreRate": 0.6101936270003497,
+        "indicators": [
+          {
+            "indicatorId": "T02I1",
+            "indicatorName": "运用等式性质解一元一次方程",
+            "scoreRate": 0.6372549019607843,
+            "judged": 64,
+            "records": 65,
+            "status": "preliminary"
+          },
+          {
+            "indicatorId": "T02I2",
+            "indicatorName": "用消元法解二元一次方程组",
+            "scoreRate": 0.581081081081081,
+            "judged": 50,
+            "records": 51,
+            "status": "preliminary"
+          },
+          {
+            "indicatorId": "T02I3",
+            "indicatorName": "列方程或方程组解决简单实际问题并检验",
+            "scoreRate": 0.6122448979591837,
+            "judged": 27,
+            "records": 27,
+            "status": "preliminary"
+          }
+        ]
+      },
+      {
+        "themeId": "T03",
+        "themeName": "不等式与不等式组",
+        "scoreRate": 0.5873447987785556,
+        "indicators": [
+          {
+            "indicatorId": "T03I1",
+            "indicatorName": "运用不等式性质求解，负数乘除时正确改变方向",
+            "scoreRate": 0.5789473684210527,
+            "judged": 37,
+            "records": 37,
+            "status": "undetermined"
+          },
+          {
+            "indicatorId": "T03I2",
+            "indicatorName": "求两个一元一次不等式解集的交集",
+            "scoreRate": 0.7068965517241379,
+            "judged": 36,
+            "records": 37,
+            "status": "preliminary"
+          },
+          {
+            "indicatorId": "T03I3",
+            "indicatorName": "根据实际限制列不等式并解释取值范围",
+            "scoreRate": 0.47619047619047616,
+            "judged": 20,
+            "records": 20,
+            "status": "preliminary"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "classId": "DC02",
+    "className": "DC02 模拟班",
+    "students": 19,
+    "records": 372,
+    "judged": 367,
+    "pending": 1,
+    "unanswered": 2,
+    "excluded": 2,
+    "scoreRate": 0.5497470489038786,
+    "themes": [
+      {
+        "themeId": "T01",
+        "themeName": "代数式与整式运算",
+        "scoreRate": 0.5814042450871095,
+        "indicators": [
+          {
+            "indicatorId": "T01I1",
+            "indicatorName": "表示数量关系并代入求值",
+            "scoreRate": 0.5217391304347826,
+            "judged": 56,
+            "records": 56,
+            "status": "preliminary"
+          },
+          {
+            "indicatorId": "T01I2",
+            "indicatorName": "识别同类项、去括号并化简",
+            "scoreRate": 0.6538461538461539,
+            "judged": 94,
+            "records": 95,
+            "status": "sufficient"
+          },
+          {
+            "indicatorId": "T01I3",
+            "indicatorName": "用整式解释具体问题",
+            "scoreRate": 0.5686274509803921,
+            "judged": 17,
+            "records": 17,
+            "status": "preliminary"
+          }
+        ]
+      },
+      {
+        "themeId": "T02",
+        "themeName": "方程与方程组",
+        "scoreRate": 0.4803907084126215,
+        "indicators": [
+          {
+            "indicatorId": "T02I1",
+            "indicatorName": "运用等式性质解一元一次方程",
+            "scoreRate": 0.4342105263157895,
+            "judged": 52,
+            "records": 52,
+            "status": "sufficient"
+          },
+          {
+            "indicatorId": "T02I2",
+            "indicatorName": "用消元法解二元一次方程组",
+            "scoreRate": 0.547945205479452,
+            "judged": 47,
+            "records": 48,
+            "status": "sufficient"
+          },
+          {
+            "indicatorId": "T02I3",
+            "indicatorName": "列方程或方程组解决简单实际问题并检验",
+            "scoreRate": 0.45901639344262296,
+            "judged": 29,
+            "records": 30,
+            "status": "preliminary"
+          }
+        ]
+      },
+      {
+        "themeId": "T03",
+        "themeName": "不等式与不等式组",
+        "scoreRate": 0.5106382978723404,
+        "indicators": [
+          {
+            "indicatorId": "T03I1",
+            "indicatorName": "运用不等式性质求解，负数乘除时正确改变方向",
+            "scoreRate": 0.5319148936170213,
+            "judged": 31,
+            "records": 32,
+            "status": "preliminary"
+          },
+          {
+            "indicatorId": "T03I2",
+            "indicatorName": "求两个一元一次不等式解集的交集",
+            "scoreRate": 0.6666666666666666,
+            "judged": 33,
+            "records": 33,
+            "status": "preliminary"
+          },
+          {
+            "indicatorId": "T03I3",
+            "indicatorName": "根据实际限制列不等式并解释取值范围",
+            "scoreRate": 0.3333333333333333,
+            "judged": 8,
+            "records": 9,
+            "status": "preliminary"
+          }
+        ]
+      }
+    ]
+  }
+]
