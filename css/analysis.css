@@ -1,0 +1,602 @@
+/* ============================================================
+   教师端学情分析页面专属样式（由教师分析组维护）
+   仅新增 .ana-* 前缀类，复用 tokens / components 变量
+   ============================================================ */
+
+/* ---------------- 通用：分节标题 / 说明 ---------------- */
+.ana-layer-head { align-items: center; }
+.ana-layer-no {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  font-family: var(--font-num);
+  font-size: 13px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 4px var(--primary-50);
+}
+.ana-layer-title-wrap { min-width: 0; flex: 1 1 auto; }
+.ana-layer-title {
+  font-size: var(--fs-md);
+  font-weight: 650;
+  color: var(--navy);
+  line-height: 1.4;
+}
+.ana-layer-head .section-desc { margin-top: 2px; }
+.ana-analysis .ana-layer { gap: var(--s-4); }
+
+.ana-inline-note,
+.ana-foot-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: var(--s-3);
+  padding: 8px 10px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  font-size: var(--fs-xs);
+  color: var(--text-2);
+  line-height: 1.6;
+}
+.ana-foot-note { border-style: solid; border-color: var(--border); }
+.ana-inline-note svg,
+.ana-foot-note svg { flex: 0 0 auto; margin-top: 1px; color: var(--text-3); }
+
+.ana-bullets { display: flex; flex-direction: column; gap: 4px; }
+.ana-bullets li { position: relative; padding-left: 14px; line-height: 1.65; }
+.ana-bullets li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: .64em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--border-strong);
+}
+
+/* ---------------- 顶部筛选条 ---------------- */
+.ana-filterbar { padding: var(--s-4) var(--s-5) var(--s-3); }
+.ana-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--s-4);
+  align-items: start;
+}
+.ana-scope-line {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+  min-height: 36px;
+}
+.ana-filter-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: var(--s-3);
+  padding-top: var(--s-3);
+  border-top: 1px dashed var(--border);
+  font-size: var(--fs-xs);
+  color: var(--text-2);
+  line-height: 1.6;
+}
+.ana-filter-note svg { flex: 0 0 auto; margin-top: 2px; color: var(--text-3); }
+.ana-filter-note b { color: var(--navy); }
+
+/* ---------------- KPI ---------------- */
+.ana-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--s-4);
+}
+
+/* ---------------- 图表卡 ---------------- */
+.ana-chart-card { min-width: 0; }
+.ana-chart-card > .card-body { min-width: 0; }
+.ana-chart-card .chart { gap: var(--s-3); }
+
+/* ---------------- 热力图 ---------------- */
+.ana-heat-wrap { max-width: 100%; overflow-x: auto; }
+.ana-kp-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin-top: var(--s-3);
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+}
+.ana-kp-legend span { white-space: nowrap; }
+.ana-kp-legend b { color: var(--navy-2); font-family: var(--font-num); }
+
+/* ---------------- 表格内小组件 ---------------- */
+.ana-row-actions { display: flex; gap: 4px; flex-wrap: wrap; }
+.ana-row-warn { background: var(--warn-50); }
+.ana-row-warn:hover { background: var(--warn-50) !important; }
+.ana-score-cell { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.ana-reviewed-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 4px;
+  font-size: 11px;
+  color: var(--teal-hover);
+}
+
+/* ---------------- 数据覆盖格 ---------------- */
+.ana-cov-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--s-3);
+}
+.ana-cov {
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+.ana-cov-label { font-size: var(--fs-xs); color: var(--text-3); }
+.ana-cov-value {
+  margin-top: 2px;
+  font-family: var(--font-num);
+  font-size: var(--fs-xl);
+  font-weight: 650;
+  color: var(--navy);
+  line-height: 1.3;
+}
+.ana-cov-sub { margin-top: 2px; font-size: 11px; color: var(--text-3); line-height: 1.5; }
+
+/* ---------------- 个体学情档案 ---------------- */
+.ana-student-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  flex-wrap: wrap;
+  padding: var(--s-4) var(--s-5);
+}
+.ana-student-select { flex: 0 1 340px; min-width: 220px; }
+.ana-student-select .label { gap: 6px; }
+.ana-student-select .label svg { color: var(--text-3); }
+.ana-student-step { display: flex; align-items: center; gap: var(--s-2); }
+.ana-student-perm {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+  max-width: 480px;
+}
+
+.ana-profile-head { padding: var(--s-5); display: flex; flex-direction: column; gap: var(--s-4); }
+.ana-profile-main { display: flex; align-items: flex-start; gap: var(--s-4); flex-wrap: wrap; }
+.ana-profile-id { display: flex; align-items: center; gap: var(--s-3); min-width: 0; flex: 1 1 380px; }
+.ana-profile-name { min-width: 0; }
+.ana-name-line { display: flex; align-items: center; gap: var(--s-2); flex-wrap: wrap; }
+.ana-name { font-size: var(--fs-xl); font-weight: 650; color: var(--navy); }
+.ana-profile-actions { display: flex; gap: var(--s-2); flex-wrap: wrap; margin-left: auto; }
+.ana-head-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s-3); }
+.ana-head-stat {
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+.ana-head-stat-label { font-size: var(--fs-xs); color: var(--text-3); }
+.ana-head-stat-value {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-top: 2px;
+  font-family: var(--font-num);
+  font-size: var(--fs-xl);
+  font-weight: 650;
+  color: var(--navy);
+}
+.ana-head-stat-value .unit { font-family: var(--font-sans); font-size: var(--fs-xs); font-weight: 500; color: var(--text-3); }
+.ana-head-stat-sub { margin-top: 3px; font-size: 11px; color: var(--text-3); line-height: 1.5; }
+
+.ana-sub-title {
+  margin: var(--s-4) 0 var(--s-2);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--navy);
+}
+.ana-dist-row {
+  display: grid;
+  grid-template-columns: minmax(150px, 1.3fr) minmax(80px, 1fr) 96px;
+  align-items: center;
+  gap: var(--s-3);
+  font-size: var(--fs-sm);
+}
+.ana-dist-label { color: var(--text-2); min-width: 0; }
+.ana-dist-value { text-align: right; color: var(--navy); font-size: var(--fs-xs); }
+.ana-dist-value .muted { color: var(--text-3); }
+.ana-tag-row { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+
+/* ---------------- 教学助理 ---------------- */
+.ana-assistant-split { grid-template-columns: minmax(0, 1fr) 340px; }
+.ana-chat-card { display: flex; flex-direction: column; min-height: 660px; }
+.ana-chat-body { flex: 1 1 auto; min-height: 0; padding: 0 var(--s-5); }
+.ana-chat-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+  min-height: 330px;
+  max-height: min(640px, calc(100vh - 380px));
+  overflow-y: auto;
+  padding: var(--s-4) 2px var(--s-2);
+  scrollbar-width: thin;
+}
+
+.ana-welcome {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  padding: var(--s-4);
+  border: 1px solid var(--primary-100);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, var(--primary-50), var(--surface) 72%);
+}
+.ana-welcome-head { display: flex; align-items: flex-start; gap: var(--s-3); }
+.ana-welcome-title { font-size: var(--fs-md); font-weight: 650; color: var(--navy); }
+.ana-welcome-sub { margin-top: 2px; font-size: var(--fs-sm); color: var(--text-2); line-height: 1.6; }
+.ana-welcome-facts { display: flex; flex-wrap: wrap; gap: 6px; }
+.ana-welcome-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: var(--fs-xs);
+  color: var(--text-2);
+  line-height: 1.6;
+}
+.ana-welcome-tip svg { flex: 0 0 auto; margin-top: 2px; color: var(--primary); }
+.ana-welcome-note { padding-top: 2px; }
+.ana-quick-asks,
+.ana-quick-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+
+.ana-ai-avatar {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--primary-50);
+  color: var(--primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.ana-msg { display: flex; align-items: flex-start; gap: var(--s-2); }
+.ana-msg-user { justify-content: flex-end; }
+.ana-msg-body { display: flex; flex-direction: column; gap: var(--s-2); min-width: 0; flex: 1 1 auto; }
+.ana-msg-meta { display: flex; align-items: center; gap: var(--s-2); flex-wrap: wrap; }
+.ana-bubble {
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  font-size: var(--fs-sm);
+  line-height: 1.7;
+  max-width: 88%;
+}
+.ana-bubble-ai { max-width: 100%; background: var(--surface-2); border: 1px solid var(--border); color: var(--text); }
+.ana-bubble-user { background: var(--primary); color: #fff; border-radius: var(--radius) var(--radius) var(--radius-xs) var(--radius); max-width: 76%; }
+.ana-card-flow { display: flex; flex-direction: column; gap: var(--s-3); }
+.ana-ai-card { gap: var(--s-3); }
+.ana-ai-suggestion {
+  padding: 8px 10px;
+  border: 1px solid var(--teal-100);
+  border-radius: var(--radius-sm);
+  background: var(--teal-50);
+  font-size: var(--fs-sm);
+  line-height: 1.7;
+  color: var(--text);
+}
+.ana-ai-suggestion-label {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  color: var(--teal-hover);
+}
+.ana-card-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.ana-followups { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.ana-disclaimer-inline {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-3);
+  line-height: 1.6;
+}
+.ana-disclaimer-inline svg { flex: 0 0 auto; margin-top: 1px; }
+
+.ana-chat-hint {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-4);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+}
+.ana-chat-hint-icon {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ana-composer-wrap { flex-direction: column; align-items: stretch; gap: var(--s-2); }
+.ana-composer { display: flex; align-items: stretch; gap: var(--s-2); }
+.ana-composer-input { flex: 1 1 auto; min-height: 46px; max-height: 130px; resize: vertical; }
+.ana-composer-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 78px;
+  text-align: center;
+}
+.ana-assistant-disclaimer {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding-top: 4px;
+  border-top: 1px dashed var(--border);
+  font-size: 11px;
+  color: var(--text-3);
+  line-height: 1.6;
+}
+.ana-assistant-disclaimer svg { flex: 0 0 auto; margin-top: 1px; }
+
+.ana-side-sub {
+  margin-bottom: var(--s-2);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: .02em;
+  color: var(--text-2);
+}
+.ana-top3 { display: flex; flex-direction: column; gap: var(--s-2); }
+.ana-top3-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-2);
+  padding: var(--s-2) var(--s-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+.ana-rank {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  margin-top: 1px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  font-family: var(--font-num);
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ana-top3-main { min-width: 0; flex: 1 1 auto; }
+.ana-top3-name { font-size: var(--fs-sm); font-weight: 600; color: var(--navy); line-height: 1.4; }
+.ana-top3-meta { margin-top: 1px; font-size: 11px; color: var(--text-3); line-height: 1.5; }
+.ana-side-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-2) var(--s-3); }
+.ana-side-stat {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s-2);
+  padding-bottom: 4px;
+  border-bottom: 1px dashed var(--border);
+  font-size: var(--fs-xs);
+  color: var(--text-2);
+}
+.ana-side-stat b { color: var(--navy); font-weight: 600; }
+.ana-jump-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-2); }
+.ana-jump-grid .btn { justify-content: flex-start; }
+
+/* ---------------- 数据与报告 ---------------- */
+.ana-tab-panel { margin-top: var(--s-4); }
+.ana-import-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: var(--s-5);
+  align-items: start;
+}
+.ana-import-format {
+  margin-top: var(--s-3);
+  padding: var(--s-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+.ana-import-format-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: var(--s-2);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--navy);
+}
+.ana-field-list { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+.ana-import-paste { display: flex; flex-direction: column; gap: var(--s-2); }
+.ana-map-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s-3);
+  margin: var(--s-4) 0;
+}
+.ana-preview-scroll { max-height: 380px; overflow: auto; border-radius: var(--radius-sm); }
+
+.ana-export-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-3) var(--s-5);
+  border-bottom: 1px solid var(--border);
+}
+.ana-export-row:last-child { border-bottom: 0; }
+.ana-export-icon {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  border-radius: var(--radius-sm);
+  background: var(--primary-50);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ana-export-main { min-width: 0; flex: 1 1 auto; }
+.ana-export-title { font-size: var(--fs-sm); font-weight: 600; color: var(--navy); }
+.ana-export-desc { margin-top: 2px; font-size: var(--fs-xs); color: var(--text-3); line-height: 1.6; }
+.ana-print-area {
+  padding: var(--s-5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.ana-print-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s-2) var(--s-4);
+  margin: var(--s-4) 0;
+}
+.ana-print-stat {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s-2);
+  padding-bottom: 4px;
+  border-bottom: 1px dashed var(--border);
+  font-size: var(--fs-xs);
+  color: var(--text-2);
+}
+.ana-print-stat b { color: var(--navy); }
+.ana-print-area .ana-sub-title { margin-top: var(--s-4); }
+
+.ana-scope-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--s-3);
+  margin: var(--s-3) 0;
+}
+.ana-scope-option {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-2);
+  padding: var(--s-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--ease);
+}
+.ana-scope-option:hover { border-color: var(--primary-200); background: var(--surface-2); }
+.ana-scope-option.is-checked { border-color: var(--primary); background: var(--primary-50); }
+.ana-scope-option input { margin-top: 2px; accent-color: var(--primary); }
+.ana-scope-option-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ana-scope-option-title { font-size: var(--fs-sm); font-weight: 600; color: var(--navy); }
+.ana-scope-option-sub { font-size: 11px; color: var(--text-3); }
+.ana-scope-summary { display: flex; align-items: center; gap: var(--s-2); flex-wrap: wrap; margin-top: var(--s-2); }
+.ana-check-row { display: flex; flex-wrap: wrap; gap: var(--s-3) var(--s-5); }
+
+/* ---------------- 响应式 ---------------- */
+@media (max-width: 1180px) {
+  .ana-kpi-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .ana-filter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ana-head-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ana-import-grid { grid-template-columns: minmax(0, 1fr); }
+  .ana-map-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ana-scope-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 1024px) {
+  .ana-assistant-split { grid-template-columns: minmax(0, 1fr); }
+  .ana-chat-list { max-height: none; }
+}
+@media (max-width: 900px) {
+  .ana-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ana-filter-grid { grid-template-columns: minmax(0, 1fr); }
+  .ana-student-bar { align-items: flex-start; }
+  .ana-student-perm { margin-left: 0; justify-content: flex-start; }
+  .ana-dist-row { grid-template-columns: minmax(120px, 1fr) 80px 76px; }
+}
+@media (max-width: 640px) {
+  .ana-kpi-grid,
+  .ana-head-stats,
+  .ana-map-grid,
+  .ana-scope-grid { grid-template-columns: minmax(0, 1fr); }
+  .ana-print-summary { grid-template-columns: minmax(0, 1fr); }
+  .ana-composer { flex-direction: column; }
+  .ana-composer-side { flex-direction: row; justify-content: flex-end; min-width: 0; }
+}
+
+/* ---------------- 打印 ---------------- */
+@media print {
+  .ana-screen-only,
+  .ana-profile-screen { display: none !important; }
+
+  .ana-filterbar,
+  .ana-analysis .page-actions,
+  .ana-data .page-actions,
+  .ana-data .page-head,
+  .ana-data .tabs { display: none !important; }
+
+  .ana-print-card {
+    border: 0 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    /* 报告正文可能超过 1 页：允许自然分页，避免整块被推到下一页而在首屏留下空白页 */
+    break-inside: auto !important;
+  }
+  .ana-print-card > .card-head { display: none !important; }
+  .ana-print-card > .card-body { padding: 0 !important; }
+  .ana-print-area { padding: 0 !important; border: 0 !important; border-radius: 0 !important; }
+
+  /* 打印表格：固定列宽 + 收紧内边距，避免 A4 下逐字换行 */
+  .print-area .table-wrap { overflow: visible !important; border: 0 !important; }
+  .print-area .table { table-layout: fixed; width: 100% !important; }
+  .print-area .table th,
+  .print-area .table td {
+    padding: 4px 6px !important;
+    font-size: 9pt;
+    line-height: 1.45;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    vertical-align: top;
+  }
+  .print-area .table th { white-space: normal !important; }
+  .print-area .table td .cell-sub { font-size: 8pt; }
+  .print-area .badge { border: 1px solid #C9D3E2; }
+  .print-area .chart-svg { max-width: 100%; }
+
+  /* A4 宽度下避免统计块与页头溢出 */
+  .print-area .print-head { flex-wrap: wrap; gap: var(--s-2); }
+  .print-area .print-head > div { min-width: 0; }
+  .print-area .print-meta { overflow-wrap: anywhere; }
+  .print-area .ana-print-summary { gap: 4px 12px; }
+  .print-area .ana-print-stat { flex-wrap: wrap; font-size: 8.5pt; }
+  .print-area .ana-print-stat b { text-align: right; }
+  .print-area .ana-bullets li { overflow-wrap: anywhere; }
+
+  .ana-kpi-grid { grid-template-columns: repeat(5, minmax(0, 1fr)) !important; }
+  .ana-head-stats { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+}

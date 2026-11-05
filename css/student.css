@@ -1,0 +1,472 @@
+/* ============================================================
+   学生端页面专属样式（由学生端组维护）
+   ------------------------------------------------------------
+   约定：
+   - 仅使用 tokens.css 变量与 components/base 已有类；
+   - 新增类统一使用 .stu-* 前缀，避免污染其他端样式；
+   - 视觉：信息密度低于教师端，留白充足，圆角 12–16px，轻阴影。
+   ============================================================ */
+
+/* ============================================================
+   一、学习主页 student/home
+   ============================================================ */
+.stu-task-card .card-desc { max-width: 80ch; }
+.stu-task-title {
+  font-size: var(--fs-lg);
+  font-weight: 600;
+  color: var(--navy);
+  line-height: 1.4;
+}
+.stu-task-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2) var(--s-5);
+  flex-wrap: wrap;
+  margin-top: var(--s-2);
+  font-size: var(--fs-sm);
+  color: var(--text-2);
+}
+.stu-meta-item { display: inline-flex; align-items: center; gap: 5px; }
+.stu-meta-item svg { color: var(--text-3); }
+.stu-task-progress {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  margin: var(--s-4) 0 var(--s-3);
+}
+.stu-task-progress .progress { flex: 1 1 auto; }
+.stu-done-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
+  color: var(--success);
+}
+.stu-done-hint .stu-task-title { font-size: var(--fs-md); }
+
+/* 最近练习列表 */
+.stu-recent-list { display: flex; flex-direction: column; }
+.stu-recent-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
+  width: 100%;
+  padding: var(--s-3) var(--s-2);
+  border: 0;
+  border-bottom: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  text-align: left;
+  transition: background var(--dur-fast) var(--ease);
+}
+.stu-recent-item:last-child { border-bottom: 0; }
+.stu-recent-item:hover { background: var(--surface-2); }
+.stu-recent-item:hover .stu-recent-title { color: var(--primary); }
+.stu-recent-main { flex: 1 1 auto; min-width: 0; }
+.stu-recent-title {
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.5;
+  transition: color var(--dur-fast) var(--ease);
+}
+.stu-recent-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+  margin-top: 5px;
+}
+.stu-recent-right { flex: 0 0 auto; padding-top: 2px; }
+
+/* 需要巩固 */
+.stu-focus-list { display: flex; flex-direction: column; gap: var(--s-3); }
+.stu-focus-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+.stu-focus-main { flex: 1 1 auto; min-width: 0; }
+.stu-focus-head {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+  color: var(--navy);
+}
+.stu-focus-note { margin-top: 5px; line-height: 1.6; }
+.stu-focus-item > .btn { flex: 0 0 auto; margin-top: 2px; }
+
+/* 伴学助手入口 */
+.stu-helper-entry { display: flex; align-items: flex-start; gap: var(--s-4); }
+.stu-helper-icon {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  border-radius: 13px;
+  background: var(--teal-50);
+  color: var(--teal-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.stu-helper-text { min-width: 0; line-height: 1.65; }
+
+/* ============================================================
+   二、题目练习 student/practice
+   ============================================================ */
+.stu-taskbar .card-body { padding: var(--s-4) var(--s-5); }
+.stu-taskbar-top {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--s-4);
+  flex-wrap: wrap;
+}
+.stu-taskbar-main { min-width: 0; }
+.stu-task-chips { margin-top: var(--s-2); }
+.stu-taskbar-progress { flex: 0 1 260px; min-width: 180px; display: flex; flex-direction: column; gap: 6px; }
+.stu-taskbar-note { margin-top: var(--s-3); }
+
+/* 题目导航 */
+.stu-qnav-card .card-body { padding: var(--s-4) var(--s-5); }
+.stu-qnav-head { margin-bottom: var(--s-3); }
+.stu-legend { display: flex; align-items: center; gap: var(--s-3); flex-wrap: wrap; }
+.stu-legend > span { display: inline-flex; align-items: center; gap: 5px; }
+.stu-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  display: inline-block;
+}
+.stu-dot.is-submitted { background: var(--teal-50); border-color: var(--teal); }
+.stu-dot.is-current { background: var(--primary); border-color: var(--primary); }
+
+.stu-qnav {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(46px, 1fr));
+  gap: var(--s-2);
+}
+.stu-qnav-btn {
+  height: 38px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-2);
+  font-family: var(--font-num);
+  font-size: var(--fs-base);
+  font-weight: 600;
+  transition: border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+}
+.stu-qnav-btn:hover { border-color: var(--primary-200); color: var(--primary); background: var(--primary-50); }
+.stu-qnav-btn.is-submitted { background: var(--teal-50); border-color: var(--teal-100); color: var(--success); }
+.stu-qnav-btn.is-current {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 0 0 3px var(--primary-50);
+}
+
+/* 题目区 */
+.stu-question-card .card-body { padding: var(--s-5) var(--s-6); }
+.stu-qmeta { display: flex; align-items: center; gap: var(--s-2); flex-wrap: wrap; }
+.stu-stem {
+  margin: var(--s-4) 0 var(--s-5);
+  font-size: var(--fs-md);
+  line-height: 1.85;
+  color: var(--text);
+}
+.stu-answer-area { display: flex; flex-direction: column; gap: var(--s-3); }
+.stu-options { display: flex; flex-direction: column; gap: var(--s-2); }
+.stu-options .option { width: 100%; text-align: left; font-family: inherit; }
+.stu-options .option-text { flex: 1 1 auto; min-width: 0; line-height: 1.6; }
+.stu-answer-input { max-width: 360px; }
+.stu-answer-area .field { max-width: 100%; }
+.stu-draft-note { display: flex; align-items: center; gap: 5px; margin-top: var(--s-2); }
+.stu-submitted-note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-2);
+  margin-top: var(--s-4);
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--success-50);
+  border: 1px solid var(--teal-100);
+  color: #1D6455;
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+}
+.stu-submitted-note svg { flex: 0 0 auto; margin-top: 2px; }
+.stu-answer-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+  margin-top: var(--s-5);
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--border);
+}
+
+/* 即时反馈 */
+.stu-feedback {
+  border-left: 3px solid var(--primary);
+  scroll-margin-top: calc(var(--topbar-h) + var(--s-4));
+}
+.stu-feedback .card-body { display: flex; flex-direction: column; gap: var(--s-3); }
+.stu-fb-score {
+  font-family: var(--font-num);
+  font-size: var(--fs-lg);
+  font-weight: 650;
+  color: var(--navy);
+  padding: 2px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-soft);
+}
+.stu-fb-block { display: flex; flex-direction: column; gap: 6px; }
+.stu-fb-row { display: flex; align-items: center; gap: var(--s-2); flex-wrap: wrap; }
+.stu-fb-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+  padding-top: var(--s-2);
+}
+
+/* 伴学面板 */
+.stu-assistant .card-body { display: flex; flex-direction: column; }
+.stu-chat { display: flex; flex-direction: column; gap: var(--s-3); min-width: 0; }
+.stu-chat-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  max-height: 430px;
+  overflow-y: auto;
+  padding: 2px 4px 2px 2px;
+  scrollbar-width: thin;
+}
+.stu-msg {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--s-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  min-width: 0;
+}
+.stu-msg.is-bot { border-top-left-radius: 4px; }
+.stu-msg.is-welcome { background: var(--surface); border-style: dashed; }
+.stu-msg.is-user {
+  align-self: flex-end;
+  max-width: 92%;
+  background: var(--primary-50);
+  border-color: var(--primary-100);
+  border-top-right-radius: 4px;
+}
+.stu-msg.is-user .stu-msg-body { color: #2C3F7E; }
+.stu-msg-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-size: var(--fs-sm);
+  color: var(--navy);
+}
+.stu-msg-head svg { color: var(--primary); }
+.stu-msg-body {
+  font-size: var(--fs-sm);
+  line-height: 1.7;
+  color: var(--text);
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+.stu-msg .steps-list { padding-left: 20px; }
+.stu-msg-actions { display: flex; align-items: center; gap: var(--s-2); flex-wrap: wrap; }
+
+.stu-chat-quick { display: flex; flex-direction: column; gap: 6px; }
+.stu-quick-asks .chip { height: 26px; font-size: var(--fs-xs); padding: 0 9px; }
+.stu-hint-levels {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-2);
+}
+.stu-hint-levels .btn { width: 100%; }
+.stu-chat-input { display: flex; align-items: center; gap: var(--s-2); }
+.stu-chat-input .input { flex: 1 1 auto; min-width: 0; }
+.stu-chat-foot { padding-top: 2px; }
+
+/* ============================================================
+   三、我的档案 student/archive
+   ============================================================ */
+.stu-filters { display: flex; flex-direction: column; gap: var(--s-3); }
+.stu-filter-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2) var(--s-3);
+  flex-wrap: wrap;
+}
+.stu-filter-label {
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  min-width: 56px;
+  flex: 0 0 auto;
+}
+.stu-filter-select { width: auto; min-width: 150px; max-width: 220px; }
+.stu-kp-table .cell-strong { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.stu-stat-list { display: flex; flex-direction: column; gap: 0; }
+.stu-drawer-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--s-3) var(--s-4);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.stu-review-list { display: flex; flex-direction: column; }
+.stu-review-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
+  padding: var(--s-3) 0;
+  border-bottom: 1px dashed var(--border);
+}
+.stu-review-item:first-child { padding-top: 0; }
+.stu-review-item:last-child { border-bottom: 0; padding-bottom: 0; }
+.stu-review-main { flex: 1 1 auto; min-width: 0; }
+.stu-review-head {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+  color: var(--navy);
+  font-size: var(--fs-sm);
+}
+.stu-review-stem { margin-top: 4px; color: var(--text); line-height: 1.6; }
+.stu-review-item > .btn { flex: 0 0 auto; }
+.stu-archive-foot { align-items: flex-start; flex-wrap: wrap; }
+
+/* ============================================================
+   四、个人学情报告 student/report
+   ============================================================ */
+.stu-report {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--s-6) var(--s-7);
+  box-shadow: var(--shadow-sm);
+}
+.stu-report-head-main { min-width: 0; }
+.stu-report-brand {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: .04em;
+  color: var(--primary);
+  margin-bottom: var(--s-2);
+}
+.stu-report-head .print-title { font-size: var(--fs-2xl); }
+.stu-report-demo { display: inline-flex; margin-left: 6px; vertical-align: middle; }
+.stu-report-head-meta { text-align: right; }
+.stu-report-head-meta > div + div { margin-top: 2px; }
+.stu-report-overview { align-items: stretch; }
+.stu-report-list { display: flex; flex-direction: column; gap: var(--s-3); }
+.stu-report-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--s-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+.stu-report-item strong { color: var(--navy); }
+.stu-report-advice { line-height: 1.6; display: block; }
+.stu-report-table .cell-sub { white-space: normal; }
+.stu-report-foot { margin-top: var(--s-8); }
+.stu-report-foot > div + div { margin-top: 3px; }
+
+/* ============================================================
+   五、响应式
+   ============================================================ */
+@media (max-width: 1024px) {
+  .stu-question-card .card-body { padding: var(--s-5); }
+  .stu-chat-list { max-height: none; }
+  .stu-taskbar-progress { flex: 1 1 100%; }
+}
+@media (max-width: 640px) {
+  .stu-report { padding: var(--s-4) var(--s-4); border-radius: var(--radius); }
+  .stu-report-head { flex-direction: column; }
+  .stu-report-head-meta { text-align: left; }
+  .stu-hint-levels { grid-template-columns: minmax(0, 1fr); }
+  .stu-answer-actions .btn { flex: 1 1 auto; }
+}
+
+/* ============================================================
+   六、打印（报告页）
+   ------------------------------------------------------------
+   目标：A4 下 2–3 页；概览三卡一行紧凑排版，明细表可跨页
+   （表头重复由公共 css/print.css 的 .table thead 提供）。
+   ============================================================ */
+@media print {
+  .stu-report {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* 概览：三卡并排 + 顶部对齐，卡片不被同排拉满，避免整页留白 */
+  .stu-report .stu-report-overview {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    align-items: start;
+    gap: 8px !important;
+    margin-bottom: 2px;
+  }
+  .stu-report .card-head { padding: 8px 10px 4px; }
+  .stu-report .card-body { padding: 0 10px 10px; }
+  .stu-report .card-body.is-solo { padding: 10px; }
+  .stu-report .card-body.is-flush { padding: 0; }
+  .stu-report .card-title { font-size: 10.5pt; }
+  .stu-report .card-desc { font-size: 8pt; line-height: 1.4; margin-top: 2px; }
+  .stu-report .stu-report-item { padding: 6px; gap: 3px; }
+  .stu-report .stu-report-item .small { font-size: 8pt; line-height: 1.45; }
+  .stu-report .stu-report-item .tiny { font-size: 7.5pt; }
+
+  /* 页头收紧，让第 1 页能容纳概览与明细表起始 */
+  .stu-report-head { padding-bottom: 6px; }
+  .stu-report-head .print-title { font-size: 16pt; }
+  .stu-report-head .print-meta { font-size: 8pt; line-height: 1.5; }
+  .stu-report-brand { font-size: 8pt; margin-bottom: 2px; }
+
+  /* 明细表允许跨页；行内不打断由公共 .table tr 规则保证 */
+  .stu-report .stu-report-table-card { break-inside: auto; }
+  .stu-report .stu-report-table th,
+  .stu-report .stu-report-table td {
+    font-size: 8.5pt;
+    padding: 4px 5px;
+    vertical-align: top;
+  }
+  .stu-report .stu-report-table .cell-sub { font-size: 7.5pt; }
+  .stu-report .stu-report-table .badge { padding: 0 5px; font-size: 7.5pt; }
+  .stu-report .stu-report-advice { font-size: 8.5pt; line-height: 1.4; }
+
+  /* 其余卡片与页脚保持整块，避免被切 */
+  .stu-report .card:not(.stu-report-table-card) { break-inside: avoid; }
+  .stu-report-foot { break-inside: avoid; }
+  .stu-chat-list { max-height: none; }
+
+  /* 打印时隐藏无意义的分页元素 */
+  .stu-report .page-actions,
+  .stu-report .no-print { display: none !important; }
+}

@@ -1,0 +1,7 @@
+﻿# 开发期临时产物
+_dsh_work/
+_backup/
+*.log
+
+# 验收截图（体积较大，用 tests/smoke.mjs --screenshots 重新生成）
+tests/screenshots/

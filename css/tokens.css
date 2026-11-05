@@ -1,0 +1,118 @@
+/* ============================================================
+   知微·智学 · 设计令牌（Design Tokens）
+   依据 UI设计.docx：暖白底 + 深海蓝主色 + 青绿辅助色
+   ============================================================ */
+:root {
+  /* 色彩 */
+  --bg: #F6F8FC;
+  --bg-soft: #F0F4FA;
+  --surface: #FFFFFF;
+  --surface-2: #FAFBFE;
+  --primary: #365CF5;
+  --primary-hover: #2A4BD8;
+  --primary-active: #2440BC;
+  --primary-50: #EEF2FF;
+  --primary-100: #DDE5FF;
+  --primary-200: #C3D0FF;
+  --navy: #172B4D;
+  --navy-2: #24395C;
+  --teal: #20B8A5;
+  --teal-hover: #17A08F;
+  --teal-50: #E7F8F5;
+  --teal-100: #CDF1EB;
+  --success: #16A085;
+  --success-50: #E6F6F2;
+  --warn: #F0A43A;
+  --warn-hover: #DC9128;
+  --warn-50: #FDF4E6;
+  --warn-100: #FBE7C7;
+  --danger: #E56B6F;
+  --danger-50: #FDEDEE;
+  --danger-100: #FAD5D7;
+  --text: #1F2937;
+  --text-2: #6B7280;
+  --text-3: #9AA4B2;
+  --text-invert: #FFFFFF;
+  --border: #E8EDF5;
+  --border-strong: #D6DFEC;
+  --border-focus: #365CF5;
+  --overlay: rgba(23, 43, 77, 0.42);
+
+  /* 圆角 */
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-pill: 999px;
+
+  /* 间距（8px 体系） */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-7: 32px;
+  --s-8: 40px;
+  --s-9: 48px;
+  --s-10: 64px;
+  --s-11: 80px;
+
+  /* 阴影 */
+  --shadow-xs: 0 1px 2px rgba(23, 43, 77, 0.05);
+  --shadow-sm: 0 1px 3px rgba(23, 43, 77, 0.07), 0 1px 2px rgba(23, 43, 77, 0.04);
+  --shadow-md: 0 6px 20px rgba(23, 43, 77, 0.08);
+  --shadow-lg: 0 18px 48px rgba(23, 43, 77, 0.14);
+  --shadow-focus: 0 0 0 3px rgba(54, 92, 245, 0.18);
+
+  /* 字体 */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", "Source Han Sans SC", sans-serif;
+  --font-num: "Inter", "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --fs-base: 14px;
+  --fs-md: 15px;
+  --fs-lg: 17px;
+  --fs-xl: 20px;
+  --fs-2xl: 24px;
+  --fs-3xl: 30px;
+  --fs-4xl: 38px;
+
+  --lh-tight: 1.25;
+  --lh-normal: 1.55;
+  --lh-relaxed: 1.75;
+
+  /* 动效 */
+  --dur-fast: 150ms;
+  --dur: 200ms;
+  --dur-slow: 250ms;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* 布局 */
+  --sidebar-w: 244px;
+  --sidebar-w-collapsed: 76px;
+  --topbar-h: 64px;
+  --content-max: 1280px;
+  --z-sticky: 20;
+  --z-nav: 40;
+  --z-overlay: 60;
+  --z-modal: 70;
+  --z-toast: 90;
+
+  /* 语义状态（与 UI 规范对应） */
+  --st-confirmed: var(--success);
+  --st-confirmed-bg: var(--success-50);
+  --st-pending: var(--warn);
+  --st-pending-bg: var(--warn-50);
+  --st-unknown: #8A94A6;
+  --st-unknown-bg: #F1F4F9;
+  --st-processing: var(--primary);
+  --st-processing-bg: var(--primary-50);
+  --st-error: var(--danger);
+  --st-error-bg: var(--danger-50);
+}
