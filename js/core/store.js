@@ -13,6 +13,7 @@
   var SESSION_KEY = 'zwz.session.v1';
 var OFFICIAL_DB_KEY = 'zwz.db.official.v1';
 var OFFICIAL_SESSION_KEY = 'zwz.session.official.v1';
+var OFFICIAL_BACKUP_KEY = 'zwz.db.official.backup.v1';
   var listeners = [];
   var storageOK = true;
 
@@ -200,6 +201,54 @@ var OFFICIAL_SESSION_KEY = 'zwz.session.official.v1';
       this.saveSession();
       this.save();
       this.emit('reset');
+    },
+
+    applyOfficialDataset: function (payload) {
+      var old = this.mode === 'official' ? this.state : null;
+      var next = ZWZ.official.build(payload);
+      normalize(next);
+      next.__rev = 1;
+      if (old) {
+        try { safeSet(OFFICIAL_BACKUP_KEY, JSON.stringify(old)); } catch (err) { /* ignore */ }
+      } else {
+        safeRemove(OFFICIAL_BACKUP_KEY);
+      }
+      this.mode = 'official';
+      this.state = next;
+      var keepUser = this.session && this.state.users.filter(function (u) { return u.id === store.session.userId; })[0];
+      if (keepUser) {
+        this.session = { userId: keepUser.id, role: keepUser.role, classId: keepUser.classId || (keepUser.classIds && keepUser.classIds[0]) || (this.state.classes[0] && this.state.classes[0].id) || 'c1' };
+      } else {
+        this.session = defaultSession('official', this.state);
+      }
+      this.saveSession();
+      this.save();
+      this.emit('official-import');
+      return this.state;
+    },
+
+    hasOfficialBackup: function () {
+      return !!safeGet(OFFICIAL_BACKUP_KEY);
+    },
+
+    rollbackOfficialDataset: function () {
+      var raw = safeGet(OFFICIAL_BACKUP_KEY);
+      if (!raw) return false;
+      try {
+        var prevSession = this.session;
+        this.mode = 'official';
+        this.state = normalize(JSON.parse(raw));
+        if (!this.state.__rev) this.state.__rev = 1;
+        var keepUser = prevSession && this.state.users.filter(function (u) { return u.id === prevSession.userId; })[0];
+        this.session = keepUser
+          ? { userId: keepUser.id, role: keepUser.role, classId: keepUser.classId || (keepUser.classIds && keepUser.classIds[0]) || (this.state.classes[0] && this.state.classes[0].id) || 'c1' }
+          : defaultSession('official', this.state);
+        this.saveSession();
+        this.save();
+        safeRemove(OFFICIAL_BACKUP_KEY);
+        this.emit('official-rollback');
+        return true;
+      } catch (err) { return false; }
     },
 
     resetCurrent: function () {
@@ -641,5 +690,7 @@ var OFFICIAL_SESSION_KEY = 'zwz.session.official.v1';
 
   ZWZ.store = store;
 })();
+
+
 
 

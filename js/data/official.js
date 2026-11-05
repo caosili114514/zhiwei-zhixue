@@ -83,8 +83,9 @@
     return '';
   }
 
-  function build() {
-    var raw = (ZWZ.officialData && ZWZ.officialData.tables) || {};
+  function build(rawArg) {
+    var sourceData = rawArg || ZWZ.officialData || {};
+    var raw = sourceData.tables || {};
     var courseRows = raw.courseRequirements || [];
     var materialRows = raw.materials || [];
     var studentRows = raw.students || [];
@@ -424,11 +425,11 @@
       }
     });
 
-    var rawCounts = (ZWZ.officialData && ZWZ.officialData.counts) || {};
+    var rawCounts = sourceData.counts || {};
     var dataQuality = {
-      datasetVersion: (ZWZ.officialData && ZWZ.officialData.version) || '2026-11-05',
+      datasetVersion: sourceData.version || '2026-11-05',
       importedAt: new Date().toISOString(),
-      source: (ZWZ.officialData && ZWZ.officialData.source) || '',
+      source: sourceData.source || '',
       rawRows: answerRows.length,
       analysisRecords: answers.length,
       revisionEvents: revisionEvents,
@@ -511,8 +512,85 @@
     return state;
   }
 
+
+  /* ---------------- 导入校验（供交互式导入使用） ---------------- */
+  function validate(tables) {
+    var t = tables || {};
+    var errors = [];
+    var warnings = [];
+    function need(name, label) {
+      if (!Array.isArray(t[name]) || !t[name].length) { errors.push('缺少数据表：' + label + '（' + name + '）'); return false; }
+      return true;
+    }
+    var ok = true;
+    ok = need('courseRequirements', '课程要求') && ok;
+    ok = need('materials', '题目与材料') && ok;
+    ok = need('students', '模拟学生') && ok;
+    ok = need('nodes', '测验节点') && ok;
+    ok = need('answers', '作答记录') && ok;
+    if (!ok) return { ok: false, errors: errors, warnings: warnings, counts: {} };
+
+    function field(row, name) { return row && row[name] !== undefined ? String(row[name]).trim() : ''; }
+    var req = ['主题编号', '主题', '指标编号', '观察指标'];
+    t.courseRequirements.forEach(function (r, i) {
+      req.forEach(function (f) { if (!field(r, f)) errors.push('课程要求第 ' + (i + 1) + ' 行缺少 ' + f); });
+    });
+    var stuIds = {};
+    t.students.forEach(function (r, i) {
+      var id = field(r, '学生编号'); var cid = field(r, '模拟班级编号');
+      if (!id || !cid) errors.push('模拟学生第 ' + (i + 1) + ' 行缺少学生编号或班级编号');
+      if (id && stuIds[id]) errors.push('学生编号重复：' + id);
+      stuIds[id] = true;
+    });
+    var questionIds = {};
+    t.materials.forEach(function (r, i) {
+      var id = field(r, '材料编号');
+      if (!id) errors.push('题目与材料第 ' + (i + 1) + ' 行缺少材料编号');
+      if (id && questionIds[id]) errors.push('材料编号重复：' + id);
+      questionIds[id] = true;
+    });
+    var nodeIds = {};
+    t.nodes.forEach(function (r, i) {
+      var id = field(r, '节点编号');
+      if (!id) errors.push('测验节点第 ' + (i + 1) + ' 行缺少节点编号');
+      nodeIds[id] = true;
+    });
+    var eventVersions = {};
+    var statuses = { '已评分': 1, '待评分': 1, '未作答': 1 };
+    t.answers.forEach(function (r, i) {
+      var sid = field(r, '学生编号'); var qid = field(r, '材料编号'); var nid = field(r, '节点编号');
+      var eid = field(r, '作答事件编号') || (sid + '-' + nid + '-' + qid);
+      var ver = Number(field(r, '修订版本') || 1);
+      var st = field(r, '评分状态');
+      if (!sid || !qid || !nid) errors.push('作答记录第 ' + (i + 1) + ' 行缺少学生/材料/节点');
+      if (sid && !stuIds[sid]) errors.push('作答记录第 ' + (i + 1) + ' 行学生不存在：' + sid);
+      if (qid && !questionIds[qid]) errors.push('作答记录第 ' + (i + 1) + ' 行材料不存在：' + qid);
+      if (nid && !nodeIds[nid]) errors.push('作答记录第 ' + (i + 1) + ' 行节点不存在：' + nid);
+      if (!statuses[st]) errors.push('作答记录第 ' + (i + 1) + ' 行评分状态非法：' + st);
+      if (!/^\d+$/.test(String(field(r, '修订版本') || '1'))) warnings.push('作答记录第 ' + (i + 1) + ' 行修订版本非整数，按 1 处理');
+      var key = eid + '#' + ver;
+      if (eventVersions[key]) errors.push('同一作答事件存在重复版本：' + eid + ' v' + ver);
+      eventVersions[key] = true;
+    });
+    return {
+      ok: errors.length === 0,
+      errors: errors.slice(0, 100),
+      warnings: warnings,
+      counts: {
+        courseRequirements: t.courseRequirements.length,
+        materials: t.materials.length,
+        questions: t.materials.filter(function (r) { return field(r, '材料类型') === '题目'; }).length,
+        students: t.students.length,
+        classes: Object.keys(t.students.reduce(function (a, r) { var c = field(r, '模拟班级编号'); if (c) a[c] = 1; return a; }, {})).length,
+        nodes: t.nodes.length,
+        answers: t.answers.length
+      }
+    };
+  }
+
   ZWZ.official = {
     build: build,
+    validate: validate,
     TYPE_MAP: TYPE_MAP,
     parsePointScores: parsePointScores,
     parseScoringPoints: parseScoringPoints

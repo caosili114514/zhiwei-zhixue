@@ -174,6 +174,28 @@ check('Task2/3 成果包结构', () => {
   assert(comp.csv([{ key: 'a', label: 'A' }], [{ a: 1 }]).indexOf('A') >= 0, 'CSV 生成失败');
   return '360 个体行 / 2 群体行 / 14 字段';
 });
+check('交互式导入校验：官方表通过、缺表阻止', () => {
+  const v = ZWZ.official.validate(official.tables);
+  eq(v.ok, true, '官方表应通过校验');
+  eq(v.counts.students, 40, '学生计数');
+  eq(v.counts.answers, 806, '作答计数');
+  const bad = { ...official.tables, answers: [] };
+  const v2 = ZWZ.official.validate(bad);
+  eq(v2.ok, false, '缺少作答表应阻止');
+  assert(v2.errors.length > 0, '应有错误说明');
+  return '官方表通过；缺作答表被阻止';
+});
+check('导入应用与回滚（store 级）', () => {
+  ZWZ.store.init('official');
+  const before = store.state.answers.length;
+  store.applyOfficialDataset({ tables: official.tables, source: 'test-import', version: 'test-v1', counts: official.counts });
+  eq(store.mode, 'official', '模式');
+  eq(store.state.answers.length, 799, '导入后分析记录');
+  assert(store.hasOfficialBackup(), '应存在上一版本备份');
+  store.rollbackOfficialDataset();
+  eq(store.state.answers.length, before, '回滚后记录数');
+  return '导入 799 / 回滚 ' + before;
+});
 check('不硬编码固定样本数量（5 人子集可构建）', () => {
   const backup = ZWZ.officialData;
   const clone = JSON.parse(JSON.stringify(backup));
@@ -191,4 +213,6 @@ check('不硬编码固定样本数量（5 人子集可构建）', () => {
 
 console.log('\n共 ' + (pass + fail) + ' 项：通过 ' + pass + '，失败 ' + fail);
 if (fail) process.exit(1);
+
+
 

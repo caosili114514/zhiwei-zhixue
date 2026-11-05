@@ -811,6 +811,8 @@
           </div>
           <div class="page-actions">
             ${ui.button({ label: '下载导入模板', icon: 'download', tone: 'secondary', attrs: 'data-act="template"' })}
+            ${ui.button({ label: '导入赛题数据', icon: 'upload', tone: 'secondary', attrs: 'data-act="official-import"' })}
+            ${ZWZ.store.hasOfficialBackup() ? ui.button({ label: '恢复赛题数据上一版本', icon: 'refresh', tone: 'ghost', attrs: 'data-act="official-rollback"' }) : ''}
             ${ui.button({ label: '导出数据快照', icon: 'database', tone: 'primary', attrs: 'data-export="snapshot"' })}
           </div>
         </div>
@@ -828,6 +830,7 @@
           ]
         })}
 
+        <input type="file" id="official-import-input" multiple accept=".csv,.json,application/json,text/csv" hidden />
         <div class="ana-tab-panel">${panel}</div>
       </div>`;
     },
@@ -839,6 +842,122 @@
         if (TABS.indexOf(key) < 0) return;
         TAB = key;
         ctx.refresh();
+      });
+
+      /* ---------------- 赛题数据导入（多 CSV / JSON） ---------------- */
+      function readText(file) {
+        if (file.text) return file.text();
+        return new Promise(function (resolve, reject) {
+          var reader = new FileReader();
+          reader.onload = function () { resolve(String(reader.result || '')); };
+          reader.onerror = function () { reject(new Error('读取文件失败：' + file.name)); };
+          reader.readAsText(file, 'utf-8');
+        });
+      }
+      function detectTable(headers) {
+        var h = headers.join('|');
+        if (h.indexOf('材料编号') >= 0 && h.indexOf('材料类型') >= 0) return 'materials';
+        if (h.indexOf('主题编号') >= 0 && h.indexOf('指标编号') >= 0 && h.indexOf('观察指标') >= 0) return 'courseRequirements';
+        if (h.indexOf('学生编号') >= 0 && h.indexOf('模拟班级编号') >= 0) return 'students';
+        if (h.indexOf('节点编号') >= 0 && h.indexOf('可用题目编号') >= 0) return 'nodes';
+        if (h.indexOf('记录编号') >= 0 && h.indexOf('作答事件编号') >= 0) return 'answers';
+        return '';
+      }
+      function parseOfficialFiles(files) {
+        var list = Array.prototype.slice.call(files || []);
+        return Promise.all(list.map(function (file) {
+          return readText(file).then(function (text) {
+            var name = file.name || '未命名';
+            if (/\.json$/i.test(name)) {
+              var obj = JSON.parse(text);
+              return { file: name, json: obj };
+            }
+            var parsed = io.parseCSV(text);
+            return { file: name, headers: parsed.headers, rows: parsed.rows };
+          });
+        })).then(function (parts) {
+          var tables = { courseRequirements: [], materials: [], students: [], nodes: [], answers: [] };
+          var used = [];
+          var unknown = [];
+          parts.forEach(function (part) {
+            if (part.json) {
+              var src = part.json.tables || part.json;
+              Object.keys(tables).forEach(function (key) {
+                if (Array.isArray(src[key]) && src[key].length) { tables[key] = src[key]; used.push(part.file + '→' + key); }
+              });
+              return;
+            }
+            var key = detectTable(part.headers);
+            if (!key) { unknown.push(part.file); return; }
+            tables[key] = part.rows;
+            used.push(part.file + '→' + key);
+          });
+          return { tables: tables, used: used, unknown: unknown };
+        });
+      }
+      function showOfficialPreview(parsed) {
+        var v = ZWZ.official.validate(parsed.tables);
+        var c = v.counts || {};
+        var rows = [
+          ['课程要求', c.courseRequirements || 0], ['题目与材料', c.materials || 0],
+          ['模拟学生', c.students || 0], ['测验节点', c.nodes || 0], ['作答记录', c.answers || 0]
+        ];
+        var body = html`<div class="stack-sm">
+          <div class="small">文件识别：${parsed.used.join('；') || '无'}${parsed.unknown.length ? '；未识别：' + parsed.unknown.join('、') : ''}</div>
+          <table class="table is-compact"><thead><tr><th>数据表</th><th>记录数</th></tr></thead><tbody>
+            ${rows.map(function (r) { return html`<tr><td>${r[0]}</td><td class="num">${r[1]}</td></tr>`; })}
+          </tbody></table>
+          ${v.errors.length ? ui.banner({ tone: 'danger', compact: true, title: '校验未通过（' + v.errors.length + ' 项）', body: html`<ul class="ana-bullets">${v.errors.slice(0, 20).map(function (e) { return html`<li>${e}</li>`; })}</ul>` }) : ui.banner({ tone: 'success', compact: true, title: '格式校验通过', body: '确认后将替换当前赛题数据（官方原始文件不受影响）；可随时恢复上一版本。' })}
+          ${v.warnings.length ? ui.banner({ tone: 'warn', compact: true, title: '提示', body: v.warnings.slice(0, 10).join('；') }) : ''}
+          <div class="tiny muted">字段按表头自动识别；仅接受课程要求/题目与材料/模拟学生/测验节点/作答记录五张表。未通过校验不会写入任何数据。</div>
+        </div>`;
+        var footer = v.ok
+          ? '<div class="spacer"></div><button type="button" class="btn btn-secondary" data-close>取消</button><button type="button" class="btn btn-primary" data-act="official-confirm">确认导入</button>'
+          : '<div class="spacer"></div><button type="button" class="btn btn-secondary" data-close>关闭</button>';
+        var ctl = ui.modal({ title: '导入赛题数据（预览）', desc: '先校验、再确认；不覆盖官方原始 CSV', size: 'lg', body: body.value, footer: footer, onMount: function (bodyEl) {
+          var btn = bodyEl.parentNode ? bodyEl.parentNode.querySelector('[data-act="official-confirm"]') : null;
+          if (!btn) btn = document.querySelector('[data-act="official-confirm"]');
+          if (btn) btn.addEventListener('click', function () {
+            try {
+              ZWZ.store.applyOfficialDataset({
+                tables: parsed.tables,
+                source: '本地导入：' + parsed.used.join('；'),
+                version: 'import-' + new Date().toISOString().slice(0, 19),
+                counts: v.counts
+              });
+              try {
+                var url = new URL(window.location.href);
+                url.searchParams.set('data', 'official');
+                history.replaceState(null, '', url.pathname + url.search + url.hash);
+              } catch (err) { /* ignore */ }
+              ctl.close();
+              ui.toast('赛题数据已导入，可恢复上一版本', 'success');
+              ctx.refresh();
+            } catch (err) {
+              ui.toast('导入失败：' + (err && err.message ? err.message : '未知错误'), 'error');
+            }
+          });
+        } });
+      }
+      var officialBtn = root.querySelector('[data-act="official-import"]');
+      var officialInput = root.querySelector('#official-import-input');
+      if (officialBtn && officialInput) {
+        officialBtn.addEventListener('click', function () { officialInput.click(); });
+        officialInput.addEventListener('change', function () {
+          var files = officialInput.files;
+          if (!files || !files.length) return;
+          parseOfficialFiles(files).then(showOfficialPreview).catch(function (err) {
+            ui.toast('读取失败：' + (err && err.message ? err.message : '未知错误'), 'error');
+          });
+          officialInput.value = '';
+        });
+      }
+      ui.bind(root, '[data-act="official-rollback"]', 'click', function () {
+        ui.confirm({ title: '恢复赛题数据上一版本？', body: '将恢复到本次导入前的赛题数据；当前数据会被替换，但不影响演示数据。', okText: '恢复上一版本' }).then(function (ok) {
+          if (!ok) return;
+          if (ZWZ.store.rollbackOfficialDataset()) { ui.toast('已恢复上一版本', 'success'); ctx.refresh(); }
+          else ui.toast('没有可恢复的上一版本', 'warn');
+        });
       });
 
       /* 文件选择 / 拖拽 */
@@ -998,5 +1117,6 @@
     }
   });
 })();
+
 
 

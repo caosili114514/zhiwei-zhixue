@@ -116,6 +116,7 @@
 <h2>7. 系统实现与证据链</h2>
 <ul>
   <li><b>双模式隔离：</b>保留原演示数据（11 人/206 条）作为 Demo；新增“赛题数据”模式（官方 40 人/806 条），独立存储键，可在用户菜单切换，互不污染。</li>
+  <li><b>正式数据导入：</b>数据与报告 → “导入赛题数据”，支持 5 张 CSV 或 JSON；表头/关联校验、预览、确认、备份与“恢复上一版本”，不覆盖官方原始文件。</li>
   <li><b>数据适配层：</b><code>js/data/official.js</code> 将官方 5 张表转换为现有 <code>store</code> 兼容 state；不修改原始 CSV；修订、状态、异常写入 <code>dataQuality</code>。</li>
   <li><b>服务层：</b><code>js/services/competition.js</code> 负责 Task1/2/3、数据质量、案例、成果包；<code>diagnosis.js</code> 扩展评分点/未作答/部分掌握；<code>selectors.js</code> 排除异常与未作答。</li>
   <li><b>页面：</b>新增“赛题成果”页（Task1 表 / Task2 班级与个体 / 三名案例 / 成果包导出），复用现有 UI 组件；原 12 个页面保留。</li>

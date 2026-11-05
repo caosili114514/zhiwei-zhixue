@@ -19,6 +19,9 @@
 | 数据对账报告 | `比赛交付/数据对账报告.md` |
 | 运行说明 | `比赛交付/运行说明.md` |
 | 实施报告（批次/测试/checkpoint/未完成项） | `比赛交付/比赛实施报告.md` |
+| 最终验收报告 | `比赛交付/最终交付验收报告.md` |
+| 最终提交清单 | `比赛交付/最终提交清单.md` |
+| 录屏操作手册 | `比赛交付/录屏操作手册.md` |
 | 赛题成果页截图 | `比赛交付/screenshots/contest-task1.png` |
 
 ## 代码与数据
@@ -27,11 +30,12 @@
 - Task1/2/3 服务：`js/services/competition.js`
 - 赛题成果页：`js/pages/teacher/contest.js`
 - 原有演示模式与 12 个页面保留；双模式独立存储。
+- 正式数据导入：数据与报告 → 导入赛题数据（5 张 CSV/JSON，校验+预览+确认+回滚）。
 
 ## 测试
 ```bash
 node tests/check-data.mjs      # 53/53（演示数据回归）
-node tests/check-official.mjs  # 13/13（官方数据/质量/成果）
+node tests/check-official.mjs  # 15/15（官方数据/质量/导入回滚/成果）
 node tests/smoke.mjs           # 12 路由 + 权限 2/2
 node tests/smoke.mjs --print   # 3/3
 ```
