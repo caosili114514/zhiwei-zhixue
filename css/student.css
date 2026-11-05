@@ -502,3 +502,45 @@
   .stu-hero .focus-title { font-size: var(--fs-xl); }
   .stu-hero .focus-actions .btn-lg { width: 100%; }
 }
+
+/* ============================================================
+   第一轮 UI 优化 · 学情报告（2026-11-05）
+   ============================================================ */
+.stu-report .page-lead { margin-bottom: 0; }
+.stu-report-focus-list { display: flex; flex-direction: column; }
+.stu-report-focus { padding: var(--s-3) 0; border-bottom: 1px solid var(--border); }
+.stu-report-focus:last-child { border-bottom: 0; padding-bottom: 0; }
+.stu-report-focus-main { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.stu-report-focus-head { display: flex; align-items: center; gap: var(--s-2); flex-wrap: wrap; }
+.stu-report-focus-kp { font-size: var(--fs-md); font-weight: 600; color: var(--navy); }
+.stu-report-focus-meta { color: var(--text-3); font-size: var(--fs-xs); }
+.stu-report-focus-action { display: flex; align-items: center; gap: var(--s-3); flex-wrap: wrap; }
+.stu-report-focus-action .link-btn { font-size: var(--fs-sm); }
+.stu-report-coverage { max-width: 420px; }
+.stu-report-evidence-block { display: flex; flex-direction: column; gap: var(--s-2); }
+.stu-report-evidence-block + .stu-report-evidence-block { border-top: 1px solid var(--border); padding-top: var(--s-3); }
+.stu-report-status-legend { display: flex; flex-direction: column; gap: 6px; }
+.stu-report-status-row { display: flex; align-items: flex-start; gap: var(--s-2); font-size: var(--fs-sm); color: var(--text-2); }
+.stu-report-status-row .badge { flex: 0 0 auto; margin-top: 1px; }
+.stu-report .stu-report-table tr.is-clickable { cursor: pointer; }
+.stu-report .stu-report-table tr.is-clickable:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+
+@media (max-width: 900px) {
+  .stu-report-focus-head { gap: 6px; }
+  .stu-report-coverage { max-width: none; }
+}
+
+@media print {
+  .stu-report .stu-report-focus { padding: 4px 0; gap: 2px; }
+  .stu-report .stu-report-focus-kp { font-size: 10pt; }
+  .stu-report .stu-report-focus .small { font-size: 8pt; line-height: 1.45; }
+  .stu-report .disclosure { break-inside: auto; border-top: 0; }
+  .stu-report .disclosure-body { break-inside: auto; }
+  .stu-report .stu-report-evidence-block { break-inside: avoid; }
+  .stu-report .page-lead { font-size: 8.5pt; padding: 6px 8px; }
+  .stu-report .stat-strip { padding: 6px 10px; }
+  .stu-report .stat { padding: 0 8px; min-width: 0; }
+  .stu-report .stat-value { font-size: 11pt; }
+  .stu-report .stat-label,
+  .stu-report .stat-sub { font-size: 7.5pt; }
+}
