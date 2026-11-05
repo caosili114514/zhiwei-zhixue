@@ -56,10 +56,19 @@ node server.mjs
 > 无需 `npm install`、无构建、无数据库、无 API Key。需要 Node.js（建议 18+）与 Edge/Chrome 桌面浏览器。
 
 ### 体验入口
-- **评委主入口（赛题成果）**：`http://127.0.0.1:5178/index.html?role=teacher&data=official#/teacher/contest`
-- 赛题教师工作台：`...?role=teacher&data=official#/teacher/dashboard`
+**首次访问 `http://127.0.0.1:5178/` 会先进入身份入口**，不会自动分配身份：
+- 学生体验：选择班级 + 具体学生后进入；
+- 教师体验：选择班级 + 教师演示身份后进入；
+- 评委快速体验：明确显示“教师演示身份 + 赛题数据 + DC01”后进入赛题成果。
+
+直接进入（明确身份，便于评委/录屏）：
+- **评委主入口（赛题成果）**：`http://127.0.0.1:5178/index.html?role=teacher&user=T01&data=official#/teacher/contest`
+- 赛题教师工作台：`...?role=teacher&user=T01&data=official#/teacher/dashboard`
 - 赛题学生端：`...?role=student&user=D01&data=official#/student/home`
-- 演示模式：`...?role=teacher#/teacher/dashboard`（原 11 学生/206 记录）
+- 演示模式教师：`...?role=teacher&user=t1#/teacher/dashboard`（原 11 学生/206 记录）
+- 身份入口（赛题数据）：`http://127.0.0.1:5178/index.html?data=official`
+
+> `role=` 只预选身份入口角色，不自动登录；`user=` 是明确身份。已选择身份后，修改 URL 不会静默切换学生（需走“切换身份/退出体验”）。
 
 详细步骤见 `演示入口说明.md`；完整闭环：数据导入 → 学生记录/作答 → 诊断 → 证据 → 建议/教学调整 → 导出成果。
 
@@ -93,7 +102,7 @@ node tests/check-official.mjs    # 官方数据/质量/导入回滚 15 项
 node tests/smoke.mjs             # 12 路由 + 权限 2/2
 node tests/smoke.mjs --print     # 打印 3/3
 cd ../测试与验收
-node 校验源代码.cjs               # 快照 52 个文件哈希
+node 校验源代码.cjs               # 快照 54 个文件哈希
 node 验证迷你数据集.cjs           # 5 名学生结构适配
 ```
 
@@ -103,7 +112,7 @@ node 验证迷你数据集.cjs           # 5 名学生结构适配
 
 1. **规则系统，不是大模型**：诊断/建议由规则和统计生成；助教为本地规则应答。
 2. **模拟 OCR**：试卷导入页面为模拟解析，不读取真实 PDF/图片内容。
-3. **无后端/登录**：数据保存在本机浏览器；教师/学生身份为本地切换，不是真实账号体系。
+3. **无后端/登录**：数据保存在本机浏览器；首次进入需在身份入口明确选择学生/教师/评委，但这是本机演示身份，不是真实账号或后端鉴权。前端会拦截 URL 越权与已选身份后的 `user=` 静默切换，但无法抵御手动修改 localStorage。
 4. **无真实独立评测成绩**：官方独立评测数据未提供；5 人迷你数据集是结构适配测试，不是评测结果。
 5. **MP4 不在本包**：演示视频需按 `比赛交付/录屏操作手册.md` 人工录制。
 6. **无头打印偶发空白页**：正式打印建议手工操作并目检。

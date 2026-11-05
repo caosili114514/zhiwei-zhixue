@@ -233,7 +233,8 @@ function wordCount(text) {
   return text.replace(/\s/g, '').length;
 }
 function routeUrl(route, role) {
-  return OPTIONS.base + '/index.html?role=' + role + '#' + '/' + route;
+  var userId = role === 'teacher' ? 't1' : 's1';
+  return OPTIONS.base + '/index.html?role=' + role + '&user=' + userId + '#' + '/' + route;
 }
 function tempRoot() {
   return path.join(os.tmpdir(), 'zwz-smoke-' + STARTED.getTime() + '-' + process.pid);
@@ -741,4 +742,5 @@ main().catch(function (err) {
   console.error('冒烟测试异常退出：', err);
   process.exitCode = 1;
 });
+
 

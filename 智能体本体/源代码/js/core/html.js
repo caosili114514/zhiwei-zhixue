@@ -26,7 +26,9 @@
   var RAW = '__zwz_raw__';
 
   function raw(value) {
-    return { __zwzRaw: RAW, value: value === null || value === undefined ? '' : String(value) };
+    var obj = { __zwzRaw: RAW, value: value === null || value === undefined ? '' : String(value) };
+    obj.toString = function () { return this.value; };
+    return obj;
   }
 
   function isRaw(value) {

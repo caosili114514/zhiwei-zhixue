@@ -1,0 +1,86 @@
+/* ============================================================
+   身份入口（首次进入 / 切换身份）
+   ============================================================ */
+.identity-page {
+  min-height: 100vh;
+  padding: 28px 20px 40px;
+  background:
+    radial-gradient(1200px 500px at 20% 0%, rgba(47, 111, 237, 0.12), transparent 60%),
+    radial-gradient(900px 500px at 90% 10%, rgba(16, 185, 129, 0.08), transparent 55%),
+    var(--bg, #f5f7fb);
+}
+.identity-card {
+  max-width: 1120px;
+  margin: 0 auto;
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #dbe2ee);
+  border-radius: 18px;
+  box-shadow: 0 18px 60px rgba(20, 40, 80, 0.10);
+  padding: 24px 28px 20px;
+}
+.identity-top { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+.identity-brand { display: flex; align-items: center; gap: 10px; }
+.identity-mark {
+  width: 38px; height: 38px; border-radius: 10px;
+  display: grid; place-items: center;
+  background: linear-gradient(135deg, #2f6fed, #17346b);
+  color: #fff; font-weight: 800; font-size: 14px; letter-spacing: 1px;
+}
+.identity-brand b { display: block; color: var(--text, #1c2434); font-size: 15px; }
+.identity-brand span { display: block; color: var(--text-3, #6b7485); font-size: 11px; margin-top: 2px; }
+.identity-mode { display: flex; align-items: center; gap: 6px; }
+.identity-mode-note { font-size: 11px; color: var(--text-3, #6b7485); margin-left: 2px; white-space: nowrap; }
+.identity-head { padding: 26px 0 18px; }
+.identity-kicker { font-size: 11px; color: #2159c9; background: #e8f2ff; display: inline-block; padding: 3px 8px; border-radius: 999px; letter-spacing: .04em; }
+.identity-head h1 { margin: 10px 0 8px; font-size: 27px; color: var(--text, #1c2434); letter-spacing: -.01em; }
+.identity-head p { margin: 0; max-width: 800px; color: var(--text-2, #4b5568); font-size: 13px; line-height: 1.7; }
+.identity-roles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.identity-role {
+  text-align: left; border: 1px solid var(--border, #dbe2ee); background: var(--surface, #fff);
+  border-radius: 12px; padding: 14px 14px 12px; cursor: pointer; display: flex; flex-direction: column; gap: 5px;
+  transition: border-color .15s, box-shadow .15s, transform .15s;
+}
+.identity-role:hover { border-color: #9bbcf5; box-shadow: 0 6px 18px rgba(47,111,237,.10); transform: translateY(-1px); }
+.identity-role.is-active { border-color: #2f6fed; box-shadow: 0 0 0 2px rgba(47,111,237,.14); background: #f8fbff; }
+.identity-role-icon { color: #2f6fed; }
+.identity-role-title { font-size: 15px; font-weight: 700; color: var(--text, #1c2434); }
+.identity-role-desc { font-size: 11.5px; color: var(--text-3, #6b7485); line-height: 1.55; }
+.identity-panel { margin-top: 16px; border: 1px solid var(--border, #dbe2ee); border-radius: 14px; padding: 16px; background: var(--surface-2, #f8fafd); }
+.identity-panel-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; margin-bottom: 12px; flex-wrap: wrap; }
+.identity-panel-head h2 { margin: 0 0 3px; font-size: 16px; color: var(--text, #1c2434); }
+.identity-class { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-3, #6b7485); }
+.identity-empty { padding: 12px; }
+.identity-student-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; max-height: 300px; overflow: auto; padding: 2px; }
+.identity-student {
+  border: 1px solid var(--border, #dbe2ee); border-radius: 10px; background: var(--surface, #fff);
+  padding: 9px 10px; text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 2px;
+}
+.identity-student:hover { border-color: #9bbcf5; }
+.identity-student.is-active { border-color: #2f6fed; box-shadow: 0 0 0 2px rgba(47,111,237,.14); background: #f8fbff; }
+.identity-student-id { font-size: 14px; font-weight: 700; color: var(--text, #1c2434); }
+.identity-student-class { font-size: 10.5px; color: var(--text-3, #6b7485); }
+.identity-student-rec { font-size: 10.5px; color: var(--text-2, #4b5568); }
+.identity-student-missing { font-size: 10px; color: #a16207; }
+.identity-actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border-2, #edf1f7); flex-wrap: wrap; }
+.identity-teacher-box { display: flex; justify-content: space-between; gap: 18px; align-items: center; flex-wrap: wrap; }
+.identity-teacher { display: flex; align-items: center; gap: 10px; }
+.identity-teacher b { display: block; font-size: 14px; color: var(--text, #1c2434); }
+.identity-scope { display: flex; gap: 24px; flex-wrap: wrap; }
+.identity-scope > div { display: flex; flex-direction: column; gap: 3px; min-width: 90px; }
+.identity-scope b { font-size: 13px; color: var(--text, #1c2434); }
+.identity-scope-wide { margin: 10px 0 12px; }
+.identity-judge .identity-panel-head { margin-bottom: 6px; }
+.identity-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-top: 16px; margin-top: 16px; border-top: 1px solid var(--border-2, #edf1f7); color: var(--text-3, #6b7485); font-size: 11px; flex-wrap: wrap; }
+.identity-foot span { display: inline-flex; align-items: center; gap: 5px; }
+
+@media (max-width: 900px) {
+  .identity-page { padding: 14px 10px 26px; }
+  .identity-card { padding: 18px 14px 16px; border-radius: 14px; }
+  .identity-head h1 { font-size: 22px; }
+  .identity-roles { grid-template-columns: 1fr; }
+  .identity-panel-head { flex-direction: column; align-items: stretch; }
+  .identity-teacher-box { flex-direction: column; align-items: flex-start; }
+  .identity-actions { flex-direction: column; align-items: stretch; }
+  .identity-actions .btn { width: 100%; }
+  .identity-foot { flex-direction: column; align-items: flex-start; }
+}

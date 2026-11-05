@@ -81,9 +81,9 @@ var OFFICIAL_BACKUP_KEY = 'zwz.db.official.backup.v1';
   function defaultSession(mode, state) {
     if (mode === 'official') {
       var st = (state.users || []).filter(function (u) { return u.role === 'student'; })[0];
-      return { userId: st ? st.id : 'D01', role: 'student', classId: st ? st.classId : 'DC01' };
+      return { userId: st ? st.id : 'D01', role: 'student', classId: st ? st.classId : 'DC01', identityChosen: false };
     }
-    return { userId: 's1', role: 'student', classId: 'c1' };
+    return { userId: 's1', role: 'student', classId: 'c1', identityChosen: false };
   }
 
   var store = {
@@ -112,8 +112,9 @@ var OFFICIAL_BACKUP_KEY = 'zwz.db.official.backup.v1';
       }
       if (!this.session || !this.session.userId) {
         this.session = defaultSession(this.mode, this.state);
-        safeSet(sessionKey, JSON.stringify(this.session));
       }
+      if (this.session && this.session.identityChosen === undefined) this.session.identityChosen = false;
+      safeSet(sessionKey, JSON.stringify(this.session));
       var user = this.state.users.filter(function (u) { return u.id === store.session.userId; })[0];
       if (!user) {
         this.session = defaultSession(this.mode, this.state);
@@ -163,6 +164,7 @@ var OFFICIAL_BACKUP_KEY = 'zwz.db.official.backup.v1';
         try { this.session = JSON.parse(sessionRaw); } catch (err) { /* ignore */ }
       }
       if (!this.session || !this.session.userId) this.session = defaultSession(this.mode, this.state);
+      if (this.session.identityChosen === undefined) this.session.identityChosen = false;
       this.saveSession();
       this.emit('mode');
       return this;
@@ -292,7 +294,8 @@ var OFFICIAL_BACKUP_KEY = 'zwz.db.official.backup.v1';
     store.session = {
       userId: target.id,
       role: role,
-      classId: target.classId || (target.classIds && target.classIds[0]) || (store.state.classes[0] && store.state.classes[0].id) || 'c1'
+      classId: target.classId || (target.classIds && target.classIds[0]) || (store.state.classes[0] && store.state.classes[0].id) || 'c1',
+      identityChosen: true
     };
     store.saveSession();
     store.emit('session');
@@ -311,9 +314,15 @@ var OFFICIAL_BACKUP_KEY = 'zwz.db.official.backup.v1';
     var user = store.state.users.filter(function (u) { return u.id === userId; })[0];
     if (!user) return;
     var classId = user.classId || (user.classIds && user.classIds[0]) || 'c1';
-    store.session = { userId: user.id, role: user.role, classId: classId };
+    store.session = { userId: user.id, role: user.role, classId: classId, identityChosen: true };
     store.saveSession();
     store.emit('session');
+  };
+
+  actions.clearIdentity = function () {
+    store.session = { userId: null, role: 'student', classId: (store.state.classes[0] && store.state.classes[0].id) || 'c1', identityChosen: false };
+    store.saveSession();
+    store.emit('identity');
   };
 
   /* ---------------- 题目 / 试卷导入 ---------------- */
@@ -690,6 +699,7 @@ var OFFICIAL_BACKUP_KEY = 'zwz.db.official.backup.v1';
 
   ZWZ.store = store;
 })();
+
 
 
 

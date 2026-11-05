@@ -25,23 +25,31 @@ node server.mjs
 
 > 无需 `npm install`、无需任何依赖与构建步骤。推荐使用 Microsoft Edge / Chrome 桌面浏览器；页面适配常见桌面与平板宽度。
 
+### 身份入口（首次进入必须选择）
+- 直接打开 `index.html`（不带身份参数）会进入**身份入口**：学生体验 / 教师体验 / 评委快速体验，不自动分配身份。
+- 学生需选择具体学生；教师需选择班级；评委快速体验固定为“教师演示身份 + 赛题数据 + DC01”。
+- 身份保存在本机浏览器；刷新保持。右上角用户菜单可“切换身份 / 退出体验”。
+- `?role=` 只预选身份入口角色，不会自动登录；`?user=` 是明确身份，可直接进入对应演示。
+
 ### 演示参数（便于直接跳到某个页面）
 | 用途 | 地址 |
 |---|---|
-| 学生端学习主页 | `index.html?role=student#/student/home` |
-| 学生练习页（指定任务/题目） | `index.html?role=student#/student/practice?task=t3&question=q20` |
-| 教师端工作台 | `index.html?role=teacher#/teacher/dashboard` |
-| 班级学情分析 | `index.html?role=teacher#/teacher/analysis` |
-| 个体学情档案（指定学生） | `index.html?role=teacher#/teacher/profile?student=s1` |
-| 教学助理 | `index.html?role=teacher#/teacher/assistant` |
+| 学生端学习主页 | `index.html?role=student&user=s1#/student/home` |
+| 学生练习页（指定任务/题目） | `index.html?role=student&user=s1#/student/practice?task=t3&question=q20` |
+| 教师端工作台 | `index.html?role=teacher&user=t1#/teacher/dashboard` |
+| 班级学情分析 | `index.html?role=teacher&user=t1#/teacher/analysis` |
+| 个体学情档案（指定学生） | `index.html?role=teacher&user=t1#/teacher/profile?student=s1` |
+| 教学助理 | `index.html?role=teacher&user=t1#/teacher/assistant` |
+| 身份入口（不带参数） | `index.html` |
 
 ### 赛题数据入口（比赛 / 评委）
 | 用途 | 地址 |
 |---|---|
-| 赛题成果（Task1/2/3 + 案例 + 成果包） | `index.html?role=teacher&data=official#/teacher/contest` |
-| 赛题教师工作台 | `index.html?role=teacher&data=official#/teacher/dashboard` |
+| 赛题成果（Task1/2/3 + 案例 + 成果包） | `index.html?role=teacher&user=T01&data=official#/teacher/contest` |
+| 赛题教师工作台 | `index.html?role=teacher&user=T01&data=official#/teacher/dashboard` |
 | 赛题学生端 | `index.html?role=student&user=D01&data=official#/student/home` |
-| 正式数据导入 | `index.html?role=teacher&data=official#/teacher/data` → 导入赛题数据 |
+| 正式数据导入 | `index.html?role=teacher&user=T01&data=official#/teacher/data` → 导入赛题数据 |
+| 身份入口（含赛题数据） | `index.html?data=official` |
 
 ### 智能体本体 / 比赛交付
 - **智能体本体**：`智能体本体/`（README、源代码、运行/配置/数据/测试/演示入口/版本信息；可独立启动）。
@@ -58,7 +66,7 @@ node server.mjs
 | 林以安（s1） | 演示学生账号，七年级(3)班 | 仅本人学习数据、练习、个人报告 |
 | 沈老师（t1） | 演示教师账号，七年级(3)班数学教师 | 本班班级分析、个体档案、批阅与复核、导入导出 |
 
-切换方式：右上角「学生端 / 教师端」分段按钮，或点击右上角用户卡片打开「切换演示身份」弹窗（含 11 名学生与教师，可一键切换、可重置演示数据）。快捷键：`Alt+1` 学生端 / `Alt+2` 教师端。
+进入/切换方式：首次进入在**身份入口**选择学生（具体学生）/教师（班级+教师演示身份）/评委快速体验；进入后右上角「学生端 / 教师端」或用户菜单的「切换身份 / 退出体验」会回到身份入口。快捷键 `Alt+1` / `Alt+2` 也进入身份入口，不会静默自动分配。学生用户菜单只显示本人，不可切换其他学生；教师可查看本班学生。前端演示身份不是真实登录。
 
 > 角色越界会被拦截并提示；教师端数据仅本班教师可见，学生端无法查看他人数据。
 
