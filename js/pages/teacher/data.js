@@ -377,7 +377,7 @@
               <div class="print-meta">
                 班级：${cls ? cls.name : '—'} · 任课教师：${teacher ? teacher.name : '—'}<br>
                 教学范围：${scopeLabel}（教材版本待教师确认）· 数据范围：${rangeStart ? fmt.date(rangeStart) + ' — ' + fmt.date(rangeEnd) : '—'}<br>
-                生成时间：${fmt.datetime(report.generatedAt)} · 全部为虚构模拟数据
+                生成时间：${fmt.datetime(report.generatedAt)} · ${state.meta && state.meta.dataMode === 'competition' ? '主办方模拟学情数据（仅用于本次比赛）' : '全部为虚构模拟数据'}
               </div>
             </div>
             <div class="print-meta">仅教师可见<br>${textbook.name || '七年级数学'}<br>${textbook.edition || ''}</div>

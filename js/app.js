@@ -1,4 +1,4 @@
-/* ============================================================
+﻿/* ============================================================
    知微·智学 · 应用外壳 / 路由 / 会话
    ============================================================ */
 (function () {
@@ -50,6 +50,7 @@
         title: '教学支持',
         items: [
           { key: 'teacher/assistant', label: '教学助理', icon: 'bot' },
+          { key: 'teacher/contest', label: '赛题成果', icon: 'target' },
           { key: 'teacher/data', label: '数据与报告', icon: 'database' }
         ]
       }
@@ -183,7 +184,7 @@
         <div class="topbar-crumb">${subtitle}</div>
       </div>
       <div class="topbar-tools">
-        <span class="demo-badge" title="全部数据为虚构演示数据">${ui.icon('shield', 12)}演示数据</span>
+        <span class="demo-badge" title="${store.mode === 'official' ? '主办方模拟赛题数据（仅用于比赛）' : '全部数据为虚构演示数据'}">${ui.icon('shield', 12)}${store.mode === 'official' ? '赛题数据' : '演示数据'}</span>
         <div class="role-switch" role="group" aria-label="切换角色">
           <button type="button" class="seg-item ${s.role === 'student' ? 'is-active' : ''}" data-act="role" data-role="student">学生端</button>
           <button type="button" class="seg-item ${s.role === 'teacher' ? 'is-active' : ''}" data-act="role" data-role="teacher">教师端</button>
@@ -345,12 +346,33 @@
     var s = session();
     var students = sel.classStudents(store.state, s.classId);
     var teacher = store.state.users.filter(function (u) { return u.role === 'teacher'; })[0];
+    var classes = store.state.classes || [];
+    var isOfficial = store.mode === 'official';
     var body = html`<div class="stack">
       ${ui.banner({
-        tone: 'info',
+        tone: isOfficial ? 'warn' : 'info',
         compact: true,
-        body: '这是一个可交互原型。切换演示身份后，页面数据与权限范围会同步变化；所有身份均为虚构。'
+        body: isOfficial
+          ? '当前为「赛题数据」模式：主办方模拟学情数据，仅用于本次比赛；学生均为匿名编号，不包含真实学生信息。'
+          : '当前为「演示数据」模式：全部为虚构演示数据；可随时切换回赛题数据。'
       })}
+      <div class="field">
+        <div class="label">数据模式</div>
+        <div class="row-sm row-wrap">
+          <button type="button" class="btn ${isOfficial ? 'btn-secondary' : 'btn-primary'} btn-sm" data-mode="demo">演示数据</button>
+          <button type="button" class="btn ${isOfficial ? 'btn-primary' : 'btn-secondary'} btn-sm" data-mode="official">赛题数据</button>
+          <span class="tiny muted">当前：${isOfficial ? '赛题数据（官方模拟数据）' : '演示数据（虚构）'}</span>
+        </div>
+        <div class="help">两种模式数据独立存储、互不污染；切换后需重新进入页面。</div>
+      </div>
+      ${isOfficial && s.role === 'teacher' && classes.length ? html`<div class="field">
+        <div class="label">当前班级（教师视图）</div>
+        <div class="row-sm row-wrap">
+          ${classes.map(function (c) {
+            return html`<button type="button" class="btn btn-sm ${c.id === s.classId ? 'btn-primary' : 'btn-secondary'}" data-class="${c.id}">${c.name}</button>`;
+          })}
+        </div>
+      </div>` : ''}
       <div class="field">
         <div class="label">教师身份</div>
         <div class="tile-grid">
@@ -361,7 +383,7 @@
         </div>
       </div>
       <div class="field">
-        <div class="label">学生身份（${s.className}）</div>
+        <div class="label">学生身份（${s.className || s.classId}）</div>
         <div class="tile-grid">
           ${students.map(function (st) {
             return html`<button type="button" class="user-chip" data-user="${st.id}">
@@ -372,18 +394,52 @@
       </div>
       <div class="divider"></div>
       <div class="row-between">
-        <div class="small muted">演示数据保存在本机浏览器中，可随时重置。</div>
-        <button type="button" class="btn btn-danger btn-sm" data-act="reset">${ui.icon('refresh', 14)}重置演示数据</button>
+        <div class="small muted">${isOfficial ? '赛题数据保存在本机浏览器；重置会恢复为官方数据的初始导入状态。' : '演示数据保存在本机浏览器中，可随时重置。'}</div>
+        <button type="button" class="btn btn-danger btn-sm" data-act="reset">${ui.icon('refresh', 14)}${isOfficial ? '重置赛题数据' : '重置演示数据'}</button>
       </div>
     </div>`;
 
     var ctl = ui.modal({
-      title: '切换演示身份',
-      desc: '当前身份：' + s.name + '（' + (s.role === 'teacher' ? '教师' : '学生') + '）',
+      title: '切换身份与数据模式',
+      desc: '当前身份：' + s.name + '（' + (s.role === 'teacher' ? '教师' : '学生') + '） · ' + (isOfficial ? '赛题数据' : '演示数据'),
       size: 'lg',
       body: body.value,
       footer: '<div class="spacer"></div><button type="button" class="btn btn-secondary" data-close>关闭</button>',
       onMount: function (bodyEl) {
+        bodyEl.querySelectorAll('[data-mode]').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var mode = btn.getAttribute('data-mode');
+            if (mode === store.mode) return;
+            ui.confirm({
+              title: mode === 'official' ? '切换到赛题数据？' : '切换到演示数据？',
+              body: '两种模式的数据独立保存，切换后会重新加载对应数据；不会删除另一种模式的数据。',
+              okText: '切换模式'
+            }).then(function (ok) {
+              if (!ok) return;
+              store.switchMode(mode);
+              try {
+                var url = new URL(window.location.href);
+                if (mode === 'official') url.searchParams.set('data', 'official');
+                else url.searchParams.delete('data');
+                history.replaceState(null, '', url.pathname + url.search + url.hash);
+              } catch (err) { /* ignore */ }
+              ctl.close();
+              ui.toast(mode === 'official' ? '已切换到赛题数据' : '已切换到演示数据', 'success');
+              navigate(ROLE_HOME[store.session.role]);
+              renderShell();
+              renderRoute(false);
+            });
+          });
+        });
+        bodyEl.querySelectorAll('[data-class]').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            store.actions.setClass(btn.getAttribute('data-class'));
+            ctl.close();
+            ui.toast('已切换班级：' + btn.textContent.trim(), 'success');
+            renderShell();
+            renderRoute(false);
+          });
+        });
         bodyEl.querySelectorAll('[data-user]').forEach(function (btn) {
           btn.addEventListener('click', function () {
             var userId = btn.getAttribute('data-user');
@@ -400,15 +456,17 @@
         if (resetBtn) {
           resetBtn.addEventListener('click', function () {
             ui.confirm({
-              title: '重置演示数据？',
-              body: '将清除本机保存的作答、复核与导入记录，恢复到初始演示数据。该操作不可撤销。',
+              title: isOfficial ? '重置赛题数据？' : '重置演示数据？',
+              body: isOfficial
+                ? '将清除本机对赛题数据的修改，恢复为官方数据初始导入状态（原始 CSV 不受影响）。该操作不可撤销。'
+                : '将清除本机保存的作答、复核与导入记录，恢复到初始演示数据。该操作不可撤销。',
               okText: '确认重置',
               danger: true
             }).then(function (ok) {
               if (!ok) return;
-              store.resetDemo();
+              store.resetCurrent();
               ctl.close();
-              ui.toast('演示数据已重置', 'success');
+              ui.toast(isOfficial ? '赛题数据已重置' : '演示数据已重置', 'success');
               navigate(ROLE_HOME[session().role]);
               renderShell();
               renderRoute(false);
@@ -421,14 +479,15 @@
 
   /* ---------------- 启动 ---------------- */
   function boot() {
-    store.init();
+    var params = null;
+    try { params = new URLSearchParams(window.location.search || ''); } catch (err) { /* ignore */ }
+    store.init(params && params.get('data') === 'official' ? 'official' : 'demo');
 
-    /* 支持深链演示参数：index.html?role=teacher#/teacher/analysis 或 ?user=s1 */
+    /* 支持深链演示参数：index.html?role=teacher#/teacher/analysis 或 ?user=s1&data=official */
     try {
-      var params = new URLSearchParams(window.location.search || '');
-      if (params.get('user')) {
+      if (params && params.get('user')) {
         store.actions.loginAs(params.get('user'));
-      } else if (params.get('role')) {
+      } else if (params && params.get('role')) {
         store.actions.setRole(params.get('role') === 'teacher' ? 'teacher' : 'student');
       }
     } catch (err) { /* 忽略不支持 URLSearchParams 的极端环境 */ }
@@ -508,3 +567,5 @@
     boot();
   }
 })();
+
+

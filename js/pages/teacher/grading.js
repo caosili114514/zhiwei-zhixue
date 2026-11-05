@@ -17,6 +17,9 @@
   var sel = ZWZ.sel;
   var fmt = ZWZ.fmt;
 
+  function classIdOf(ctx) {
+    return (ctx && ctx.session && ctx.session.classId) || (ZWZ.store.session && ZWZ.store.session.classId) || (ZWZ.store.state && ZWZ.store.state.classes && ZWZ.store.state.classes[0] && ZWZ.store.state.classes[0].id) || 'c1';
+  }
   var CLASS_ID = 'c1';
   var TYPE_LABEL = { choice: '选择题', fill: '填空题', calc: '计算题', process: '过程 / 应用题' };
   var STATUS_FILTERS = [
@@ -456,6 +459,7 @@
     subtitle: '七年级(3)班 · 待复核批阅与教师给分',
 
     render: function (ctx) {
+      CLASS_ID = classIdOf(ctx);
       if (S._fresh) {
         S._fresh = false;
         applyInitial(ctx);
@@ -563,7 +567,7 @@
           <li>识别质量低时系统不猜测作答内容，也不据此自动定分；请核对原始作答后再给分。</li>
           <li>“建议复核”“暂无法判阅”属于待复核状态，不计入一次正确率与错误率统计；“暂无法判阅”不计为答错。</li>
           <li>确认给分或修正分数后写入复核记录，复核结果同步到班级分析与个体档案，并写入审计日志。</li>
-          <li>本页不承诺 100% 自动批改；演示数据仅用于产品演示，不代表真实学情。</li>
+          <li>本页不承诺 100% 自动批改；${state.meta && state.meta.dataMode === 'competition' ? '赛题数据为主办方模拟数据，仅用于本次比赛。' : '演示数据仅用于产品演示，不代表真实学情。'}</li>
           <li>队列按提交时间倒序排列；支持 ↑/↓ 或 ←/→ 切换当前作答（输入框内不响应）。</li>
         </ul>`
       });
@@ -663,4 +667,5 @@
     return n;
   }
 })();
+
 

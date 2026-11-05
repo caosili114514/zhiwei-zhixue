@@ -526,7 +526,7 @@
   }
 
   /* ---------------- 数据口径、权限与说明（折叠） ---------------- */
-  function renderNotes() {
+  function renderNotes(state) {
     return ui.disclosure({
       summary: '数据口径、权限与说明',
       count: '6 条',
@@ -536,7 +536,7 @@
         <li>完成方式（独立 / 提示后 / 反复尝试）为可重叠统计，与学生学习档案的互斥口径不同。</li>
         <li>本页仅教师可见，学生仅能查看本人数据；不用于排名、分班或标签化评价。</li>
         <li>教材版本与教学范围待教师确认；未纳入范围的内容不参与正式诊断结论。</li>
-        <li>本页为虚构模拟数据，仅用于产品演示；诊断结论可随新记录与教师复核变化，不替代教师判断。</li>
+        <li>${state.meta && state.meta.dataMode === 'competition' ? '本页数据为主办方模拟学情数据（仅用于本次比赛）；诊断结论可随新记录与教师复核变化，不替代教师判断。' : '本页为虚构模拟数据，仅用于产品演示；诊断结论可随新记录与教师复核变化，不替代教师判断。'}</li>
       </ul>`
     });
   }
@@ -728,7 +728,7 @@
             ${renderTrend(state, studentId)}
             ${renderCompletion(state, studentId)}
             ${renderReviews(state, studentId)}
-            ${renderNotes()}
+            ${renderNotes(state)}
           </div>
         </div>
 
@@ -812,4 +812,6 @@
     }
   });
 })();
+
+
 

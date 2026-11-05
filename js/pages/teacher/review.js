@@ -1,4 +1,4 @@
-/* ============================================================
+﻿/* ============================================================
    教师端 · 复核中心（诊断复核 + 批阅复核入口 + 复核时间线）
    ------------------------------------------------------------
    第一轮 UI 优化（2026-11-05）：
@@ -20,6 +20,9 @@
   var fmt = ZWZ.fmt;
   var diagnosis = ZWZ.diagnosis;
 
+  function classIdOf(ctx) {
+    return (ctx && ctx.session && ctx.session.classId) || (ZWZ.store.session && ZWZ.store.session.classId) || (ZWZ.store.state && ZWZ.store.state.classes && ZWZ.store.state.classes[0] && ZWZ.store.state.classes[0].id) || 'c1';
+  }
   var CLASS_ID = 'c1';
 
   var S = {
@@ -414,7 +417,7 @@
     });
   }
 
-  function renderNotes() {
+  function renderNotes(state) {
     return ui.disclosure({
       summary: '复核口径与审计说明',
       count: '5 条',
@@ -423,7 +426,7 @@
         <li>确认 / 修正 / 标记暂无法判断均写入复核记录（reviews / diagnosisReviews）与审计日志，并即时同步到班级分析与个体档案。</li>
         <li>“暂无法判断”不会作为正式结论使用，也不会计为答错；待复核批阅不计入一次正确率与错误类型统计。</li>
         <li>“证据充分”仅建议在记录足够时选择；过程题不自动定分，系统不承诺 100% 自动批改。</li>
-        <li>本页为虚构模拟数据，仅用于产品演示；复核结论可随新记录再次调整。</li>
+        <li>${state.meta && state.meta.dataMode === 'competition' ? '本页数据为主办方模拟学情数据（仅用于本次比赛）；复核结论可随新记录再次调整。' : '本页为虚构模拟数据，仅用于产品演示；复核结论可随新记录再次调整。'}</li>
       </ul>`
     });
   }
@@ -492,6 +495,7 @@
     subtitle: '七年级(3)班 · 待办优先',
 
     render: function (ctx) {
+      CLASS_ID = classIdOf(ctx);
       if (S._fresh) {
         S._fresh = false;
         applyInitial(ctx);
@@ -551,7 +555,7 @@
         ${content}
         <div class="tch-review-details">
           ${renderTimeline(state)}
-          ${renderNotes()}
+          ${renderNotes(state)}
         </div>
       </div>`;
     },
@@ -635,4 +639,6 @@
     }
   });
 })();
+
+
 

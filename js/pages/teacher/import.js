@@ -1,4 +1,4 @@
-/* ============================================================
+﻿/* ============================================================
    教师端 · 试卷与题目（上传 → 模拟解析预览 → 确认题目与知识点 → 布置任务）
    ------------------------------------------------------------
    - 文件解析为“模拟能力”：只读取文件名/大小/类型，题目来自内置示例题库；
@@ -17,6 +17,9 @@
   var sel = ZWZ.sel;
   var fmt = ZWZ.fmt;
 
+  function classIdOf(ctx) {
+    return (ctx && ctx.session && ctx.session.classId) || (ZWZ.store.session && ZWZ.store.session.classId) || (ZWZ.store.state && ZWZ.store.state.classes && ZWZ.store.state.classes[0] && ZWZ.store.state.classes[0].id) || 'c1';
+  }
   var CLASS_ID = 'c1';
   var TYPE_LABEL = { choice: '选择题', fill: '填空题', calc: '计算题', process: '过程 / 应用题' };
   var DIFF_OPTIONS = ['基础', '中等', '提升'];
@@ -959,6 +962,7 @@
     subtitle: '七年级(3)班 · 试卷导入与题目确认',
 
     render: function (ctx) {
+      CLASS_ID = classIdOf(ctx);
       ensureFresh();
       var stepBody;
       if (S.step === 2) stepBody = renderStep2(ctx);
@@ -1146,3 +1150,4 @@
     }
   });
 })();
+

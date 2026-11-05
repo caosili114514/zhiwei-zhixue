@@ -586,7 +586,7 @@
         ${reviewBlock}
 
         <div class="row-between stu-archive-foot">
-          ${ui.aiNote('本页数据为演示用模拟数据；诊断结论由规则引擎实时派生，可随记录补充与教师复核变化。')}
+          ${ui.aiNote(state.meta && state.meta.dataMode === 'competition' ? '本页数据为主办方模拟学情数据（仅用于本次比赛）；诊断结论由规则引擎实时派生，可随记录补充与教师复核变化。' : '本页数据为演示用模拟数据；诊断结论由规则引擎实时派生，可随记录补充与教师复核变化。')}
           ${ui.button({ label: '查看可打印的学情报告', tone: 'secondary', size: 'sm', icon: 'printer', attrs: 'data-go="#/student/report"' })}
         </div>
       </div>`;

@@ -1,4 +1,4 @@
-/* ============================================================
+﻿/* ============================================================
    知微·智学 · 状态存储与数据操作（唯一写入口）
    ------------------------------------------------------------
    - 所有页面通过 ZWZ.store.actions.* 修改数据；
@@ -11,6 +11,8 @@
   var ZWZ = (window.ZWZ = window.ZWZ || {});
   var DB_KEY = 'zwz.db.v1';
   var SESSION_KEY = 'zwz.session.v1';
+var OFFICIAL_DB_KEY = 'zwz.db.official.v1';
+var OFFICIAL_SESSION_KEY = 'zwz.session.official.v1';
   var listeners = [];
   var storageOK = true;
 
@@ -68,11 +70,19 @@
     return state;
   }
 
-  function freshState() {
-    var state = ZWZ.seed.build();
+  function freshState(mode) {
+    var state = mode === 'official' && ZWZ.official ? ZWZ.official.build() : ZWZ.seed.build();
     normalize(state);
     state.__rev = 1;
     return state;
+  }
+
+  function defaultSession(mode, state) {
+    if (mode === 'official') {
+      var st = (state.users || []).filter(function (u) { return u.role === 'student'; })[0];
+      return { userId: st ? st.id : 'D01', role: 'student', classId: st ? st.classId : 'DC01' };
+    }
+    return { userId: 's1', role: 'student', classId: 'c1' };
   }
 
   var store = {
@@ -80,34 +90,34 @@
     session: null,
     storageOK: true,
 
-    init: function () {
-      var raw = safeGet(DB_KEY);
+    init: function (mode) {
+      this.mode = mode === 'official' ? 'official' : 'demo';
+      var dbKey = this.mode === 'official' ? OFFICIAL_DB_KEY : DB_KEY;
+      var sessionKey = this.mode === 'official' ? OFFICIAL_SESSION_KEY : SESSION_KEY;
+      var raw = safeGet(dbKey);
       var loaded = null;
       if (raw) {
         try {
           loaded = JSON.parse(raw);
           if (!loaded || !loaded.meta || !loaded.questions || !loaded.answers) loaded = null;
-        } catch (err) {
-          loaded = null;
-        }
+        } catch (err) { loaded = null; }
       }
-      this.state = loaded ? normalize(loaded) : freshState();
+      this.state = loaded ? normalize(loaded) : freshState(this.mode);
       if (!this.state.__rev) this.state.__rev = 1;
 
-      var sessionRaw = safeGet(SESSION_KEY);
+      var sessionRaw = safeGet(sessionKey);
       if (sessionRaw) {
-        try {
-          this.session = JSON.parse(sessionRaw);
-        } catch (err) {
-          this.session = null;
-        }
+        try { this.session = JSON.parse(sessionRaw); } catch (err) { this.session = null; }
       }
       if (!this.session || !this.session.userId) {
-        this.session = { userId: 's1', role: 'student', classId: 'c1' };
-        safeSet(SESSION_KEY, JSON.stringify(this.session));
+        this.session = defaultSession(this.mode, this.state);
+        safeSet(sessionKey, JSON.stringify(this.session));
       }
       var user = this.state.users.filter(function (u) { return u.id === store.session.userId; })[0];
-      if (!user) this.session = { userId: 's1', role: 'student', classId: 'c1' };
+      if (!user) {
+        this.session = defaultSession(this.mode, this.state);
+        safeSet(sessionKey, JSON.stringify(this.session));
+      }
       this.storageOK = storageOK;
       return this;
     },
@@ -120,21 +130,41 @@
     save: function () {
       var payload = this.state;
       var json = null;
-      try {
-        json = JSON.stringify(payload);
-      } catch (err) {
-        return false;
-      }
-      if (!safeSet(DB_KEY, json)) {
-        this.storageOK = false;
-        return false;
-      }
+      try { json = JSON.stringify(payload); } catch (err) { return false; }
+      var key = this.mode === 'official' ? OFFICIAL_DB_KEY : DB_KEY;
+      if (!safeSet(key, json)) { this.storageOK = false; return false; }
       this.storageOK = true;
       return true;
     },
 
     saveSession: function () {
-      safeSet(SESSION_KEY, JSON.stringify(this.session));
+      var key = this.mode === 'official' ? OFFICIAL_SESSION_KEY : SESSION_KEY;
+      safeSet(key, JSON.stringify(this.session));
+    },
+
+    switchMode: function (mode) {
+      this.save();
+      this.mode = mode === 'official' ? 'official' : 'demo';
+      var dbKey = this.mode === 'official' ? OFFICIAL_DB_KEY : DB_KEY;
+      var sessionKey = this.mode === 'official' ? OFFICIAL_SESSION_KEY : SESSION_KEY;
+      var raw = safeGet(dbKey);
+      this.state = null;
+      if (raw) {
+        try {
+          var loaded = JSON.parse(raw);
+          if (loaded && loaded.meta && loaded.questions && loaded.answers) this.state = normalize(loaded);
+        } catch (err) { /* ignore */ }
+      }
+      if (!this.state) { this.state = freshState(this.mode); this.save(); }
+      var sessionRaw = safeGet(sessionKey);
+      this.session = null;
+      if (sessionRaw) {
+        try { this.session = JSON.parse(sessionRaw); } catch (err) { /* ignore */ }
+      }
+      if (!this.session || !this.session.userId) this.session = defaultSession(this.mode, this.state);
+      this.saveSession();
+      this.emit('mode');
+      return this;
     },
 
     subscribe: function (fn) {
@@ -163,8 +193,22 @@
 
     resetDemo: function () {
       safeRemove(DB_KEY);
-      this.state = freshState();
-      this.session = { userId: 's1', role: 'student', classId: 'c1' };
+      safeRemove(SESSION_KEY);
+      if (this.mode === 'official') return this.resetCurrent();
+      this.state = freshState('demo');
+      this.session = defaultSession('demo', this.state);
+      this.saveSession();
+      this.save();
+      this.emit('reset');
+    },
+
+    resetCurrent: function () {
+      var dbKey = this.mode === 'official' ? OFFICIAL_DB_KEY : DB_KEY;
+      var sessionKey = this.mode === 'official' ? OFFICIAL_SESSION_KEY : SESSION_KEY;
+      safeRemove(dbKey);
+      safeRemove(sessionKey);
+      this.state = freshState(this.mode);
+      this.session = defaultSession(this.mode, this.state);
       this.saveSession();
       this.save();
       this.emit('reset');
@@ -191,15 +235,27 @@
 
   /* ---------------- 会话 ---------------- */
   actions.setRole = function (role) {
-    var target = role === 'teacher' ? 't1' : 's1';
+    var users = store.state.users || [];
+    var target = null;
+    if (role === 'teacher') target = users.filter(function (u) { return u.role === 'teacher'; })[0];
+    else target = users.filter(function (u) { return u.role === 'student'; })[0];
+    if (!target) return;
     store.session = {
-      userId: target,
+      userId: target.id,
       role: role,
-      classId: store.state.users.filter(function (u) { return u.id === target; })[0].classId || 'c1'
+      classId: target.classId || (target.classIds && target.classIds[0]) || (store.state.classes[0] && store.state.classes[0].id) || 'c1'
     };
-    if (role === 'teacher' && !store.session.classId) store.session.classId = 'c1';
     store.saveSession();
     store.emit('session');
+  };
+
+  actions.setClass = function (classId) {
+    var exists = (store.state.classes || []).some(function (c) { return c.id === classId; });
+    if (!exists) return null;
+    store.session.classId = classId;
+    store.saveSession();
+    store.emit('class');
+    return classId;
   };
 
   actions.loginAs = function (userId) {
@@ -536,7 +592,7 @@
   actions.importLearners = function (payload) {
     var p = payload || {};
     var preview = p.preview || [];
-    var cls = store.state.classes.filter(function (c) { return c.id === (p.classId || 'c1'); })[0];
+    var cls = store.state.classes.filter(function (c) { return c.id === (p.classId || (store.state.classes[0] && store.state.classes[0].id) || 'c1'); })[0];
     var added = 0;
     preview.forEach(function (row) {
       if (!row.name) return;
@@ -547,7 +603,7 @@
         id: id,
         role: 'student',
         name: row.name,
-        classId: cls ? cls.id : 'c1',
+        classId: cls ? cls.id : ((store.state.classes[0] && store.state.classes[0].id) || 'c1'),
         avatarSeed: id,
         note: '导入后待确认',
         importedAt: nowIso()
@@ -585,3 +641,5 @@
 
   ZWZ.store = store;
 })();
+
+

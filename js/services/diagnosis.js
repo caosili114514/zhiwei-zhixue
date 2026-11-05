@@ -36,6 +36,7 @@
     independent: { label: '独立完成', tone: 'teal', desc: '在无提示情况下完成' },
     'after-hint': { label: '提示后完成', tone: 'primary', desc: '借助提示后完成，独立程度待观察' },
     retry: { label: '反复尝试后完成', tone: 'primary', desc: '多次尝试后完成，一次正确率待提升' },
+    partial: { label: '部分掌握', tone: 'primary', desc: '部分得分，存在明确失分点，需针对性巩固' },
     difficulty: { label: '仍需巩固', tone: 'warn', desc: '目标知识点上仍有困难，建议针对性练习' },
     'not-learned': { label: '尚未学习 / 不在范围', tone: 'neutral', desc: '未纳入当前教学范围，不作为诊断结论' },
     insufficient: { label: '记录不足', tone: 'neutral', desc: '有效记录不足，暂不作结论' }
@@ -84,6 +85,11 @@
 
   function buildQuote(record) {
     var a = record.answer;
+    if (a.attemptStatus === 'unanswered') {
+      var q0 = record.question;
+      return fmt.shortDate(a.submittedAt) + ' ' + (q0 ? '第' + q0.code + '题（' + (TYPE_LABELS[q0.type] || '题目') + '）' : '') +
+        '未作答（缺失记录，不计为答错）';
+    }
     var q = record.question;
     var parts = [];
     parts.push(fmt.shortDate(a.submittedAt) + ' 第' + q.code + '题（' + (TYPE_LABELS[q.type] || '题目') + '）');
@@ -132,6 +138,11 @@
       case 'retry':
         text = '经过反复尝试后完成「' + kp.name + '」相关题目，说明思路能形成但不够熟练；建议做少量限时练习提升一次正确率。';
         break;
+      case 'partial':
+        text = '「' + kp.name + '」有部分得分，说明基础思路已建立，但仍存在明确失分点' +
+          (errorLabel ? '（主要涉及「' + errorLabel + '」）' : '') +
+          '。建议先针对失分步骤做 2—3 道同类型变式题，再回到完整解答检验是否稳定。';
+        break;
       case 'difficulty':
         text = '目前记录显示在「' + kp.name + '」上仍有困难' + (errorLabel ? '，主要涉及「' + errorLabel + '」' : '') +
           '。建议先回顾教材例题与关键步骤，再完成 2—3 道同类基础题，之后用新记录复核。';
@@ -160,16 +171,34 @@
       return new Date(a.answer.submittedAt) - new Date(b.answer.submittedAt);
     });
     var judged = sorted.filter(function (r) {
-      return r.answer.score !== null && r.answer.score !== undefined;
+      return r.answer.score !== null && r.answer.score !== undefined && !r.answer.excludeFromStats;
     });
+    var excluded = sorted.filter(function (r) { return r.answer.excludeFromStats; });
+    var absent = sorted.filter(function (r) { return r.answer.attemptStatus === 'unanswered'; });
     var pending = sorted.filter(function (r) {
-      return r.answer.gradeStatus === 'suggested' || r.answer.gradeStatus === 'unjudged';
+      return (r.answer.gradeStatus === 'suggested' || r.answer.gradeStatus === 'unjudged') &&
+        r.answer.attemptStatus !== 'unanswered' && !r.answer.excludeFromStats;
     });
     var correct = judged.filter(function (r) { return isCorrect(r.answer); });
     var wrong = judged.filter(function (r) { return !isCorrect(r.answer); });
     var hintRecords = sorted.filter(function (r) { return r.answer.hintLevels && r.answer.hintLevels.length; });
     var retryRecords = sorted.filter(function (r) { return r.answer.attempts && r.answer.attempts > 1; });
     var lowRecognition = sorted.filter(function (r) { return r.answer.recognition === 'low'; });
+    var totalScore = judged.reduce(function (n, r) { return n + (Number(r.answer.score) || 0); }, 0);
+    var totalMax = judged.reduce(function (n, r) { return n + (Number(r.answer.maxScore) || 0); }, 0);
+    var scoreRate = totalMax ? totalScore / totalMax : null;
+    var fullMarks = judged.filter(function (r) { return Number(r.answer.score) >= Number(r.answer.maxScore); });
+    var partialMarks = judged.filter(function (r) {
+      var sc = Number(r.answer.score), mx = Number(r.answer.maxScore);
+      return sc > 0 && sc < mx;
+    });
+    var pointLoss = [];
+    wrong.forEach(function (r) {
+      var ps = r.answer.pointScores || {};
+      (r.question.scoringPoints || []).forEach(function (p) {
+        if (ps[p.id] !== undefined && Number(ps[p.id]) <= 0) pointLoss.push(p.id + ' ' + p.label);
+      });
+    });
 
     var errorCounts = {};
     wrong.forEach(function (r) {
@@ -185,6 +214,7 @@
     }).sort(function (a, b) { return b.count - a.count; });
 
     var ratio = judged.length ? correct.length / judged.length : 0;
+    var isCompetition = !!(state.meta && state.meta.dataMode === 'competition');
     var status;
     var performance;
     if (!inScope) {
@@ -194,24 +224,32 @@
       status = 'undetermined';
       performance = 'insufficient';
     } else if (!judged.length) {
-      status = 'pending';
-      performance = 'insufficient';
+      if (pending.length) { status = 'pending'; performance = 'insufficient'; }
+      else if (absent.length) { status = 'undetermined'; performance = 'insufficient'; }
+      else { status = 'pending'; performance = 'insufficient'; }
     } else {
-      performance = pickPerformance(ratio, sorted, hintRecords.length, retryRecords.length, judged.length);
-      if (judged.length < 2) {
-        status = 'preliminary';
-      } else if (pending.length > 0 && pending.length >= Math.ceil(judged.length * 0.5)) {
-        status = 'pending';
-      } else if (judged.length >= 3 && (ratio >= 0.85 || ratio <= 0.4)) {
-        status = 'sufficient';
+      if (isCompetition) {
+        if (judged.length >= 4 && scoreRate !== null && scoreRate >= 0.9) performance = 'secure';
+        else if (scoreRate !== null && scoreRate >= 0.75) performance = 'independent';
+        else if (scoreRate !== null && scoreRate >= 0.4) performance = 'partial';
+        else performance = 'difficulty';
+        if (judged.length < 2) status = 'preliminary';
+        else if (pending.length > 0 && pending.length >= Math.ceil(judged.length * 0.5)) status = 'pending';
+        else if (judged.length >= 3 && scoreRate !== null && (scoreRate >= 0.85 || scoreRate <= 0.4)) status = 'sufficient';
+        else status = 'preliminary';
       } else {
-        status = 'preliminary';
+        performance = pickPerformance(ratio, sorted, hintRecords.length, retryRecords.length, judged.length);
+        if (judged.length < 2) status = 'preliminary';
+        else if (pending.length > 0 && pending.length >= Math.ceil(judged.length * 0.5)) status = 'pending';
+        else if (judged.length >= 3 && (ratio >= 0.85 || ratio <= 0.4)) status = 'sufficient';
+        else status = 'preliminary';
       }
       if (lowRecognition.length && judged.length <= 2) status = 'pending';
     }
 
     var quotes = [];
     var ordered = wrong.concat(pending.filter(function (p) { return wrong.indexOf(p) < 0; }))
+      .concat(absent)
       .concat(correct)
       .slice(0, 4);
     ordered.forEach(function (r) { quotes.push(buildQuote(r)); });
@@ -261,10 +299,16 @@
         correct: correct.length,
         wrong: wrong.length,
         pending: pending.length,
+        absent: absent.length,
+        excluded: excluded.length,
+        scoreRate: scoreRate,
+        fullMarks: fullMarks.length,
+        partialMarks: partialMarks.length,
+        pointLoss: pointLoss.slice(0, 8),
         hintUsed: hintRecords.length,
         retries: retryRecords.length,
         lowRecognition: lowRecognition.length,
-        coverageText: judged.length + ' / ' + sorted.length + ' 条可判读',
+        coverageText: judged.length + ' / ' + (sorted.length - absent.length) + ' 条可判读' + (absent.length ? '（另 ' + absent.length + ' 条未作答）' : '') + (excluded.length ? '（' + excluded.length + ' 条异常已标记）' : ''),
         quotes: quotes
       },
       suggestion: buildSuggestion(kp, performance, status, errorTypes, judged.length, pending.length),

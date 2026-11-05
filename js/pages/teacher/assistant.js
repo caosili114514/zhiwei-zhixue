@@ -158,7 +158,7 @@
         </div>
         <div class="ana-assistant-disclaimer">
           ${ui.icon('shield', 13)}
-          <span>本地规则应答，未接入真实大模型；建议仅供参考，不替代教师判断。数据为虚构模拟。</span>
+          <span>本地规则应答，未接入真实大模型；建议仅供参考，不替代教师判断。${state.meta && state.meta.dataMode === 'competition' ? '数据为主办方模拟学情数据。' : '数据为虚构模拟。'}</span>
         </div>
       </div>
     </section>`;

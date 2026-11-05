@@ -20,6 +20,9 @@
   var sel = ZWZ.sel;
   var fmt = ZWZ.fmt;
 
+  function classIdOf(ctx) {
+    return (ctx && ctx.session && ctx.session.classId) || (ZWZ.store.session && ZWZ.store.session.classId) || (ZWZ.store.state && ZWZ.store.state.classes && ZWZ.store.state.classes[0] && ZWZ.store.state.classes[0].id) || 'c1';
+  }
   var CLASS_ID = 'c1';
 
   /* ---------------- 取数辅助（只读，不修改 state） ---------------- */
@@ -118,6 +121,7 @@
     subtitle: '七年级(3)班 · 学情诊断与个性化学习',
 
     render: function (ctx) {
+      CLASS_ID = classIdOf(ctx);
       var state = ctx.state;
       var cls = sel.classById(state, CLASS_ID) || { name: '七年级(3)班' };
       var ov = sel.classOverview(state, CLASS_ID);
@@ -308,7 +312,7 @@
           <div>数据覆盖 = 范围内已有可判读记录的知识点数 / 范围内知识点总数；未覆盖不代表学生不会。</div>
           <div>错误类型仅统计已判分错误记录；识别异常（识别质量低 / 空白）需教师核对原始作答后才计入判分与诊断。</div>
           <div>过程题按步骤给分，系统只做辅助批阅，不承诺 100% 自动批改。</div>
-          <div>本页为虚构演示数据，仅用于产品演示，不代表真实学情；教材版本与教学范围待教师确认。</div>
+          <div>${state.meta && state.meta.dataMode === 'competition' ? '本页数据为主办方模拟学情数据，仅用于本次比赛，不代表真实学情。' : '本页为虚构演示数据，仅用于产品演示，不代表真实学情；教材版本与教学范围待教师确认。'}</div>
         </div>`
       });
       var firstScreen = html`<div class="tch-focus tch-focus-v2">
@@ -382,6 +386,8 @@
     }
   });
 })();
+
+
 
 
 

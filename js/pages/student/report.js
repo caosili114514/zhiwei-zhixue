@@ -71,7 +71,7 @@
         <div class="print-meta stu-report-head-meta">
           <div>统计区间：${rangeText(report.range)}</div>
           <div>生成时间：${fmt.datetime(report.generatedAt)}</div>
-          <div>数据性质：演示用模拟数据（不含真实学生信息）</div>
+          <div>数据性质：${state.meta && state.meta.dataMode === 'competition' ? '主办方模拟学情数据（仅用于本次比赛，不含真实学生信息）' : '演示用模拟数据（不含真实学生信息）'}</div>
           <div>适用范围：当前教学范围内 ${scopeCount} 个知识点</div>
         </div>
       </div>`;

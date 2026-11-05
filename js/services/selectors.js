@@ -1,4 +1,4 @@
-/* ============================================================
+﻿/* ============================================================
    知微·智学 · 选择器层（纯查询 / 聚合，不修改数据库）
    页面统一通过 selectors 取数，保证学生端 / 教师端 / 图表 / 导出数据一致。
    ============================================================ */
@@ -108,7 +108,7 @@
     var submitted = answers(state, { studentId: studentId, taskId: task.id });
     var submittedIds = submitted.map(function (a) { return a.questionId; });
     var missing = questions.filter(function (qid) { return submittedIds.indexOf(qid) < 0; });
-    var judged = submitted.filter(function (a) { return a.score !== null && a.score !== undefined; });
+    var judged = submitted.filter(function (a) { return a.score !== null && a.score !== undefined && !a.excludeFromStats; });
     var correct = judged.filter(isCorrect);
     return {
       task: task,
@@ -131,7 +131,7 @@
       return taskProgress(state, studentId, t);
     });
     var all = answers(state, { studentId: studentId });
-    var judged = all.filter(function (a) { return a.score !== null && a.score !== undefined; });
+    var judged = all.filter(function (a) { return a.score !== null && a.score !== undefined && !a.excludeFromStats; });
     var correct = judged.filter(isCorrect);
 
     var diags = diagnostics(state, { studentId: studentId, scopeOnly: true });
@@ -178,7 +178,7 @@
         hintCount: hintCount,
         scopeKpCount: diags.filter(function (d) { return d.scope === 'in-scope'; }).length,
         coveredKpCount: diags.filter(function (d) { return d.scope === 'in-scope' && d.evidence.records > 0; }).length,
-        pendingReviews: all.filter(function (a) { return a.gradeStatus === 'suggested' || a.gradeStatus === 'unjudged'; }).length
+        pendingReviews: all.filter(function (a) { return (a.gradeStatus === 'suggested' || a.gradeStatus === 'unjudged') && a.attemptStatus !== 'unanswered'; }).length
       },
       trend: studentTrend(state, studentId)
     };
@@ -192,7 +192,7 @@
     var points = [];
     tasks.forEach(function (t) {
       var rows = answers(state, { studentId: studentId, taskId: t.id }).filter(function (a) {
-        return a.score !== null && a.score !== undefined;
+        return a.score !== null && a.score !== undefined && !a.excludeFromStats;
       });
       if (!rows.length) return;
       var correct = rows.filter(isCorrect).length;
@@ -383,7 +383,7 @@
       var st = userById(state, a.studentId);
       return st && st.classId === classId;
     });
-    var judged = all.filter(function (a) { return a.score !== null && a.score !== undefined; });
+    var judged = all.filter(function (a) { return a.score !== null && a.score !== undefined && !a.excludeFromStats; });
     var correct = judged.filter(isCorrect);
     var activeIds = {};
     all.forEach(function (a) { activeIds[a.studentId] = true; });
@@ -415,7 +415,7 @@
       judged: judged.length,
       accuracy: judged.length ? correct.length / judged.length : null,
       hintRate: all.length ? all.filter(function (a) { return a.hintLevels && a.hintLevels.length; }).length / all.length : null,
-      pendingGrades: all.filter(function (a) { return a.gradeStatus === 'suggested' || a.gradeStatus === 'unjudged'; }).length,
+      pendingGrades: all.filter(function (a) { return (a.gradeStatus === 'suggested' || a.gradeStatus === 'unjudged') && a.attemptStatus !== 'unanswered'; }).length,
       pendingDiagnoses: diags.filter(function (d) { return d.status === 'pending'; }).length,
       kpRows: kpRows,
       weakKps: weakKps,
@@ -434,6 +434,7 @@
       var st = userById(state, a.studentId);
       if (!st || (classId && st.classId !== classId)) return;
       if (a.gradeStatus !== 'suggested' && a.gradeStatus !== 'unjudged') return;
+      if (a.attemptStatus === 'unanswered' || a.excludeFromStats) return;
       out.grades.push({ answer: a, question: question(state, a.questionId), student: st });
     });
     var diags = diagnostics(state, { classId: classId, scopeOnly: true });
@@ -538,3 +539,6 @@
     assistantContext: assistantContext
   };
 })();
+
+
+

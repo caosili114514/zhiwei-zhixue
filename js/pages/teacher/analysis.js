@@ -80,6 +80,7 @@
 
   function chapterRangeLabel(chapters) {
     if (!chapters.length) return '未设置';
+    if (chapters[0].standardRef || chapters[0].goal) return chapters.map(function (c) { return c.name; }).join(' · ');
     var orders = chapters.map(function (c) { return c.order; }).sort(function (a, b) { return a - b; });
     var contiguous = orders.length > 1 && orders[orders.length - 1] - orders[0] === orders.length - 1;
     if (contiguous) {
@@ -216,7 +217,7 @@
           <div class="label">班级</div>
           <select class="select is-sm" id="ana-class" aria-label="选择班级">
             ${classes.map(function (c) {
-              return html`<option value="${c.id}" ${c.id === classId ? 'selected' : ''}>${c.name}（当前班级）</option>`;
+              return html`<option value="${c.id}" ${c.id === classId ? 'selected' : ''}>${c.name}${c.id === classId ? '（当前）' : ''}</option>`;
             })}
           </select>
         </div>
@@ -746,7 +747,7 @@
           <li>缺失记录与待复核的过程题<b>不计为答错</b>；目前待复核批阅 ${overview.pendingGrades} 条、待确认诊断 ${overview.pendingDiagnoses} 项，复核后相关结论可能调整。</li>
           <li>掌握率只以“有可判读记录的学生”为分母；记录数少于 3 条或覆盖低于 50% 的知识点，结论仅作参考。</li>
           <li>教材版本与教学范围（${scopeLabel}）<b>待教师确认</b>；未纳入范围：${excludedText}，不参与正式诊断结论。</li>
-          <li>本页全部数据为虚构模拟数据，仅用于产品演示，不代表真实学情；图表由规则引擎从原始作答实时派生，未接入真实大模型。</li>
+          <li>${state.meta && state.meta.dataMode === 'competition' ? '本页数据为主办方模拟学情数据（仅用于本次比赛），图表由规则引擎从原始作答实时派生。' : '本页全部数据为虚构模拟数据，仅用于产品演示，不代表真实学情；图表由规则引擎从原始作答实时派生，未接入真实大模型。'}</li>
         </ul>`
       })}
     </section>`;
@@ -946,7 +947,8 @@
       var classSelect = root.querySelector('#ana-class');
       if (classSelect) {
         classSelect.addEventListener('change', function () {
-          ui.toast('演示数据仅包含 1 个班级，切换班级为原型预留能力', 'info');
+          ZWZ.store.actions.setClass(classSelect.value);
+          ctx.refresh();
         });
       }
 
@@ -992,4 +994,5 @@
     }
   });
 })();
+
 
