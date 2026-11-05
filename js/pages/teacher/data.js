@@ -1,4 +1,4 @@
-/* ============================================================
+﻿/* ============================================================
    知微·智学 · 数据与报告（教师端）
    ------------------------------------------------------------
    四个标签页：
@@ -90,7 +90,14 @@
         </ul>`
       }) : ''}
       ${panel}
-      ${renderImportHistory(state)}
+      ${ui.disclosure({
+        summary: '最近导入记录',
+        count: Math.min(6, (state.imports || []).length) + ' 条',
+        body: html`<div class="stack-sm">
+          ${renderImportHistoryTable(state)}
+          <div class="tiny muted">完整导入记录见“审计日志”标签页。</div>
+        </div>`
+      })}
     </div>`;
   }
 
@@ -99,10 +106,7 @@
       <div class="card-head">
         <div class="card-head-main">
           <div class="card-title">导入学情数据（CSV）</div>
-          <div class="card-desc">支持上传、拖拽或直接粘贴；导入前会先做字段映射与质量检查，不会直接写入数据</div>
-        </div>
-        <div class="card-actions">
-          ${ui.button({ label: '下载导入模板', icon: 'download', size: 'sm', tone: 'secondary', attrs: 'data-act="template"' })}
+          <div class="card-desc">支持上传、拖拽或粘贴；先做字段映射与质量检查，确认后写入。</div>
         </div>
       </div>
       <div class="card-body">
@@ -111,18 +115,21 @@
             <label class="upload-zone" id="ana-drop" for="ana-file">
               <span class="upload-icon">${ui.icon('upload', 20)}</span>
               <span class="upload-title">点击选择 CSV 文件，或拖拽到此处</span>
-              <span class="upload-desc">首行为字段名，如：姓名、学号、班级、知识点、作答/表现、备注。文件仅在本地解析，不会上传到服务器。</span>
+              <span class="upload-desc">首行为字段名（姓名、学号、班级等）；CSV 仅在本地解析，不上传服务器。</span>
               <input type="file" id="ana-file" accept=".csv,text/csv,.txt" />
             </label>
-            <div class="ana-import-format">
-              <div class="ana-import-format-title">${ui.icon('fileText', 14)}字段说明</div>
-              <div class="ana-field-list">
-                ${io.LEARNER_FIELDS.map(function (field) {
-                  return html`<span class="tag">${field.label}${field.required ? '（必填）' : ''}</span>`;
-                })}
-              </div>
-              <div class="tiny muted">模板：[姓名, 学号, 班级, 知识点, 作答/表现, 备注]。导入只会新增学生名单，不覆盖已有作答记录；同名学生会自动跳过。</div>
-            </div>
+            ${ui.disclosure({
+              summary: '导入格式与字段说明',
+              count: io.LEARNER_FIELDS.length + ' 个字段',
+              body: html`<div class="ana-import-format">
+                <div class="ana-field-list">
+                  ${io.LEARNER_FIELDS.map(function (field) {
+                    return html`<span class="tag">${field.label}${field.required ? '（必填）' : ''}</span>`;
+                  })}
+                </div>
+                <div class="tiny muted">模板：[姓名, 学号, 班级, 知识点, 作答/表现, 备注]。导入只新增学生名单，不覆盖已有作答；同名学生自动跳过。</div>
+              </div>`
+            })}
           </div>
           <div class="ana-import-paste">
             <div class="label">或直接粘贴 CSV 文本</div>
@@ -136,7 +143,7 @@
       </div>
       <div class="card-foot">
         ${ui.icon('info', 14)}
-        <span class="tiny muted">导入流程：选择文件 → 自动映射字段 → 预览与质量检查 → 确认导入。任一步发现问题都可返回修改。</span>
+        <span class="tiny muted">流程：选择 / 粘贴 → 字段映射 → 质量检查 → 确认导入；发现问题可返回修改。</span>
       </div>
     </section>`;
   }
@@ -228,9 +235,9 @@
     </section>`;
   }
 
-  function renderImportHistory(state) {
+  function renderImportHistoryTable(state) {
     var rows = (state.imports || []).slice(0, 6);
-    var table = ui.table({
+    return ui.table({
       className: 'is-compact',
       columns: [
         { key: 'at', label: '时间', width: '132px', render: function (row) { return html`<span class="num small">${fmt.datetime(row.at)}</span>`; } },
@@ -248,17 +255,8 @@
       rows: rows,
       empty: ui.empty({ compact: true, title: '暂无导入记录', desc: '完成的导入会显示在这里，并同步写入审计日志。' })
     });
-
-    return html`<section class="card">
-      <div class="card-head">
-        <div class="card-head-main">
-          <div class="card-title">最近导入记录</div>
-          <div class="card-desc">记录最近 6 次导入及其结果；完整记录见“审计日志”标签页</div>
-        </div>
-      </div>
-      <div class="card-body is-flush">${table}</div>
-    </section>`;
   }
+
 
   /* ============================================================
      标签页 2：导出与报告
@@ -300,7 +298,7 @@
           tone: 'warn',
           icon: 'lock',
           title: '导出权限说明',
-          body: '导出内容仅限本班教师使用，包含学生作答与诊断信息；请勿外传。导出不含与教学无关的个人信息，文件名自动带日期；学生端只能导出本人数据。'
+          body: '仅限本班教师使用，含学生作答与诊断信息，请勿外传；不含与教学无关的个人信息，文件名自动带日期。'
         })}
       </div>
 
@@ -308,10 +306,7 @@
         <div class="card-head">
           <div class="card-head-main">
             <div class="card-title">导出数据与报告</div>
-            <div class="card-desc">四种导出格式对应不同用途；导出成功后会提示文件与行数</div>
-          </div>
-          <div class="card-actions">
-            ${ui.button({ label: '导出完整快照', icon: 'database', size: 'sm', tone: 'secondary', attrs: 'data-export="snapshot"' })}
+            <div class="card-desc">四种格式对应不同用途；完成后提示文件与行数。</div>
           </div>
         </div>
         <div class="card-body is-flush">${rows}</div>
@@ -365,13 +360,16 @@
       <div class="card-head">
         <div class="card-head-main">
           <div class="card-title">班级学情报告（打印预览）</div>
-          <div class="card-desc">下方区域为打印/导出 PDF 的内容，含口径、数据范围、材料来源与待复核说明</div>
+          <div class="card-desc">打印 / 导出 PDF 的内容；展开后核对口径、数据范围与材料来源。</div>
         </div>
         <div class="card-actions">
           ${ui.button({ label: '打印 / 导出 PDF', icon: 'printer', size: 'sm', tone: 'primary', attrs: 'data-act="print"' })}
         </div>
       </div>
-      <div class="card-body ana-print-card-body">
+      ${ui.disclosure({
+        summary: '打印预览与数据范围',
+        count: '1 份报告',
+        body: html`<div class="ana-print-card-body">
         <div class="print-area ana-print-area">
           <div class="print-head">
             <div>
@@ -416,7 +414,7 @@
             本报告由本地规则引擎从原始作答派生，未接入真实大模型，仅供教学参考，不替代教师判断。
           </div>
         </div>
-      </div>
+      </div>` })}
       <div class="card-foot no-print">
         ${ui.icon('printer', 14)}
         <span class="tiny muted">打印会使用浏览器打印对话框，可选择“另存为 PDF”；导出文件名与日期由浏览器下载设置决定。</span>
@@ -438,7 +436,7 @@
       <div class="card-head">
         <div class="card-head-main">
           <div class="card-title">教学范围设置</div>
-          <div class="card-desc">勾选章节将决定哪些知识点纳入正式诊断；历史作答仍然保留，但范围外内容不作为诊断依据</div>
+          <div class="card-desc">勾选章节决定纳入正式诊断的知识点；范围外内容仍保留但不作为诊断依据。</div>
         </div>
         <div class="card-actions">
           ${ui.button({ label: '保存教学范围', icon: 'check', size: 'sm', tone: 'primary', attrs: 'data-act="save-scope"' })}
@@ -449,7 +447,7 @@
           tone: 'warn',
           title: '教材版本待教师确认',
           body: '当前教材：' + (textbook.name || '七年级数学（上册）') + ' · ' + (textbook.edition || '示例配置 · 教材版本待教师确认') +
-            '。章节顺序与知识点归属按示例配置组织，确认版本后可在此调整。'
+            '。章节与知识点归属按示例配置组织，确认版本后可调整。'
         })}
         <div class="ana-scope-grid">
           ${(state.chapters || []).map(function (chapter) {
@@ -468,9 +466,13 @@
           ${ui.badge('未纳入 ' + (allKps.length - kps.length) + ' 个', 'neutral')}
           <span class="tiny muted">保存后立即影响班级学情分析、个体档案与教学助理的诊断范围。</span>
         </div>
-        <div class="tiny muted mt-2">
-          说明：知识库中单独标记为“未纳入”的知识点（当前 ${allKps.length - kps.length} 个：${allKps.filter(function (kp) { return kps.every(function (item) { return item.id !== kp.id; }); }).map(function (kp) { return kp.name; }).join('、') || '无'}），即使勾选其所在章节也不会自动纳入正式诊断，需在知识点配置中确认。
-        </div>
+        ${ui.disclosure({
+          summary: '范围说明与未纳入知识点',
+          count: (allKps.length - kps.length) + ' 个',
+          body: html`<div class="tiny muted">
+            知识库中单独标记为“未纳入”的知识点（${allKps.length - kps.length} 个：${allKps.filter(function (kp) { return kps.every(function (item) { return item.id !== kp.id; }); }).map(function (kp) { return kp.name; }).join('、') || '无'}），即使勾选其所在章节也不会自动纳入正式诊断，需在知识点配置中确认。
+          </div>`
+        })}
       </div>
     </section>`;
 
@@ -516,7 +518,7 @@
         <div class="card-head">
           <div class="card-head-main">
             <div class="card-title">材料与知识来源</div>
-            <div class="card-desc">材料用于标注知识点范围与来源；版本与状态由教师确认</div>
+            <div class="card-desc">材料用于标注知识点范围与来源。</div>
           </div>
           <div class="card-actions">
             ${ui.button({ label: '新增材料', icon: 'plus', size: 'sm', tone: 'primary', attrs: 'data-act="add-material"' })}
@@ -683,14 +685,11 @@
       <section class="card">
         <div class="card-head">
           <div class="card-head-main">
-            <div class="card-title">数据质量概览</div>
-            <div class="card-desc">用于快速判断当前数据是否足以支撑结论</div>
+            <div class="card-title">判分状态</div>
           </div>
         </div>
         <div class="card-body">
           <div class="ana-cov-grid">
-            <div class="ana-cov"><div class="ana-cov-label">学生数</div><div class="ana-cov-value num">${state.users.filter(function (u) { return u.role === 'student'; }).length}</div><div class="ana-cov-sub">班级名单 ${sel.classStudents(state, classId).length} 人</div></div>
-            <div class="ana-cov"><div class="ana-cov-label">作答记录</div><div class="ana-cov-value num">${(state.answers || []).length}</div><div class="ana-cov-sub">题目 ${(state.questions || []).length} 道 · 任务 ${(state.tasks || []).length} 个</div></div>
             <div class="ana-cov"><div class="ana-cov-label">自动判分</div><div class="ana-cov-value num">${statusCounts.auto}</div><div class="ana-cov-sub">客观题自动判分</div></div>
             <div class="ana-cov"><div class="ana-cov-label">建议复核</div><div class="ana-cov-value num warn-text">${statusCounts.suggested}</div><div class="ana-cov-sub">过程题需教师复核给分</div></div>
             <div class="ana-cov"><div class="ana-cov-label">暂无法判阅</div><div class="ana-cov-value num">${statusCounts.unjudged}</div><div class="ana-cov-sub">识别质量低或空白，需人工核对</div></div>
@@ -703,21 +702,20 @@
         <div class="card-head">
           <div class="card-head-main">
             <div class="card-title">审计日志</div>
-            <div class="card-desc">最近 ${logs.length} 条操作记录（导入、复核、诊断确认、教学范围调整等）</div>
+            <div class="card-desc">最近 ${logs.length} 条操作记录</div>
           </div>
         </div>
         <div class="card-body is-flush">${logTable}</div>
       </section>
 
-      <section class="card">
-        <div class="card-head">
-          <div class="card-head-main">
-            <div class="card-title">导入记录</div>
-            <div class="card-desc">最近 ${importRows.length} 条导入记录，含行数、成功数、状态与字段映射</div>
-          </div>
-        </div>
-        <div class="card-body is-flush">${importTable}</div>
-      </section>
+      ${ui.disclosure({
+        summary: '导入记录',
+        count: importRows.length + ' 条',
+        body: html`<div class="stack-sm">
+          <div class="card-body is-flush">${importTable}</div>
+          <div class="tiny muted">含行数、成功数、状态与字段映射；完整操作记录见上方审计日志。</div>
+        </div>`
+      })}
     </div>`;
   }
 
@@ -788,6 +786,15 @@
       var classId = classIdOf(ctx);
       initTab(ctx);
 
+      var classStudents = sel.classStudents(state, classId).length;
+      var answerCount = (state.answers || []).length;
+      var questionCount = (state.questions || []).length;
+      var taskCount = (state.tasks || []).length;
+      var dataStatus = html`<div class="ana-data-status">
+        ${ui.icon('database', 14)}
+        <span>当前数据：学生 <b class="num">${classStudents}</b> 名 · 作答 <b class="num">${answerCount}</b> 条 · 题目 <b class="num">${questionCount}</b> 道 · 任务 <b class="num">${taskCount}</b> 个</span>
+      </div>`;
+
       var panel = TAB === 'export'
         ? renderExportPanel(ctx, state, classId)
         : TAB === 'materials'
@@ -800,16 +807,15 @@
         <div class="page-head">
           <div class="page-head-main">
             <div class="page-title">数据与报告</div>
-            <div class="page-desc">
-              导入学情数据、导出班级与个体报告、维护材料与教学范围，并查看审计日志。
-              导出与学生数据仅本班教师可见；教材版本与教学范围待教师确认。
-            </div>
+            <div class="page-desc">导入学情数据、导出报告、维护教学范围与材料；导出仅本班教师可见。</div>
           </div>
           <div class="page-actions">
             ${ui.button({ label: '下载导入模板', icon: 'download', tone: 'secondary', attrs: 'data-act="template"' })}
             ${ui.button({ label: '导出数据快照', icon: 'database', tone: 'primary', attrs: 'data-export="snapshot"' })}
           </div>
         </div>
+
+        ${dataStatus}
 
         ${ui.tabs({
           name: 'data',
@@ -992,3 +998,5 @@
     }
   });
 })();
+
+

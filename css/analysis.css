@@ -796,3 +796,26 @@
 .ana-assistant .ana-chat-list { min-height: 160px; }
 .ana-assistant .ana-composer-side { min-width: 104px; }
 .ana-assistant .ana-composer-side .tiny { white-space: nowrap; line-height: 1.5; }
+
+/* ============================================================
+   Batch 3D · 数据管理：格式/历史/打印预览折叠与说明压缩
+   ============================================================ */
+.ana-data .disclosure { margin-top: 0; }
+.ana-data .card-body > .disclosure { margin: 0; }
+.ana-data .ana-print-card .disclosure { margin-top: 0; }
+.ana-data .ana-print-card .disclosure-body { padding-top: var(--s-2); }
+.ana-data .ana-print-card .print-area { margin-top: var(--s-2); }
+.ana-data .ana-import-format { padding: var(--s-2) 0 0; border-top: 1px dashed var(--border); }
+
+/* 页头数据状态行：跨 Tab 常显的当前数据规模 */
+.ana-data-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 2px;
+  font-size: var(--fs-sm);
+  color: var(--text-2);
+  line-height: 1.6;
+}
+.ana-data-status svg { color: var(--text-3); flex: 0 0 auto; }
+.ana-data-status b { color: var(--navy); font-weight: 600; }
