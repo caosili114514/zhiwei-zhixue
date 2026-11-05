@@ -600,3 +600,93 @@
   .ana-kpi-grid { grid-template-columns: repeat(5, minmax(0, 1fr)) !important; }
   .ana-head-stats { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
 }
+
+/* ============================================================
+   第一轮 UI 优化 · 班级学情分析（2026-11-05）
+   ============================================================ */
+.ana-filterbar { padding: var(--s-4) var(--s-5); }
+.ana-filter-row {
+  display: grid;
+  grid-template-columns: 170px minmax(0, 1fr) 210px 168px;
+  gap: var(--s-4);
+  align-items: end;
+}
+.ana-field-class .select,
+.ana-field-kp .select { width: 100%; }
+.ana-field-range .seg { width: fit-content; max-width: 100%; }
+.ana-filter-current {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: var(--s-3);
+  padding-top: var(--s-3);
+  border-top: 1px solid var(--border);
+  font-size: var(--fs-sm);
+  color: var(--text-2);
+}
+.ana-filter-current svg { color: var(--text-3); flex: 0 0 auto; }
+.ana-filter-current b { color: var(--navy); font-weight: 600; }
+
+.ana-seg-nav { margin-top: calc(-1 * var(--s-2)); margin-bottom: calc(-1 * var(--s-2)); }
+.ana-seg-nav .tabs { border-bottom-color: var(--border); }
+.ana-seg-nav .tab { font-size: var(--fs-base); padding: 9px 14px; }
+
+.ana-segment {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+  animation: page-in var(--dur-slow) var(--ease-out);
+}
+.ana-seg-actions { display: flex; gap: var(--s-2); flex-wrap: wrap; }
+
+.ana-status-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s-3); }
+.ana-status-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--s-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  min-width: 0;
+}
+.ana-status-card .row-sm { gap: var(--s-2); }
+.ana-status-card .num.strong { font-size: var(--fs-lg); color: var(--navy); }
+.ana-status-card .tiny.muted { line-height: 1.5; }
+.ana-status-card .link-btn { align-self: flex-start; font-size: var(--fs-sm); margin-top: auto; }
+
+.ana-segment .plain-block .plain-head { align-items: baseline; }
+.ana-segment .stat-strip { background: var(--surface); }
+
+@media (max-width: 1180px) {
+  .ana-filter-row { grid-template-columns: 160px minmax(0, 1fr) 200px; }
+  .ana-field-scope { grid-column: 1 / -1; }
+}
+@media (max-width: 900px) {
+  .ana-filter-row { grid-template-columns: minmax(0, 1fr); }
+  .ana-status-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ana-seg-nav .tabs { overflow-x: auto; }
+}
+@media (max-width: 640px) {
+  .ana-status-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 900px) {
+  .ana-filter-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ana-field-range { grid-column: 1 / -1; }
+  .ana-field-scope { grid-column: 1 / -1; }
+}
+
+/* 窄屏筛选条：班级与知识点同一行，时间区间与教学范围各占一行（显式放置避免空列） */
+@media (max-width: 900px) {
+  .ana-filter-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ana-field-class { grid-column: 1; grid-row: 1; }
+  .ana-field-kp { grid-column: 2; grid-row: 1; }
+  .ana-field-range { grid-column: 1 / -1; grid-row: 2; }
+  .ana-field-scope { grid-column: 1 / -1; grid-row: 3; }
+}
+@media (max-width: 640px) {
+  .ana-filter-row { grid-template-columns: minmax(0, 1fr); }
+  .ana-field-class, .ana-field-kp, .ana-field-range, .ana-field-scope { grid-column: auto; grid-row: auto; }
+}
