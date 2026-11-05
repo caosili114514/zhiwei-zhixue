@@ -255,7 +255,7 @@
         },
         {
           key: 'records', label: '记录 / 可判读', align: 'right', width: '104px', render: function (row) {
-            return html`<span class="num">${row.evidence.judged}</span> / ${row.evidence.records} 条`;
+            return html`<span class="num">${row.evidence.records}</span> 条 / 可判读 <span class="num">${row.evidence.judged}</span> 条`;
           }
         },
         {

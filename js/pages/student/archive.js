@@ -171,7 +171,7 @@
         : ''}
       <div class="stu-drawer-stats">
         <div class="stat-line"><span class="k">章节</span><span class="v">${d.chapterName || '—'}</span></div>
-        <div class="stat-line"><span class="k">相关记录数 / 可判读</span><span class="v num">${d.evidence.records} / ${d.evidence.judged}</span></div>
+        <div class="stat-line"><span class="k">记录 / 可判读</span><span class="v num">${d.evidence.records} / ${d.evidence.judged}</span></div>
         <div class="stat-line"><span class="k">其中待复核</span><span class="v num">${d.evidence.pending}</span></div>
         <div class="stat-line"><span class="k">提示使用 / 反复尝试</span><span class="v num">${d.evidence.hintUsed} / ${d.evidence.retries}</span></div>
         <div class="stat-line"><span class="k">最近更新</span><span class="v num">${d.updatedAt ? fmt.datetime(d.updatedAt) : '—'}</span></div>
@@ -357,7 +357,7 @@
         </div>
         <div class="stu-filter-current">
           ${ui.icon('filter', 13)}
-          <span>当前筛选：<b>${activeTask ? rangeLabel(activeTask) : '全部时间'}</b> · <b>${kpLabel}</b> · <b>${errorLabel}</b> · <b>${modeLabel}</b> · 显示 ${rows.length} 个知识点</span>
+          <span>当前筛选：<b>${activeTask ? rangeLabel(activeTask) : '全部时间'}</b> · <b>${kpLabel}</b> · <b>${errorLabel}</b> · <b>${modeLabel}</b> · 显示 ${rows.length} 个知识点 · 仅作用于下方明细与统计</span>
         </div>
       </section>`;
 
@@ -388,7 +388,7 @@
           { label: '表现', render: function (row) { return ui.badge(row.diag.performanceLabel, row.diag.performanceTone); } },
           { label: '诊断状态', render: function (row) { return ui.statusBadge(row.diag.status); } },
           {
-            label: '记录数 / 可判读',
+            label: '记录 / 可判读',
             align: 'right',
             render: function (row) {
               return html`<span class="num">${row.diag.evidence.records}</span><span class="muted small"> / ${row.diag.evidence.judged}</span>`;
@@ -468,7 +468,7 @@
             <div class="stat-line"><span class="k">反复尝试（多次提交）</span><span class="v num">${completion.retry} 条 · ${ratio(completion.retry)}</span></div>
             <div class="stat-line"><span class="k">参与统计的作答总数</span><span class="v num">${completion.total} 条</span></div>
           </div>
-          <div class="ai-caveat">提示后完成 ≠ 未掌握：借助提示完成说明思路可以建立，独立程度需要更多记录观察；系统分别统计独立完成 / 提示后完成 / 反复尝试，不会把使用提示直接当作不会。</div>
+          <div class="ai-caveat">提示后完成 ≠ 未掌握：借助提示完成说明思路可以建立，独立程度需要更多记录观察；系统按互斥方式统计（反复尝试优先，其次提示后完成，其余归为独立完成），不会把使用提示直接当作不会。</div>
         </div>`
       });
 
