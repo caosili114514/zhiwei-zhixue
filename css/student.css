@@ -470,3 +470,35 @@
   .stu-report .page-actions,
   .stu-report .no-print { display: none !important; }
 }
+
+/* ============================================================
+   第一轮 UI 优化 · 学习主页（2026-11-05）
+   ============================================================ */
+.stu-hero { position: relative; }
+.stu-hero .focus-title { font-size: var(--fs-2xl); }
+.stu-hero .focus-meta { margin-top: 6px; }
+.stu-hero .focus-progress { margin-top: 2px; }
+.stu-hero .focus-actions { margin-top: var(--s-2); }
+.stu-hero .focus-kicker svg { color: var(--primary); }
+
+/* 当前优先关注：单条知识点诊断摘要 */
+.stu-priority {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  padding: var(--s-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.stu-priority-head { display: flex; align-items: center; gap: var(--s-2); flex-wrap: wrap; }
+.stu-priority-kp { font-size: var(--fs-md); font-weight: 600; color: var(--navy); }
+.stu-priority-meta { font-size: var(--fs-xs); color: var(--text-3); }
+.stu-priority-actions { display: flex; align-items: center; gap: var(--s-3); flex-wrap: wrap; margin-top: 2px; }
+.stu-priority-actions .link-btn { font-size: var(--fs-sm); }
+
+/* 首页指标带在窄屏保持两列 */
+@media (max-width: 640px) {
+  .stu-hero .focus-title { font-size: var(--fs-xl); }
+  .stu-hero .focus-actions .btn-lg { width: 100%; }
+}

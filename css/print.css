@@ -15,6 +15,14 @@
   .table tfoot { display: table-footer-group; }
   .table tr { break-inside: avoid; }
 
+  /* 渐进披露：打印时隐藏折叠标题（内容由 ui.js 的 beforeprint 自动展开） */
+  .disclosure > summary { display: none !important; }
+  .disclosure { border-top: 0 !important; padding-top: 0 !important; }
+  .disclosure-body { padding: 0 !important; }
+
+  .stat-strip { border-color: #D6DFEC; background: transparent; }
+  .focus-card { background: #fff; }
+
   .print-only { display: block; }
   .print-area { padding: 0; }
   .print-area .card { border: 1px solid #D6DFEC; }

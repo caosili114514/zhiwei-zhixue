@@ -574,6 +574,56 @@
     setTimeout(function () { el.classList.remove('is-wrong', 'is-active'); }, 1400);
   }
 
+  /* ============================================================
+     第一轮 UI 优化 · 轻量展示原语（2026-11-05 追加，仅新增）
+     ============================================================ */
+
+  /**
+   * 渐进披露容器（原生 details，键盘可操作；打印前自动展开）
+   * ui.disclosure({ summary: '证据与数据口径', count: 7, body: html`...`, open: false })
+   */
+  function disclosure(opts) {
+    var o = opts || {};
+    var body = o.body === undefined || o.body === null ? '' : o.body;
+    return html`<details class="disclosure${raw(o.className ? ' ' + o.className : '')}"${raw(o.open ? ' open' : '')}>
+      <summary>${o.summary || '展开查看'}${o.count === undefined || o.count === null ? '' : html`<span class="disclosure-count">${o.count}</span>`}</summary>
+      <div class="disclosure-body">${body}</div>
+    </details>`;
+  }
+
+  /**
+   * 指标带：3–4 个关键数字一行展示（替代多个独立 KPI 卡）
+   * ui.statStrip([{ label, value, unit, sub, tone }])
+   */
+  function statStrip(items, opts) {
+    var o = opts || {};
+    return html`<div class="stat-strip${raw(o.className ? ' ' + o.className : '')}">
+      ${(items || []).map(function (it) {
+        return html`<div class="stat${raw(it.tone ? ' is-' + it.tone : '')}">
+          <div class="stat-label">${it.label}</div>
+          <div class="stat-value">${it.value === undefined || it.value === null ? '—' : it.value}${it.unit ? html`<span class="unit">${it.unit}</span>` : ''}</div>
+          ${it.sub ? html`<div class="stat-sub">${it.sub}</div>` : ''}
+        </div>`;
+      })}
+    </div>`;
+  }
+
+  /* 打印时自动展开所有折叠面板，打印后恢复原状，保证打印版信息完整 */
+  if (typeof window !== 'undefined' && window.addEventListener) {
+    window.addEventListener('beforeprint', function () {
+      document.querySelectorAll('details.disclosure').forEach(function (el) {
+        el.setAttribute('data-was-open', el.open ? '1' : '0');
+        el.open = true;
+      });
+    });
+    window.addEventListener('afterprint', function () {
+      document.querySelectorAll('details.disclosure').forEach(function (el) {
+        el.open = el.getAttribute('data-was-open') === '1';
+        el.removeAttribute('data-was-open');
+      });
+    });
+  }
+
   ZWZ.ui = {
     icon: icon,
     PATHS: PATHS,
@@ -583,6 +633,8 @@
     statusBadge: statusBadge,
     STATUS_MAP: STATUS_MAP,
     kpi: kpi,
+    statStrip: statStrip,
+    disclosure: disclosure,
     table: table,
     tabs: tabs,
     bindTabs: bindTabs,
