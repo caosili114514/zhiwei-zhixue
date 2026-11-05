@@ -649,3 +649,51 @@
 /* 任务栏标签不换行（避免窄屏竖排） */
 .stu-workbar-task .tiny.muted { white-space: nowrap; flex: 0 0 auto; }
 .stu-workbar-task .select { flex: 1 1 auto; }
+
+/* ============================================================
+   第一轮 UI 优化 · 我的档案（2026-11-05）
+   ============================================================ */
+.stu-filterbar { padding: var(--s-4) var(--s-5); }
+.stu-filter-inline {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) repeat(3, minmax(0, 1fr)) auto;
+  gap: var(--s-3);
+  align-items: end;
+}
+.stu-filter-inline .field { min-width: 0; }
+.stu-filter-inline .select { width: 100%; }
+.stu-filter-range .seg { width: fit-content; max-width: 100%; }
+.stu-filter-reset { display: flex; align-items: flex-end; }
+.stu-filter-current {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: var(--s-3);
+  padding-top: var(--s-3);
+  border-top: 1px solid var(--border);
+  font-size: var(--fs-sm);
+  color: var(--text-2);
+}
+.stu-filter-current svg { color: var(--text-3); flex: 0 0 auto; }
+.stu-filter-current b { color: var(--navy); font-weight: 600; }
+
+/* 折叠区聚合成一组，减少行间空白 */
+.stu-arch-details { display: flex; flex-direction: column; gap: 2px; }
+.stu-arch-details .disclosure + .disclosure { margin-top: 0; }
+.stu-arch-details .disclosure-body { padding-top: var(--s-2); }
+
+@media (max-width: 1080px) {
+  .stu-filter-inline { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stu-filter-range { grid-column: 1 / -1; }
+  .stu-filter-reset { grid-column: 1 / -1; justify-content: flex-start; }
+}
+@media (max-width: 640px) {
+  .stu-filter-inline { grid-template-columns: minmax(0, 1fr); }
+  .stu-filter-range, .stu-filter-reset { grid-column: auto; }
+}
+
+/* 窄屏筛选：完成方式与「重置」同一行，避免空列 */
+@media (max-width: 1080px) {
+  .stu-filter-reset { grid-column: auto; justify-content: flex-end; }
+}
