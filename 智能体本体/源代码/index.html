@@ -1,0 +1,70 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>知微·智学 · 七年级数学学情诊断与个性化学习智能体</title>
+  <meta name="description" content="面向七年级数学的学情诊断与个性化学习智能体原型（演示数据）" />
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/charts.css" />
+  <link rel="stylesheet" href="css/student.css" />
+  <link rel="stylesheet" href="css/teacher.css" />
+  <link rel="stylesheet" href="css/analysis.css" />
+  <link rel="stylesheet" href="css/print.css" />
+  <link rel="stylesheet" href="css/contest.css" />
+</head>
+<body>
+  <a class="skip-link" href="#app">跳到主要内容</a>
+  <div id="app" class="app-root">
+    <div class="boot">
+      <div class="boot-mark">知微</div>
+      <p class="boot-text">正在加载演示数据……</p>
+    </div>
+  </div>
+  <div id="overlay-root"></div>
+  <div id="toast-root" class="toast-root" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- 核心库 -->
+  <script src="js/core/html.js"></script>
+  <script src="js/core/pages.js"></script>
+  <script src="js/data/seed.js"></script>
+  <script src="js/data/official-data.js"></script>
+  <script src="js/data/official.js"></script>
+  <script src="js/services/parser.js"></script>
+  <script src="js/services/grader.js"></script>
+  <script src="js/services/diagnosis.js"></script>
+  <script src="js/services/selectors.js"></script>
+  <script src="js/services/assistant.js"></script>
+  <script src="js/services/io.js"></script>
+  <script src="js/services/competition.js"></script>
+  <script src="js/core/store.js"></script>
+  <script src="js/core/ui.js"></script>
+  <script src="js/core/charts.js"></script>
+
+  <!-- 学生端页面 -->
+  <script src="js/pages/student/home.js"></script>
+  <script src="js/pages/student/practice.js"></script>
+  <script src="js/pages/student/archive.js"></script>
+  <script src="js/pages/student/report.js"></script>
+
+  <!-- 教师端页面（核心流程） -->
+  <script src="js/pages/teacher/dashboard.js"></script>
+  <script src="js/pages/teacher/import.js"></script>
+  <script src="js/pages/teacher/grading.js"></script>
+  <script src="js/pages/teacher/review.js"></script>
+
+  <!-- 教师端页面（学情分析） -->
+  <script src="js/pages/teacher/analysis.js"></script>
+  <script src="js/pages/teacher/profile.js"></script>
+  <script src="js/pages/teacher/assistant.js"></script>
+  <script src="js/pages/teacher/data.js"></script>
+  <script src="js/pages/teacher/contest.js"></script>
+
+  <!-- 应用入口 -->
+  <script src="js/app.js"></script>
+</body>
+</html>
+
+

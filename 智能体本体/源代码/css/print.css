@@ -1,0 +1,49 @@
+/* ============================================================
+   知微·智学 · 打印样式（个人报告 / 班级报告）
+   ============================================================ */
+.print-only { display: none; }
+
+@media print {
+  @page { size: A4; margin: 14mm 12mm; }
+
+  /* 屏幕辅助链接（跳转到主要内容）不应被打印 */
+  .skip-link { display: none !important; }
+  .toast-root { display: none !important; }
+
+  /* 表格跨页时重复表头，行不跨页断开 */
+  .table thead { display: table-header-group; }
+  .table tfoot { display: table-footer-group; }
+  .table tr { break-inside: avoid; }
+
+  /* 渐进披露：打印时隐藏折叠标题（内容由 ui.js 的 beforeprint 自动展开） */
+  .disclosure > summary { display: none !important; }
+  .disclosure { border-top: 0 !important; padding-top: 0 !important; }
+  .disclosure-body { padding: 0 !important; }
+
+  .stat-strip { border-color: #D6DFEC; background: transparent; }
+  .focus-card { background: #fff; }
+
+  .print-only { display: block; }
+  .print-area { padding: 0; }
+  .print-area .card { border: 1px solid #D6DFEC; }
+  .page-head .page-actions,
+  .card-actions,
+  .toolbar,
+  .modal-foot,
+  .drawer-foot { display: none !important; }
+
+  .page-title { font-size: 20pt; }
+  .card-title, .section-title { font-size: 11pt; }
+  body { font-size: 10.5pt; }
+
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .split, .split-sm { grid-template-columns: minmax(0, 1fr) !important; }
+  .split-side { position: static !important; }
+  .table th, .table td { padding: 6px 8px; }
+  .badge { border: 1px solid #C9D3E2; }
+
+  .print-area a[href]::after { content: ""; }
+  .chart-svg { max-width: 100%; }
+  .avoid-break { break-inside: avoid; }
+  .page-break { break-before: page; }
+}

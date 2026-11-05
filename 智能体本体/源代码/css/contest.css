@@ -1,0 +1,21 @@
+﻿
+/* ============================================================
+   赛题成果页（Task 1/2/3 + 案例 + 成果包）
+   ============================================================ */
+.ct-page .plain-block { gap: var(--s-2); }
+.ct-case { margin-bottom: var(--s-3); }
+.ct-rec {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--s-3) var(--s-4);
+  border-left: 3px solid var(--primary);
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  margin-top: var(--s-2);
+}
+.ct-rec ul { margin: 0; padding-left: 18px; }
+.ct-page .table-wrap { background: var(--surface); }
+@media (max-width: 900px) {
+  .ct-page .page-actions { flex-wrap: wrap; }
+}
