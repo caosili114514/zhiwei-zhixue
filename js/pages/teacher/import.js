@@ -29,6 +29,7 @@
     parsing: false,
     parse: null,
     questions: [],
+    openQ: {},
     importId: null,
     title: '',
     paperId: null,
@@ -57,6 +58,7 @@
     S.parsing = false;
     S.parse = null;
     S.questions = [];
+    S.openQ = {};
     S.importId = null;
     S.title = '';
     S.paperId = null;
@@ -164,9 +166,10 @@
 
     return html`<div class="stack">
       ${ui.banner({
-        tone: 'info',
-        title: '能力说明：文件解析为模拟能力',
-        body: '当前版本未接入真实 OCR / 文档解析服务。“开始解析”会基于内置示例题库生成待确认题目，并标注“模拟解析”，请逐题核对后确认。'
+        tone: 'warn',
+        compact: true,
+        title: '模拟解析 · 未接入真实 OCR',
+        body: '解析结果基于内置示例题库生成，请逐题核对后确认；文件不会上传到服务器。'
       })}
       ${zone}
       ${S.file ? fileItem : ''}
@@ -186,34 +189,40 @@
     }).join('') + '</div>');
   }
 
-  function questionCard(q) {
+  function questionRow(q) {
     var need = !!(q.review && q.review.needConfirm);
     var notes = (q.review && q.review.notes) || [];
-    return html`<article class="tch-q-card">
-      <div class="tch-q-head">
-        <div class="row-sm row-wrap">
+    var open = !!S.openQ[q.id];
+    var stem = q.stem || '（题干为空，请编辑补充）';
+    return html`<article class="tch-q-row${raw(need ? ' is-need' : '')}${raw(open ? ' is-open' : '')}" data-q-row="${q.id}">
+      <div class="tch-q-row-head">
+        <div class="tch-q-row-main">
           <span class="tch-q-no">第 ${q.code} 题</span>
           ${ui.badge(typeLabel(q.type), 'neutral')}
           ${need ? ui.badge('待确认', 'warn') : ui.badge('已识别', 'teal')}
-          <span class="tiny muted">置信度 ${qConfidence(q)}% · 模拟值</span>
-          <span class="tag">${q.difficulty || '待确认'}</span>
+          <span class="tch-q-summary">${fmt.trunc(stem, 58)}</span>
         </div>
-        <div class="row-sm">
-          ${ui.button({ label: '编辑', tone: 'secondary', size: 'sm', icon: 'edit', attrs: 'data-edit="' + q.id + '"' })}
+        <div class="tch-q-row-actions">
+          ${ui.button({ label: '编辑', tone: need ? 'secondary' : 'ghost', size: 'sm', icon: 'edit', attrs: 'data-edit="' + q.id + '"' })}
+          <button type="button" class="btn btn-ghost btn-sm" data-toggle-q="${q.id}" aria-expanded="${open ? 'true' : 'false'}">
+            <span>${open ? '收起' : '展开'}</span>${ui.icon(open ? 'chevronUp' : 'chevronDown', 14)}
+          </button>
         </div>
       </div>
-      <div class="question-stem">${q.stem || '（题干为空，请编辑补充）'}</div>
-      ${optionsHtml(q)}
-      <div class="tch-q-meta">
-        <div class="tch-meta-item"><span class="k">参考答案</span><span class="v${q.answer ? '' : ' is-warn'}">${q.answer || '待教师确认'}</span></div>
-        <div class="tch-meta-item"><span class="k">知识点</span><span class="v">${(q.kpNames && q.kpNames.length) ? q.kpNames.join('、') : '待确认'}</span></div>
-        <div class="tch-meta-item"><span class="k">满分</span><span class="v num">${(q.scoring && q.scoring.max) || 0} 分</span></div>
-        <div class="tch-meta-item"><span class="k">难度</span><span class="v">${q.difficulty || '待确认'}</span></div>
-      </div>
-      ${notes.length ? html`<div class="tch-q-note">${ui.icon('alert', 13)}<span>${notes.join('；')}</span></div>` : ''}
+      ${need && !open ? html`<div class="tch-q-row-flag">${ui.icon('alert', 12)}<span>需核对：${notes.slice(0, 2).join('；') || '请核对题干、参考答案与知识点'}</span></div>` : ''}
+      ${open ? html`<div class="tch-q-detail">
+        <div class="question-stem">${stem}</div>
+        ${optionsHtml(q)}
+        <div class="tch-q-meta">
+          <div class="tch-meta-item"><span class="k">参考答案</span><span class="v${q.answer ? '' : ' is-warn'}">${q.answer || '待教师确认'}</span></div>
+          <div class="tch-meta-item"><span class="k">知识点</span><span class="v">${(q.kpNames && q.kpNames.length) ? q.kpNames.join('、') : '待确认'}</span></div>
+          <div class="tch-meta-item"><span class="k">满分</span><span class="v num">${(q.scoring && q.scoring.max) || 0} 分</span></div>
+          <div class="tch-meta-item"><span class="k">难度</span><span class="v">${q.difficulty || '待确认'}</span></div>
+        </div>
+        ${notes.length ? html`<div class="tch-q-note">${ui.icon('alert', 13)}<span>${notes.join('；')}</span></div>` : ''}
+      </div>` : ''}
     </article>`;
   }
-
   function renderStep2(ctx) {
     if (!S.parse || !S.questions.length) {
       return html`<div class="stack">
@@ -243,7 +252,8 @@
           ${ui.badge('其中 ' + need + ' 处需确认', need ? 'warn' : 'teal')}
         </div>
       </div>
-      <div class="stack">${S.questions.map(questionCard)}</div>
+      <div class="tiny muted">标记「待确认」的题目请展开核对题干、参考答案与知识点后再入库；折叠只隐藏细节，不改变已识别内容。</div>
+      <div class="stack">${S.questions.map(questionRow)}</div>
       <div class="tch-wizard-actions">
         ${ui.button({ label: '重新上传', tone: 'ghost', icon: 'refresh', attrs: 'data-act="reset-wizard"' })}
         <div class="spacer"></div>
@@ -575,7 +585,7 @@
     return html`<section class="section">
       <div class="section-head">
         <div class="section-title">试卷与题目库</div>
-        <div class="section-desc">已确认的试卷、手动录入入口与导入记录；点击试卷可查看题目明细。</div>
+        <div class="section-desc">已确认的试卷、手动录入入口与导入记录。</div>
       </div>
       <div class="card">
         <div class="tch-tabbar">${ui.tabs({ name: 'tch-import-tabs', active: S.tab, items: tabItems })}</div>
@@ -586,9 +596,9 @@
 
   /* ---------------- 能力边界说明 ---------------- */
   function renderCapability() {
-    return ui.card({
-      title: '能力与边界说明',
-      desc: '原型阶段明确区分真实能力、模拟能力与待接入能力，避免把演示效果误解为已上线功能。',
+    return ui.disclosure({
+      summary: '能力与边界说明',
+      count: '9 条',
       body: html`<div class="grid-3">
         <div class="tch-cap">
           ${ui.badge('真实能力 · 已实现', 'teal')}
@@ -969,12 +979,7 @@
       var head = html`<div class="page-head">
         <div class="page-head-main">
           <div class="page-title">试卷与题目</div>
-          <div class="page-desc">上传试卷 → 模拟解析预览 → 逐题确认题目与知识点 → 布置任务。解析为模拟能力，OCR 尚未接入。</div>
-          <div class="row-sm row-wrap tch-head-tags">
-            ${ui.badge('真实能力：题目编辑与确认入库', 'teal')}
-            ${ui.badge('模拟能力：文件解析', 'warn')}
-            ${ui.badge('待接入：OCR / 文档解析', 'neutral')}
-          </div>
+          <div class="page-desc">上传试卷 → 模拟解析预览 → 逐题核对 → 确认入库 → 布置任务。</div>
         </div>
         <div class="page-actions">
           ${ui.button({ label: '查看批阅队列', tone: 'secondary', icon: 'clipboard', attrs: 'data-go="#/teacher/grading"' })}
@@ -1067,6 +1072,23 @@
       ui.bind(root, '[data-act="create-task"]', 'click', function () { createTask(ctx); });
 
       /* 编辑题目（预览列表与确认表格共用） */
+      ui.bind(root, '[data-toggle-q]', 'click', function (ev, el) {
+        ev.stopPropagation();
+        var qid = el.getAttribute('data-toggle-q');
+        if (!qid) return;
+        S.openQ[qid] = !S.openQ[qid];
+        ctx.refresh();
+      });
+      root.querySelectorAll('[data-q-row]').forEach(function (row) {
+        row.addEventListener('click', function (ev) {
+          if (ev.target.closest('button, a, input, textarea, select, label')) return;
+          var qid = row.getAttribute('data-q-row');
+          if (!qid) return;
+          S.openQ[qid] = !S.openQ[qid];
+          ctx.refresh();
+        });
+      });
+
       ui.bind(root, '[data-edit]', 'click', function (ev, el) {
         openEditModal(ctx, el.getAttribute('data-edit'));
       });
