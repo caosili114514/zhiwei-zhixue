@@ -1,11 +1,13 @@
-/* ============================================================
+﻿/* ============================================================
    学生端 · 题目练习（student/practice）
    ------------------------------------------------------------
-   双栏：左侧题目区 + 题目导航 + 即时诊断反馈；右侧分层伴学助手。
-   - 取数全部来自 ZWZ.sel；修改只通过 ZWZ.store.actions；
-   - 作答自动存草稿（debounce 300ms），渲染时回填；
-   - 提交后展示判分结果、知识点表现、诊断证据、建议与不确定性说明；
-   - 提示按 1→4 分层，完整解析需二次确认并记录提示使用。
+   第一轮 UI 优化（2026-11-05）：
+   - 主焦点 = 题目与作答区：任务栏压缩为一行，题目卡内含题号/进度/导航/操作；
+   - 即时诊断反馈压缩为「判分结论 + 关键指标 + 折叠依据」，不再一屏长文；
+   - 伴学提示按 1→4 层级列出（知识点提醒 / 思路提示 / 步骤提示 / 完整解析），
+     完整解析仍需二次确认并记录提示使用；
+   - 新增「上一题 / 结束练习」，切换前同步保存草稿，避免误操作丢失输入。
+   数据逻辑、判分与诊断规则、权限与伴学能力均未改动。
    ============================================================ */
 (function () {
   'use strict';
@@ -23,6 +25,12 @@
     choice: '选择题', fill: '填空题', calc: '计算题', process: '过程 / 应用题'
   };
   var HINT_LABELS = { 1: '知识点提醒', 2: '思路提示', 3: '步骤提示', 4: '完整解析' };
+  var HINT_META = [
+    { level: 1, label: '知识点提醒', desc: '只提示涉及的考点，不给解法' },
+    { level: 2, label: '思路提示', desc: '提示解题方向，不给步骤' },
+    { level: 3, label: '步骤提示', desc: '给出关键步骤，最后一步自己做' },
+    { level: 4, label: '完整解析', desc: '给出完整过程，需确认并记为提示使用' }
+  ];
   var DIFF_TONE = { '基础': 'teal', '中等': 'primary', '提升': 'warn' };
   var MAX_MESSAGES = 80;
 
@@ -41,15 +49,6 @@
     } catch (err) {
       return null;
     }
-  }
-
-  function shortTaskName(title) {
-    var text = String(title || '');
-    if (text.indexOf('订正') >= 0) return '订正再练';
-    if (text.indexOf('单元测评') >= 0) return '单元测评';
-    if (text.indexOf('课后巩固') >= 0) return '课后巩固';
-    if (text.indexOf('测评') >= 0) return '单元测评';
-    return fmt.trunc(text, 10);
   }
 
   function practiceUrl(taskId, questionId) {
@@ -131,7 +130,7 @@
     };
   }
 
-  /* ---------------- 即时诊断反馈 ---------------- */
+  /* ---------------- 即时诊断反馈（压缩版） ---------------- */
   function buildFeedback(state, info, q, answer) {
     var result = ZWZ.grader.grade(state, answer, q);
     var kpId = (q.kpIds || [])[0];
@@ -144,56 +143,36 @@
     }
     var judged = result.score !== null && result.score !== undefined;
     var scoreText = judged ? (result.score + ' / ' + result.maxScore + ' 分') : '暂不计分';
+    var hintCount = (answer.hintLevels || []).length;
 
-    var statusBanner = '';
-    if (result.status === 'suggested') {
-      statusBanner = ui.banner({
-        tone: 'warn',
-        compact: true,
-        title: '过程题需教师复核',
-        body: '系统只做辅助批阅，不对过程题自动定分；本条记录不会计为答错，最终得分以教师复核为准。'
-      });
+    var summary;
+    if (result.status === 'auto') {
+      summary = judged && result.score === result.maxScore
+        ? '自动判分：与参考答案一致，本题满分。'
+        : '自动判分：与参考答案不一致，本题未得分（客观题不设部分分）。';
+    } else if (result.status === 'suggested') {
+      summary = '过程题需教师复核：系统只做辅助批阅、暂不计分，最终得分以教师复核为准。';
     } else if (result.status === 'unjudged') {
-      statusBanner = ui.banner({
-        tone: 'warn',
-        compact: true,
-        title: '暂无法判阅',
-        body: '没有识别到有效内容，或识别质量较低，本条记录不计入答错。你可以修改后重新提交，或等待教师核对原始作答。'
-      });
-    }
-
-    var diagBlock = '';
-    if (diag) {
-      diagBlock = html`<div class="stu-fb-block">
-        <div class="stu-fb-row">
-          <span class="small muted">当前知识点表现</span>
-          ${ui.badge(diag.performanceLabel, diag.performanceTone)}
-          ${ui.statusBadge(diag.status)}
-          <span class="tiny muted num">${diag.evidence.coverageText}</span>
-        </div>
-        <div class="tiny muted">
-          「${diag.kpName}」累计 ${diag.evidence.records} 条记录，其中 ${diag.evidence.judged} 条可判读、${diag.evidence.pending} 条待复核。单次提交只增加 1 条记录，不单独判定掌握情况。
-        </div>
-      </div>`;
-    }
-
-    var errorBlock = '';
-    if (diag && diag.errorTypes && diag.errorTypes.length) {
-      errorBlock = html`<div class="stu-fb-block">
-        <div class="tiny muted">错误类型（来自累计记录，非单题定性）</div>
-        <div class="chip-row">
-          ${diag.errorTypes.map(function (e) { return ui.badge(e.label + ' ×' + e.count, e.tone); })}
-        </div>
-      </div>`;
+      summary = '暂无法判阅：未识别到有效内容或识别质量较低，本条不计为答错，可修改后重新提交。';
+    } else {
+      summary = result.note || '已提交。';
     }
 
     var hasNext = info.qIndex >= 0 && info.qIndex < info.questions.length - 1;
     var hasMissing = info.questions.some(function (qq) { return !info.answersByQ[qq.id]; });
 
-    var body = html`
-      ${statusBanner}
-      ${diagBlock}
-      ${errorBlock}
+    var kpiRow = html`<div class="stu-fb-kpis">
+      <span>本题判分 ${ui.statusBadge(result.status)}</span>
+      <span class="num">${scoreText}</span>
+      ${diag
+        ? html`<span>知识点表现 ${ui.badge(diag.performanceLabel, diag.performanceTone)} ${ui.statusBadge(diag.status)}</span>
+               <span class="num">累计 ${diag.evidence.records} 条 · 可判读 ${diag.evidence.judged} 条</span>`
+        : ''}
+      <span class="num">本题使用提示 ${hintCount} 次</span>
+      <span class="num">第 ${answer.attempts || 1} 次作答</span>
+    </div>`;
+
+    var evidenceBodies = html`<div class="stack-sm">
       ${ui.evidence({
         title: '本题判分依据',
         items: result.evidence || [],
@@ -205,26 +184,30 @@
         status: diag.status,
         coverage: diag.evidence.coverageText
       }) : ''}
-      ${diag ? ui.banner({ tone: 'info', compact: true, title: '下一步建议', body: diag.suggestion }) : ''}
-      ${ui.banner({
-        tone: 'info',
-        compact: true,
-        title: '单题不作结论',
-        body: '这道题只带来 1 条新的作答记录。知识点表现需要累计记录支撑，诊断状态会随记录数量与教师复核结果变化，并不代表对你的固定评价。'
-      })}
-      <div class="stu-fb-actions">
-        ${hasNext ? ui.button({ label: '下一题', tone: 'primary', icon: 'arrowRight', attrs: 'data-act="next"' }) : ''}
-        ${hasMissing ? ui.button({ label: '继续练习（下一道未完成）', tone: 'secondary', attrs: 'data-act="continue"' }) : ''}
-        ${ui.button({ label: '查看提示', tone: 'quiet', icon: 'lightbulb', attrs: 'data-hint="1"' })}
-      </div>`;
+      ${diag && diag.errorTypes && diag.errorTypes.length
+        ? html`<div class="row-sm row-wrap"><span class="tiny muted">错误类型（累计记录）：</span>${diag.errorTypes.map(function (e) { return ui.badge(e.label + ' ×' + e.count, e.tone); })}</div>`
+        : ''}
+      ${diag ? html`<div class="small muted">下一步建议：${diag.suggestion}</div>` : ''}
+      <div class="ai-caveat">单题不作结论：本题只带来 1 条新记录，知识点表现需要累计记录支撑，会随记录数量与教师复核变化，不代表对你的固定评价。</div>
+    </div>`;
 
-    return ui.card({
-      className: 'stu-feedback',
-      title: html`即时诊断反馈 ${ui.statusBadge(result.status)}`,
-      desc: '提交后立即生成；结论会随记录累积与教师复核变化。',
-      actions: html`<span class="stu-fb-score">${scoreText}</span>`,
-      body: body
-    });
+    return html`<section class="card stu-feedback">
+      <div class="card-head">
+        <div class="card-head-main">
+          <div class="card-title">判分结果 ${ui.statusBadge(result.status)}</div>
+          <div class="card-desc">${summary}</div>
+        </div>
+        <div class="card-actions"><span class="stu-fb-score">${scoreText}</span></div>
+      </div>
+      <div class="card-body">
+        ${kpiRow}
+        ${ui.disclosure({ summary: '判分依据与知识点证据', body: evidenceBodies })}
+        <div class="stu-fb-actions">
+          ${hasNext ? ui.button({ label: '下一题', tone: 'primary', icon: 'arrowRight', attrs: 'data-act="next"' }) : ''}
+          ${hasMissing ? ui.button({ label: '继续练习（下一道未完成）', tone: 'secondary', attrs: 'data-act="continue"' }) : ''}
+        </div>
+      </div>
+    </section>`;
   }
 
   /* ---------------- 伴学消息 ---------------- */
@@ -273,8 +256,7 @@
   function welcomeHtml() {
     return html`<div class="stu-msg is-bot is-welcome">
       <div class="stu-msg-head">${ui.icon('bot', 14)}<strong>伴学助手</strong></div>
-      <div class="stu-msg-body">我会围绕当前这道题提供分层帮助，不直接给答案。可以先点下方快捷问法，或选择「知识点提醒 / 思路提示 / 步骤提示 / 完整解析」。</div>
-      <div class="ai-caveat">完整解析需要你确认后才会展示，并记录为“提示使用”；提示使用会与「独立完成」区分统计，不影响对你的评价。</div>
+      <div class="stu-msg-body">按层级获取提示，默认不直接给答案。完整解析需确认后展示，并记录为“提示使用”。</div>
     </div>`;
   }
 
@@ -334,6 +316,13 @@
     return input ? input.value : '';
   }
 
+  /** 切换题目 / 结束练习前同步保存草稿，避免 debounce 未触发导致输入丢失 */
+  function flushDraft(root, info, q) {
+    if (!q || !info || !info.sid) return;
+    var value = readAnswer(root, q);
+    actions.saveDraft({ studentId: info.sid, questionId: q.id, text: value });
+  }
+
   function doSubmit(root, ctx, info) {
     var q = info.q;
     if (!q) {
@@ -356,7 +345,7 @@
       return;
     }
     var message;
-    if (res.result.status === 'auto') message = '已提交并完成自动判分，下方为即时诊断反馈';
+    if (res.result.status === 'auto') message = '已提交并完成自动判分，下方为判分结果';
     else if (res.result.status === 'suggested') message = '已提交。过程题需教师复核，下方为辅助批阅结果';
     else message = '已提交。本题暂无法判阅，可修改后重新提交';
     ui.toast(message, res.result.status === 'auto' ? 'success' : 'info');
@@ -387,13 +376,13 @@
           <div class="page-head">
             <div class="page-head-main">
               <h1 class="page-title">题目练习</h1>
-              <div class="page-desc">选择任务、逐题作答，提交后查看即时诊断反馈；右侧伴学助手提供分层提示。</div>
+              <div class="page-desc">当前还没有分配给你的练习任务。</div>
             </div>
           </div>
           <div class="card">${ui.empty({
             icon: 'edit',
             title: '暂时没有可练习的任务',
-            desc: '当前还没有分配给你的练习任务。可以先回到学习主页查看最近的记录与学情。',
+            desc: '可以先回到学习主页查看最近的记录与学情。',
             action: ui.button({ label: '回到学习主页', tone: 'primary', attrs: 'data-go="#/student/home"' })
           })}</div>
         </div>`;
@@ -404,82 +393,64 @@
       var activeProgress = info.activeProgress || { total: 0, submitted: 0, missingCount: 0 };
       var pct = activeProgress.total ? Math.round((activeProgress.submitted / activeProgress.total) * 100) : 0;
 
-      /* ---- 任务 chips ---- */
-      var taskChips = info.progress.map(function (p) {
-        return ui.chip(shortTaskName(p.task.title) + ' · ' + p.submitted + '/' + p.total, {
-          active: p.task.id === task.id,
-          attrs: 'data-task="' + p.task.id + '"'
-        });
-      });
+      var head = html`<div class="page-head">
+        <div class="page-head-main">
+          <h1 class="page-title">题目练习</h1>
+          <div class="page-desc">逐题作答并提交，提交后查看判分与诊断；右侧可按层级获取提示。</div>
+        </div>
+        <div class="page-actions">
+          ${ui.button({ label: '结束练习', tone: 'ghost', icon: 'x', attrs: 'data-act="exit"' })}
+        </div>
+      </div>`;
 
-      var taskBar = html`<div class="card stu-taskbar">
-        <div class="card-body is-solo">
-          <div class="stu-taskbar-top">
-            <div class="stu-taskbar-main">
-              <div class="small strong navy">练习任务</div>
-              <div class="chip-row stu-task-chips">${taskChips}</div>
-            </div>
-            <div class="stu-taskbar-progress">
-              <div class="small muted">已提交 <span class="num">${activeProgress.submitted}</span> / <span class="num">${activeProgress.total}</span> 题
-                ${activeProgress.missingCount ? html`<span class="warn-text">· 还剩 ${activeProgress.missingCount} 题</span>` : html`<span class="teal-text">· 已全部提交</span>`}
-              </div>
-              ${ui.progress(pct, activeProgress.missingCount ? 'primary' : 'teal')}
-            </div>
-          </div>
-          <div class="tiny muted stu-taskbar-note">${task.scopeNote || ''} · 截止 ${fmt.datetime(task.dueAt)}（${fmt.rel(task.dueAt)}）</div>
+      /* ---- 任务栏（一行：任务选择 + 截止 + 进度） ---- */
+      var taskOptions = info.progress.map(function (p) {
+        var label = p.task.title + '（' + p.submitted + '/' + p.total + '）';
+        return html`<option value="${p.task.id}" ${p.task.id === task.id ? 'selected' : ''}>${label}</option>`;
+      });
+      var workbar = html`<div class="stu-workbar">
+        <div class="stu-workbar-task">
+          <span class="tiny muted">任务</span>
+          <select class="select is-sm" id="task-select" aria-label="切换练习任务">${taskOptions}</select>
+        </div>
+        <div class="stu-workbar-meta">
+          <span class="tiny muted">截止 ${fmt.datetime(task.dueAt)}（${fmt.rel(task.dueAt)}）</span>
+          ${task.scopeNote ? html`<span class="tag tag-primary">${task.scopeNote}</span>` : ''}
+        </div>
+        <div class="stu-workbar-progress">
+          <span class="tiny muted">已提交 <b class="num">${activeProgress.submitted} / ${activeProgress.total}</b>${activeProgress.missingCount ? ' · 剩 ' + activeProgress.missingCount + ' 题' : ' · 已全部提交'}</span>
+          ${ui.progress(pct, activeProgress.missingCount ? 'primary' : 'teal')}
         </div>
       </div>`;
 
       if (!q) {
         return html`<div class="page stu-practice">
-          <div class="page-head">
-            <div class="page-head-main">
-              <h1 class="page-title">题目练习</h1>
-              <div class="page-desc">选择任务、逐题作答，提交后查看即时诊断反馈；右侧伴学助手提供分层提示。</div>
-            </div>
-          </div>
-          ${taskBar}
+          ${head}
+          ${workbar}
           <div class="card">${ui.empty({
             icon: 'fileText',
             title: '该任务下暂无题目',
-            desc: '任务题目正在准备中，请稍后再试或选择其他任务。',
+            desc: '任务题目正在准备中，请稍后再试或切换其他任务。',
             action: ui.button({ label: '回到学习主页', tone: 'secondary', attrs: 'data-go="#/student/home"' })
           })}</div>
         </div>`;
       }
 
-      /* ---- 题目导航 ---- */
-      var navButtons = info.questions.map(function (item, idx) {
-        var submitted = !!info.answersByQ[item.id];
-        var cls = 'stu-qnav-btn' + (submitted ? ' is-submitted' : '') + (item.id === q.id ? ' is-current' : '');
-        var label = '第 ' + (idx + 1) + ' 题' + (submitted ? ' · 已提交' : ' · 未提交');
-        return html`<button type="button" class="${cls}" data-qid="${item.id}" title="${label}" aria-label="${label}">${item.code}</button>`;
-      });
-      var navCard = html`<div class="card stu-qnav-card">
-        <div class="card-body is-solo">
-          <div class="row-between stu-qnav-head">
-            <div class="small strong navy">题目导航</div>
-            <div class="stu-legend tiny muted">
-              <span><i class="stu-dot is-submitted"></i>已提交</span>
-              <span><i class="stu-dot"></i>未提交</span>
-              <span><i class="stu-dot is-current"></i>当前题</span>
-            </div>
-          </div>
-          <div class="stu-qnav">${navButtons}</div>
-        </div>
-      </div>`;
-
-      /* ---- 题目区 ---- */
+      /* ---- 题目区（主焦点） ---- */
       var answer = info.answersByQ[q.id];
       var currentValue = answerText(info, q);
       var typeLabel = TYPE_LABELS[q.type] || q.type;
       var diffTone = DIFF_TONE[q.difficulty] || 'neutral';
-      var metaHtml = html`<div class="stu-qmeta">
-        <span class="tag tag-primary">第 ${info.qIndex + 1} 题</span>
-        <span class="tag">${typeLabel}</span>
-        ${ui.badge(q.difficulty || '难度待确认', diffTone)}
-        ${(q.kpNames || []).map(function (name) { return html`<span class="tag tag-teal">${name}</span>`; })}
-        ${answer ? html`<span class="badge badge-success">${ui.icon('check', 12)}已提交</span>` : ''}
+
+      var qhead = html`<div class="stu-qhead">
+        <div class="stu-qhead-main">
+          <span class="tag tag-primary">第 ${q.code} 题</span>
+          <span class="tag">${typeLabel}</span>
+          ${ui.badge(q.difficulty || '难度待确认', diffTone)}
+          ${(q.kpNames || []).map(function (name) { return html`<span class="tag tag-teal">${name}</span>`; })}
+          ${answer ? html`<span class="badge badge-success">${ui.icon('check', 12)}已提交</span>` : ''}
+        </div>
+        <div class="stu-qhead-right tiny muted num">第 ${info.qIndex + 1} / ${info.questions.length} 题</div>
       </div>`;
 
       var answerArea;
@@ -501,20 +472,20 @@
           </button>`;
         });
         answerArea = html`<div class="stu-options">${options}</div>
-          <div class="answer-hint">点击选项即可选择；选择后会自动保存，切换题目不会丢失。</div>`;
+          <div class="answer-hint">点击选项即可选择；选择后自动保存，切换题目不会丢失。</div>`;
       } else if (q.type === 'process') {
         answerArea = html`<div class="field">
           <label class="label" for="answer-input">你的作答过程</label>
           <textarea class="textarea is-lg stu-answer-input" id="answer-input" data-answer-input="1"
             placeholder="写出关键步骤与最终结果，例如：3 − (−9) = 3 + 9 = 12（℃）">${currentValue}</textarea>
-          <div class="help">过程题由系统辅助批阅，最终得分以教师复核为准；空白不会被计为答错。</div>
+          <div class="help">过程题由系统辅助批阅，最终得分以教师复核为准；空白不计为答错。</div>
         </div>`;
       } else {
         answerArea = html`<div class="field">
           <label class="label" for="answer-input">${q.type === 'fill' ? '填写答案' : '计算结果'}</label>
           <input class="input stu-answer-input" id="answer-input" data-answer-input="1" type="text"
             value="${currentValue}" placeholder="${q.type === 'fill' ? '填写最终答案' : '填写计算结果，例如 -4'}" autocomplete="off" />
-          <div class="help">按题目的参考答案填写最终结果即可；书写不规范时可修改后重新提交。</div>
+          <div class="help">填写最终结果即可；书写不规范时可修改后重新提交。</div>
         </div>`;
       }
 
@@ -523,90 +494,93 @@
         var hintsUsed = (answer.hintLevels || []).length;
         submittedNote = html`<div class="stu-submitted-note">
           ${ui.icon('checkCircle', 14)}
-          <span>已于 ${fmt.datetime(answer.submittedAt)} 提交（第 ${answer.attempts || 1} 次作答）${hintsUsed ? '，本题使用提示 ' + hintsUsed + ' 次' : '，本次未使用提示'}。如需修改，改动后再次提交即可。</span>
+          <span>已于 ${fmt.datetime(answer.submittedAt)} 提交（第 ${answer.attempts || 1} 次）${hintsUsed ? '，本题使用提示 ' + hintsUsed + ' 次' : '，本次未使用提示'}。修改后可重新提交。</span>
         </div>`;
       }
       var draft = draftOf(info.sid, q.id);
       var draftNote = draft && !answer ? html`<div class="tiny muted stu-draft-note">${ui.icon('edit', 12)} 草稿已自动保存</div>` : '';
 
-      var questionCard = html`<div class="card stu-question-card">
+      var navButtons = info.questions.map(function (item, idx) {
+        var submitted = !!info.answersByQ[item.id];
+        var cls = 'stu-qnav-btn' + (submitted ? ' is-submitted' : '') + (item.id === q.id ? ' is-current' : '');
+        var label = '第 ' + (idx + 1) + ' 题' + (submitted ? ' · 已提交' : ' · 未提交');
+        return html`<button type="button" class="${cls}" data-qid="${item.id}" title="${label}" aria-label="${label}">${item.code}</button>`;
+      });
+
+      var questionCard = html`<section class="card stu-question-card">
         <div class="card-body is-solo">
-          ${metaHtml}
+          ${qhead}
           <div class="question-stem stu-stem">${q.stem}</div>
           <div class="stu-answer-area">${answerArea}</div>
           ${draftNote}
           ${submittedNote}
           <div class="stu-answer-actions">
-            ${ui.button({
-              label: answer ? '重新提交' : '提交作答',
-              tone: 'primary',
-              icon: 'check',
-              attrs: 'data-act="submit"'
-            })}
+            ${ui.button({ label: answer ? '重新提交' : '提交作答', tone: 'primary', size: 'lg', icon: 'check', attrs: 'data-act="submit"' })}
             ${ui.button({ label: '下一题', tone: 'secondary', icon: 'arrowRight', attrs: 'data-act="next"' })}
+            ${ui.button({ label: '上一题', tone: 'ghost', icon: 'chevronLeft', attrs: 'data-act="prev"' })}
             ${ui.button({ label: '清空重填', tone: 'ghost', attrs: 'data-act="reset"' })}
           </div>
         </div>
-      </div>`;
+        <div class="card-foot stu-qnav-foot">
+          <span class="tiny muted">题目导航</span>
+          <div class="stu-qnav">${navButtons}</div>
+          <span class="stu-legend tiny muted">
+            <span><i class="stu-dot is-submitted"></i>已提交</span>
+            <span><i class="stu-dot"></i>未提交</span>
+            <span><i class="stu-dot is-current"></i>当前</span>
+          </span>
+        </div>
+      </section>`;
 
       var feedbackCard = answer ? buildFeedback(state, info, q, answer) : '';
 
-      /* ---- 右侧伴学面板 ---- */
+      /* ---- 右侧伴学面板：提示层级 → 对话 → 提问 ---- */
       var chatList = MEM.messages.length ? MEM.messages.map(messageHtml) : welcomeHtml();
       var quickAsks = (assistant && assistant.quickAsks) || [];
-      var hintButtons = [1, 2, 3, 4].map(function (level) {
-        return ui.button({
-          label: HINT_LABELS[level],
-          size: 'sm',
-          tone: level === 1 ? 'quiet' : 'secondary',
-          icon: level === 4 ? 'eye' : 'lightbulb',
-          attrs: 'data-hint="' + level + '"'
-        });
+      var hintRows = HINT_META.map(function (h) {
+        return html`<button type="button" class="stu-hint-row${h.level === 4 ? ' is-solution' : ''}" data-hint="${h.level}">
+          <span class="stu-hint-idx">${h.level}</span>
+          <span class="stu-hint-main">
+            <span class="stu-hint-label">${h.label}</span>
+            <span class="stu-hint-desc">${h.desc}</span>
+          </span>
+          ${ui.icon(h.level === 4 ? 'eye' : 'chevronRight', 14)}
+        </button>`;
       });
 
-      var assistantCard = ui.card({
-        className: 'stu-assistant',
-        title: html`伴学助手 ${ui.badge('分层提示', 'teal')}`,
-        desc: '当前题目：第 ' + q.code + ' 题 · ' + ((q.kpNames || [])[0] || '知识点待确认'),
-        actions: ui.button({ label: '清空', size: 'sm', tone: 'ghost', icon: 'refresh', attrs: 'data-act="clear-chat"' }),
-        body: html`<div class="stu-chat">
-          <div class="stu-chat-list" data-chat-list>
-            ${chatList}
+      var assistantCard = html`<section class="card stu-assistant">
+        <div class="card-head">
+          <div class="card-head-main">
+            <div class="card-title">伴学助手 ${ui.badge('分层提示', 'teal')}</div>
+            <div class="card-desc">当前：第 ${q.code} 题 · ${(q.kpNames || [])[0] || '知识点待确认'}</div>
           </div>
-          <div class="stu-chat-quick">
-            <div class="tiny muted">快捷问法</div>
-            <div class="chip-row stu-quick-asks">
-              ${quickAsks.map(function (text) {
-                return ui.chip(text, { attrs: 'data-ask="' + ZWZ.esc(text) + '"' });
-              })}
+          <div class="card-actions">${ui.button({ label: '清空', size: 'sm', tone: 'ghost', icon: 'refresh', attrs: 'data-act="clear-chat"' })}</div>
+        </div>
+        <div class="card-body">
+          <div class="stu-hint-steps">${hintRows}</div>
+          <div class="stu-chat">
+            <div class="stu-chat-list" data-chat-list>${chatList}</div>
+            <div class="stu-chat-quick">
+              <div class="chip-row stu-quick-asks">
+                ${quickAsks.map(function (text) {
+                  return ui.chip(text, { attrs: 'data-ask="' + ZWZ.esc(text) + '"' });
+                })}
+              </div>
             </div>
-          </div>
-          <div class="stu-hint-levels">${hintButtons}</div>
-          <div class="stu-chat-input">
-            <input class="input" id="chat-input" type="text" placeholder="就当前题目提问，例如：这道题在考什么？" autocomplete="off" />
-            ${ui.button({ label: '发送', tone: 'primary', size: 'sm', icon: 'arrowRight', attrs: 'data-act="send-chat"' })}
-          </div>
-          <div class="tiny muted stu-chat-foot">${(assistant && assistant.MODEL_NOTE) || '本地规则应答'} · 提示使用会与独立完成区分统计</div>
-        </div>`
-      });
-
-      return html`<div class="page stu-practice">
-        <div class="page-head">
-          <div class="page-head-main">
-            <h1 class="page-title">题目练习</h1>
-            <div class="page-desc">选择任务、逐题作答，提交后查看即时诊断反馈；右侧伴学助手按层级提供提示，不直接给答案。</div>
-          </div>
-          <div class="page-actions">
-            ${ui.button({ label: '我的档案', tone: 'secondary', icon: 'target', attrs: 'data-go="#/student/archive"' })}
-            ${ui.button({ label: '学情报告', tone: 'secondary', icon: 'chart', attrs: 'data-go="#/student/report"' })}
+            <div class="stu-chat-input">
+              <input class="input" id="chat-input" type="text" placeholder="就当前题目提问…" autocomplete="off" />
+              ${ui.button({ label: '发送', tone: 'primary', size: 'sm', icon: 'arrowRight', attrs: 'data-act="send-chat"' })}
+            </div>
+            <div class="tiny muted stu-chat-foot">${(assistant && assistant.MODEL_NOTE) || '本地规则应答'} · 提示使用会与独立完成区分统计</div>
           </div>
         </div>
+      </section>`;
 
-        ${taskBar}
-
+      return html`<div class="page stu-practice">
+        ${head}
+        ${workbar}
         <div class="split stu-practice-split">
           <div class="split-main stack">
-            ${navCard}
             ${questionCard}
             ${feedbackCard}
           </div>
@@ -626,19 +600,24 @@
         if (target) ctx.navigate(target);
       });
 
-      /* 任务切换 */
-      ui.bind(root, '[data-task]', 'click', function (ev, el) {
-        var taskId = el.getAttribute('data-task');
-        if (!taskId || taskId === MEM.taskId) return;
-        MEM.taskId = taskId;
-        MEM.questionId = null;
-        ctx.navigate(practiceUrl(taskId));
-      });
+      /* 任务切换（下拉） */
+      var taskSelect = root.querySelector('#task-select');
+      if (taskSelect) {
+        taskSelect.addEventListener('change', function () {
+          flushDraft(root, info, q);
+          var taskId = taskSelect.value;
+          if (!taskId || taskId === MEM.taskId) return;
+          MEM.taskId = taskId;
+          MEM.questionId = null;
+          ctx.navigate(practiceUrl(taskId));
+        });
+      }
 
-      /* 题目切换 */
+      /* 题目切换（导航） */
       ui.bind(root, '[data-qid]', 'click', function (ev, el) {
         var questionId = el.getAttribute('data-qid');
         if (!questionId) return;
+        flushDraft(root, info, q);
         goQuestion(ctx, MEM.taskId, questionId);
       });
 
@@ -661,17 +640,28 @@
         inputEl.addEventListener('input', saveDraft);
       }
 
-      /* 提交 / 下一题 / 继续 / 清空 */
+      /* 提交 / 下一题 / 上一题 / 继续 / 清空 */
       ui.bind(root, '[data-act="submit"]', 'click', function () { doSubmit(root, ctx, info); });
       ui.bind(root, '[data-act="next"]', 'click', function () {
         if (!q) return;
+        flushDraft(root, info, q);
         if (info.qIndex >= 0 && info.qIndex < info.questions.length - 1) {
           goQuestion(ctx, info.task.id, info.questions[info.qIndex + 1].id);
         } else {
           ui.toast('已经是本任务的最后一题', 'info');
         }
       });
+      ui.bind(root, '[data-act="prev"]', 'click', function () {
+        if (!q) return;
+        flushDraft(root, info, q);
+        if (info.qIndex > 0) {
+          goQuestion(ctx, info.task.id, info.questions[info.qIndex - 1].id);
+        } else {
+          ui.toast('已经是本任务的第一题', 'info');
+        }
+      });
       ui.bind(root, '[data-act="continue"]', 'click', function () {
+        flushDraft(root, info, q);
         var next = info.questions.filter(function (item) { return !info.answersByQ[item.id]; })[0];
         if (next) goQuestion(ctx, info.task.id, next.id);
         else ui.toast('本任务已全部提交，可以到「我的档案」查看学情记录', 'success');
@@ -684,6 +674,19 @@
         actions.clearDraft({ studentId: info.sid, questionId: q.id });
         ui.toast('已清空当前输入内容（已提交的记录不受影响）', 'info');
         ctx.refresh();
+      });
+
+      /* 结束练习：先保存草稿，再确认离开 */
+      ui.bind(root, '[data-act="exit"]', 'click', function () {
+        flushDraft(root, info, q);
+        ui.confirm({
+          title: '结束本次练习？',
+          body: '已填写的内容会作为草稿保存，下次进入可继续；已提交的作答不受影响。',
+          okText: '结束练习',
+          cancelText: '继续作答'
+        }).then(function (ok) {
+          if (ok) ctx.navigate('#/student/home');
+        });
       });
 
       /* 分层提示 */
@@ -723,3 +726,4 @@
     }
   });
 })();
+

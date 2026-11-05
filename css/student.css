@@ -544,3 +544,108 @@
   .stu-report .stat-label,
   .stu-report .stat-sub { font-size: 7.5pt; }
 }
+
+/* ============================================================
+   第一轮 UI 优化 · 题目练习（2026-11-05）
+   ============================================================ */
+/* 任务栏：一行，不抢题目焦点 */
+.stu-workbar {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  flex-wrap: wrap;
+  padding: 0 0 var(--s-3);
+  border-bottom: 1px solid var(--border);
+}
+.stu-workbar-task { display: flex; align-items: center; gap: var(--s-2); min-width: 0; }
+.stu-workbar-task .select { max-width: 280px; }
+.stu-workbar-meta { display: flex; align-items: center; gap: var(--s-2); flex-wrap: wrap; }
+.stu-workbar-progress { margin-left: auto; display: flex; align-items: center; gap: var(--s-2); min-width: 240px; }
+.stu-workbar-progress .progress { flex: 1 1 auto; }
+.stu-workbar-progress b { color: var(--navy); font-weight: 600; }
+
+/* 题目头部：题号 / 题型 / 难度 / 知识点 / 当前进度 */
+.stu-qhead { display: flex; align-items: flex-start; gap: var(--s-3); flex-wrap: wrap; margin-bottom: var(--s-3); }
+.stu-qhead-main { display: flex; align-items: center; gap: var(--s-2); flex-wrap: wrap; min-width: 0; flex: 1 1 auto; }
+.stu-qhead-right { flex: 0 0 auto; }
+
+/* 题目导航移入题目卡底部 */
+.stu-qnav-foot { gap: var(--s-3); flex-wrap: wrap; }
+.stu-qnav-foot .stu-qnav { flex: 1 1 auto; }
+.stu-qnav-foot .stu-legend { display: inline-flex; gap: var(--s-3); flex-wrap: wrap; }
+
+/* 伴学提示层级 */
+.stu-hint-steps { display: flex; flex-direction: column; gap: 6px; margin-bottom: var(--s-3); }
+.stu-hint-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  width: 100%;
+  padding: 8px 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  text-align: left;
+  color: var(--text);
+  transition: border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+}
+.stu-hint-row:hover { border-color: var(--primary-200); background: var(--surface-2); }
+.stu-hint-row svg { color: var(--text-3); flex: 0 0 auto; }
+.stu-hint-idx {
+  width: 20px; height: 20px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--primary-50);
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.stu-hint-main { display: flex; flex-direction: column; gap: 1px; min-width: 0; flex: 1 1 auto; }
+.stu-hint-label { font-size: var(--fs-sm); font-weight: 600; color: var(--navy); }
+.stu-hint-desc { font-size: var(--fs-xs); color: var(--text-3); line-height: 1.4; }
+.stu-hint-row.is-solution { border-color: var(--warn-100); background: var(--warn-50); }
+.stu-hint-row.is-solution:hover { border-color: var(--warn); }
+.stu-hint-row.is-solution .stu-hint-idx { background: var(--warn-100); color: var(--warn-hover); }
+.stu-hint-row.is-solution .stu-hint-desc { color: #8A5D12; }
+
+/* 判分结果：结论 + 关键指标 + 折叠依据 */
+.stu-fb-kpis {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2) var(--s-4);
+  flex-wrap: wrap;
+  padding: var(--s-2) var(--s-3);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-sm);
+  color: var(--text-2);
+}
+.stu-fb-kpis > span { display: inline-flex; align-items: center; gap: 6px; }
+.stu-fb-kpis .num { color: var(--navy); font-weight: 500; }
+.stu-feedback .card-head { align-items: flex-start; }
+.stu-feedback .stu-fb-score { font-size: var(--fs-xl); color: var(--navy); }
+.stu-feedback .disclosure { margin-top: var(--s-1); }
+
+/* 右侧伴学面板对话区高度收紧 */
+.stu-assistant .stu-chat-list { max-height: 300px; overflow-y: auto; }
+.stu-assistant .stu-quick-asks { gap: 6px; }
+.stu-assistant .stu-quick-asks .chip { font-size: var(--fs-xs); height: 26px; padding: 0 9px; }
+
+@media (max-width: 1080px) {
+  .stu-workbar-progress { flex: 1 1 100%; margin-left: 0; }
+  .stu-assistant .stu-chat-list { max-height: none; }
+}
+@media (max-width: 640px) {
+  .stu-workbar-task { width: 100%; }
+  .stu-workbar-task .select { max-width: none; flex: 1 1 auto; }
+  .stu-answer-actions .btn { flex: 1 1 auto; }
+  .stu-qnav-foot { flex-direction: column; align-items: flex-start; }
+}
+
+/* 任务栏标签不换行（避免窄屏竖排） */
+.stu-workbar-task .tiny.muted { white-space: nowrap; flex: 0 0 auto; }
+.stu-workbar-task .select { flex: 1 1 auto; }
