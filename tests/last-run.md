@@ -1,6 +1,6 @@
 # 冒烟测试结果（自动生成）
 
-- 运行时间：2026/11/5 16:20:39（耗时 33117 ms）
+- 运行时间：2026/11/5 16:25:25（耗时 31907 ms）
 - 目标地址：http://127.0.0.1:5178
 - 浏览器：C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe
 - 模式：DOM 冒烟 + 打印 PDF 复核
@@ -10,25 +10,25 @@
 
 | # | 路由 | 身份 | 状态 | 页面标题 | 内容字数 | 耗时 | 失败原因 |
 |---|---|---|---|---|---|---|---|
-| 1 | `#/student/home` | 学生 | ✅ 通过 | 学习主页 · 知微·智学 | 534 | 5389ms | — |
-| 2 | `#/student/practice` | 学生 | ✅ 通过 | 题目练习 · 知微·智学 | 491 | 5389ms | — |
-| 3 | `#/student/archive` | 学生 | ✅ 通过 | 我的档案 · 知微·智学 | 1851 | 5360ms | — |
-| 4 | `#/student/report` | 学生 | ✅ 通过 | 学情报告 · 知微·智学 | 2424 | 5386ms | — |
-| 5 | `#/teacher/dashboard` | 教师 | ✅ 通过 | 工作台 · 知微·智学 | 909 | 3513ms | — |
-| 6 | `#/teacher/analysis` | 教师 | ✅ 通过 | 班级学情分析 · 知微·智学 | 711 | 3515ms | — |
-| 7 | `#/teacher/profile` | 教师 | ✅ 通过 | 个体学情档案 · 知微·智学 | 3754 | 3515ms | — |
-| 8 | `#/teacher/import` | 教师 | ✅ 通过 | 试卷与题目 · 知微·智学 | 797 | 3516ms | — |
-| 9 | `#/teacher/grading` | 教师 | ✅ 通过 | 作业批阅 · 知微·智学 | 1821 | 3547ms | — |
-| 10 | `#/teacher/review` | 教师 | ✅ 通过 | 复核中心 · 知微·智学 | 6336 | 4242ms | — |
-| 11 | `#/teacher/assistant` | 教师 | ✅ 通过 | 教学助理 · 知微·智学 | 1029 | 3529ms | — |
-| 12 | `#/teacher/data` | 教师 | ✅ 通过 | 数据与报告 · 知微·智学 | 471 | 3518ms | — |
+| 1 | `#/student/home` | 学生 | ✅ 通过 | 学习主页 · 知微·智学 | 534 | 5312ms | — |
+| 2 | `#/student/practice` | 学生 | ✅ 通过 | 题目练习 · 知微·智学 | 491 | 5274ms | — |
+| 3 | `#/student/archive` | 学生 | ✅ 通过 | 我的档案 · 知微·智学 | 1851 | 5275ms | — |
+| 4 | `#/student/report` | 学生 | ✅ 通过 | 学情报告 · 知微·智学 | 2424 | 5286ms | — |
+| 5 | `#/teacher/dashboard` | 教师 | ✅ 通过 | 工作台 · 知微·智学 | 909 | 4567ms | — |
+| 6 | `#/teacher/analysis` | 教师 | ✅ 通过 | 班级学情分析 · 知微·智学 | 711 | 4571ms | — |
+| 7 | `#/teacher/profile` | 教师 | ✅ 通过 | 个体学情档案 · 知微·智学 | 3934 | 4549ms | — |
+| 8 | `#/teacher/import` | 教师 | ✅ 通过 | 试卷与题目 · 知微·智学 | 797 | 4519ms | — |
+| 9 | `#/teacher/grading` | 教师 | ✅ 通过 | 作业批阅 · 知微·智学 | 1821 | 3964ms | — |
+| 10 | `#/teacher/review` | 教师 | ✅ 通过 | 复核中心 · 知微·智学 | 6336 | 3945ms | — |
+| 11 | `#/teacher/assistant` | 教师 | ✅ 通过 | 教学助理 · 知微·智学 | 1029 | 3948ms | — |
+| 12 | `#/teacher/data` | 教师 | ✅ 通过 | 数据与报告 · 知微·智学 | 471 | 3965ms | — |
 
 ## 权限守卫（跨角色访问）
 
 | 场景 | 状态 | 实际页面标题 | 耗时 | 失败原因 |
 |---|---|---|---|---|
-| 权限守卫 · 学生访问教师路由（`/index.html?role=student#/teacher/analysis`） | ✅ 通过 | 学习主页 · 知微·智学 | 1389ms | — |
-| 权限守卫 · 教师访问学生路由（`/index.html?role=teacher#/student/home`） | ✅ 通过 | 工作台 · 知微·智学 | 1540ms | — |
+| 权限守卫 · 学生访问教师路由（`/index.html?role=student#/teacher/analysis`） | ✅ 通过 | 学习主页 · 知微·智学 | 1341ms | — |
+| 权限守卫 · 教师访问学生路由（`/index.html?role=teacher#/student/home`） | ✅ 通过 | 工作台 · 知微·智学 | 1335ms | — |
 
 ## 打印复核（--print）
 
@@ -37,7 +37,7 @@
 | 打印对象 | 路由 | 状态 | 页数 | 文件大小 | 尝试次数 | 失败原因 |
 |---|---|---|---|---|---|---|
 | 打印 · 学生个人报告 | `/index.html?role=student#/student/report` | ✅ 通过 | 3 | 336 KB | 1 | — |
-| 打印 · 教师个体档案 | `/index.html?role=teacher#/teacher/profile` | ✅ 通过 | 2 | 176 KB | 1 | — |
-| 打印 · 教师班级报告 | `/index.html?role=teacher#/teacher/data?tab=export` | ✅ 通过 | 2 | 237 KB | 4 | — |
+| 打印 · 教师个体档案 | `/index.html?role=teacher#/teacher/profile` | ✅ 通过 | 2 | 176 KB | 4 | — |
+| 打印 · 教师班级报告 | `/index.html?role=teacher#/teacher/data?tab=export` | ✅ 通过 | 2 | 237 KB | 1 | — |
 
 > 本文件由 `node tests/smoke.mjs` 自动生成，每次运行覆盖；请勿手工编辑。

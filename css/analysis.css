@@ -690,3 +690,74 @@
   .ana-filter-row { grid-template-columns: minmax(0, 1fr); }
   .ana-field-class, .ana-field-kp, .ana-field-range, .ana-field-scope { grid-column: auto; grid-row: auto; }
 }
+
+/* ============================================================
+   第一轮 UI 优化 · 个体学情档案（2026-11-05）
+   ============================================================ */
+.ana-profile-head-row { align-items: flex-start; }
+.ana-profile-head-row .ana-name-line { align-items: center; gap: var(--s-3); }
+.ana-profile-head-row .page-title { font-size: var(--fs-2xl); line-height: 1.2; }
+
+/* 学生切换：压缩为一行，无卡片边框 */
+.ana-student-bar.is-slim {
+  padding: 0 0 var(--s-3);
+  border-bottom: 1px solid var(--border);
+  align-items: flex-end;
+}
+.ana-student-bar.is-slim .ana-student-select { flex: 0 1 300px; }
+
+/* 当前关注知识点 */
+.ana-focus-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  padding: var(--s-5);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--warn);
+  border-radius: var(--radius);
+}
+.ana-focus-head { display: flex; align-items: center; gap: var(--s-2); flex-wrap: wrap; }
+.ana-focus-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: .04em;
+  color: var(--text-3);
+}
+.ana-focus-kp { font-size: var(--fs-lg); font-weight: 650; color: var(--navy); }
+.ana-focus-meta { font-size: var(--fs-sm); color: var(--text-2); }
+.ana-focus-quote {
+  font-size: var(--fs-sm);
+  color: var(--text-2);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  line-height: 1.6;
+}
+.ana-focus-actions { display: flex; gap: var(--s-2); flex-wrap: wrap; margin-top: 2px; }
+
+/* 其他需关注行：标题行允许换行显示徽标 */
+.ana-focus-title {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* 折叠区聚合，减少行间空白 */
+.ana-profile-details { display: flex; flex-direction: column; gap: 2px; }
+.ana-profile-details .disclosure + .disclosure { margin-top: 0; }
+
+@media (max-width: 900px) {
+  .ana-focus-card { padding: var(--s-4); }
+  .ana-focus-kp { font-size: var(--fs-md); }
+  .ana-student-bar.is-slim .ana-student-select { flex: 1 1 220px; }
+  .ana-student-bar.is-slim .ana-student-perm { margin-left: 0; justify-content: flex-start; }
+}
