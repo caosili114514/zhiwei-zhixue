@@ -457,3 +457,57 @@
   .tch-metric-row { grid-template-columns: minmax(0, 1fr); }
   .tch-error-mini-label { width: 84px; }
 }
+
+/* ============================================================
+   第一轮 UI 优化 · 复核中心（2026-11-05）
+   ============================================================ */
+.tch-review-page .tabs { margin-top: calc(-1 * var(--s-2)); }
+.tch-review-page .table-wrap { background: var(--surface); }
+.tch-review-board { gap: var(--s-3); }
+.tch-review-board .plain-head { align-items: baseline; }
+.tch-review-filters {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+}
+.tch-review-current {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+  margin-left: auto;
+  font-size: var(--fs-sm);
+  color: var(--text-2);
+}
+.tch-review-current b { color: var(--navy); font-weight: 600; }
+.tch-review-page .tch-quote { max-width: 260px; }
+
+.tch-review-entry {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-4);
+  flex-wrap: wrap;
+  padding: var(--s-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.tch-review-entry-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  font-size: var(--fs-sm);
+  color: var(--text-2);
+}
+.tch-review-entry-text b { color: var(--navy); }
+
+.tch-review-details { display: flex; flex-direction: column; gap: 2px; }
+.tch-review-details .disclosure + .disclosure { margin-top: 0; }
+
+@media (max-width: 900px) {
+  .tch-review-current { margin-left: 0; width: 100%; }
+  .tch-review-entry { padding: var(--s-3); }
+}

@@ -1,10 +1,12 @@
 /* ============================================================
-   教师端 · 复核中心（诊断复核 + 批阅复核入口 + 复核记录时间线）
+   教师端 · 复核中心（诊断复核 + 批阅复核入口 + 复核时间线）
    ------------------------------------------------------------
-   - 诊断列表来自 sel.pendingReviews(state,{classId:'c1'}).diagnoses（pending / preliminary）；
-   - 确认 / 修正 / 标记暂无法判断均通过 store.actions 写入，
-     诊断结果由 selectors 实时派生，班级分析与个体档案同步生效；
-   - 所有复核写入 reviews / diagnosisReviews 与 auditLogs，页面底部展示时间线。
+   第一轮 UI 优化（2026-11-05）：
+   - 首屏：3 项待办指标 + 诊断复核主列表（默认「待复核」，不把已处理内容放首屏）；
+   - 列表改为紧凑任务行：学生 / 知识点（含表现）/ 待复核原因 / 状态 / 记录 / 最近更新 / 复核入口；
+   - 展开行内保留完整判据与处理表单（确认 / 修改 / 标记暂无法判断），动作与原有逻辑一致；
+   - 批阅复核 Tab 只保留入口、计数说明与已复核记录（折叠）；
+   - 复核时间线与口径/审计说明收进带数量的折叠区；状态、排序、筛选与复核闭环不变。
    ============================================================ */
 (function () {
   'use strict';
@@ -23,7 +25,7 @@
   var S = {
     _fresh: true,
     tab: 'diag',
-    filter: 'all',
+    filter: 'pending',
     expandedId: null
   };
 
@@ -34,7 +36,7 @@
   function applyInitial(ctx) {
     var q = ctx.query || {};
     S.tab = 'diag';
-    S.filter = (q.filter === 'pending' || q.filter === 'preliminary') ? q.filter : 'all';
+    S.filter = (q.filter === 'all' || q.filter === 'preliminary' || q.filter === 'pending') ? q.filter : 'pending';
     S.expandedId = null;
   }
 
@@ -63,7 +65,37 @@
     return sel.userById(state, id) || { id: id, name: id };
   }
 
-  /* ---------------- 诊断复核列表 ---------------- */
+  /** 待复核原因：只做事实性说明，不夸大结论 */
+  function reasonOf(d) {
+    if (d.status === 'pending') {
+      return d.evidence.pending
+        ? '存在 ' + d.evidence.pending + ' 条待复核记录，需人工判断'
+        : '识别异常或证据不足，需人工判断';
+    }
+    return '可判读记录 ' + d.evidence.judged + ' 条，尚未达到“证据充分”';
+  }
+
+  function countOf(state) {
+    var diagRows = allDiagnoses(state);
+    var pending = diagRows.filter(function (r) { return r.diag.status === 'pending'; }).length;
+    var prelim = diagRows.filter(function (r) { return r.diag.status === 'preliminary'; }).length;
+    var counts = ZWZ.grader.countByStatus(state, classAnswers(state));
+    var pendingGrades = (counts.suggested || 0) + (counts.unjudged || 0);
+    var reviewedGrades = counts.reviewed || 0;
+    var reviewedDiags = (state.diagnosisReviews || []).length;
+    return {
+      diagRows: diagRows,
+      pending: pending,
+      prelim: prelim,
+      counts: counts,
+      pendingGrades: pendingGrades,
+      reviewedGrades: reviewedGrades,
+      reviewedDiags: reviewedDiags,
+      reviewedTotal: reviewedGrades + reviewedDiags
+    };
+  }
+
+  /* ---------------- 诊断复核：行内详情 ---------------- */
   function diagDetailHtml(state, d) {
     var ev = d.evidence || {};
     var quotes = ev.quotes || [];
@@ -140,34 +172,34 @@
     </div>`;
   }
 
+  /* ---------------- 诊断复核列表（紧凑任务行） ---------------- */
   function diagTable(state, rows) {
-    var head = '<div class="table-wrap tch-diag-wrap"><table class="table tch-diag-table"><thead><tr>' +
+    var head = '<div class="table-wrap tch-diag-wrap"><table class="table tch-diag-table is-compact"><thead><tr>' +
       '<th style="width:150px">学生</th>' +
-      '<th style="width:190px">知识点</th>' +
-      '<th style="width:120px">表现</th>' +
-      '<th style="width:110px">状态</th>' +
-      '<th style="width:150px">记录 / 可判读</th>' +
-      '<th>证据摘要</th>' +
-      '<th style="width:88px"></th>' +
+      '<th style="width:230px">知识点 / 表现</th>' +
+      '<th style="width:210px">待复核原因</th>' +
+      '<th style="width:110px">诊断状态</th>' +
+      '<th style="width:140px">记录 / 可判读</th>' +
+      '<th style="width:120px">最近更新</th>' +
+      '<th style="width:78px"></th>' +
       '</tr></thead><tbody>';
     var body = rows.map(function (r) {
       var d = r.diag;
       var st = r.student || sel.student(state, d.studentId) || { name: d.studentId, id: d.studentId };
       var expanded = S.expandedId === d.id;
-      var quote = (d.evidence.quotes && d.evidence.quotes.length) ? d.evidence.quotes[0] : '暂无证据记录';
       var reviewedTag = d.reviewed ? ui.badge('已复核', 'success').value : '';
       var row =
         '<tr class="tch-diag-row' + (expanded ? ' is-expanded' : '') + '" data-diag-id="' + esc(d.id) + '">' +
         '<td><div class="tch-diag-student">' + ui.avatar(st.name, { size: 'sm', seed: st.id }).value +
-          '<div><div class="cell-strong">' + esc(st.name) + '</div>' + (reviewedTag ? '<div class="cell-sub">' + reviewedTag + '</div>' : '') + '</div></div></td>' +
-        '<td><div class="cell-strong">' + esc(d.kpName) + '</div><span class="cell-sub">' + esc(d.chapterName) + '</span></td>' +
-        '<td>' + performanceBadge(d).value + '</td>' +
+          '<div><div class="cell-strong">' + esc(st.name) + '</div>' + (reviewedTag ? '<div class="cell-sub">' + reviewedTag + '</div>' : '<div class="cell-sub">' + esc(st.seatNo ? '学号 ' + st.seatNo : '') + '</div>') + '</div></div></td>' +
+        '<td><div class="cell-strong">' + esc(d.kpName) + '</div><div class="cell-sub">' + esc(d.chapterName) + ' · ' + performanceBadge(d).value + '</div></td>' +
+        '<td><span class="tch-quote">' + esc(reasonOf(d)) + '</span></td>' +
         '<td>' + ui.statusBadge(d.status).value + '</td>' +
         '<td><span class="num">' + d.evidence.records + '</span> 条 · 可判读 <span class="num">' + d.evidence.judged + '</span>' +
           '<span class="cell-sub">' + esc(d.evidence.coverageText) + '</span></td>' +
-        '<td><span class="tch-quote">' + esc(fmt.trunc(quote, 62)) + '</span></td>' +
+        '<td><span class="num tiny">' + (d.updatedAt ? fmt.shortDate(d.updatedAt) + ' ' + fmt.time(d.updatedAt) : '—') + '</span></td>' +
         '<td><button type="button" class="btn btn-ghost btn-sm" data-toggle-diag="' + esc(d.id) + '">' +
-          (expanded ? '收起' : '展开') + ui.icon(expanded ? 'chevronDown' : 'chevronRight', 14).value + '</button></td>' +
+          (expanded ? '收起' : '复核') + ui.icon(expanded ? 'chevronDown' : 'chevronRight', 14).value + '</button></td>' +
         '</tr>';
       if (expanded) {
         row += '<tr class="tch-expand-row"><td colspan="7"><div class="tch-diag-detail">' + diagDetailHtml(state, d).value + '</div></td></tr>';
@@ -178,9 +210,8 @@
   }
 
   function renderDiagTab(state) {
-    var all = allDiagnoses(state);
-    var pendingCount = all.filter(function (r) { return r.diag.status === 'pending'; }).length;
-    var prelimCount = all.filter(function (r) { return r.diag.status === 'preliminary'; }).length;
+    var info = countOf(state);
+    var all = info.diagRows;
     var rows = filterRows(all);
     rows = rows.slice().sort(function (a, b) {
       var order = { pending: 0, preliminary: 1, sufficient: 2, undetermined: 3 };
@@ -191,21 +222,23 @@
     });
 
     var filters = [
-      { key: 'pending', label: '待复核', count: pendingCount },
-      { key: 'preliminary', label: '初步判断', count: prelimCount },
+      { key: 'pending', label: '待复核', count: info.pending },
+      { key: 'preliminary', label: '初步判断', count: info.prelim },
       { key: 'all', label: '全部', count: all.length }
     ];
-
-    var filterBar = html`<div class="tch-queue-filters">
-      <div class="seg">
+    var currentLabel = (filters.filter(function (f) { return f.key === S.filter; })[0] || filters[0]).label;
+    var filterBar = html`<div class="tch-review-filters">
+      <div class="seg" data-review-filter role="group" aria-label="诊断筛选">
         ${filters.map(function (f) {
           return html`<button type="button" class="seg-item${raw(S.filter === f.key ? ' is-active' : '')}" data-filter="${f.key}">
             ${f.label}<span class="tiny muted"> ${f.count}</span>
           </button>`;
         })}
       </div>
-      <div class="spacer"></div>
-      <span class="tiny muted">点击行展开证据与处理表单</span>
+      <div class="tch-review-current">
+        <span>当前筛选：<b>${currentLabel}</b> · 显示 ${rows.length} 项</span>
+        <span class="tiny muted">点击行展开证据与处理表单</span>
+      </div>
     </div>`;
 
     var listHtml;
@@ -224,26 +257,19 @@
       listHtml = diagTable(state, rows);
     }
 
-    return html`<div class="stack">
-      ${ui.banner({
-        tone: 'info',
-        compact: true,
-        body: '诊断由规则引擎派生：单条记录不下结论；记录数 < 2 为“初步判断”，识别异常为“待复核”。确认或修正后立即生效，“证据充分”仅建议在记录足够时选择。'
-      })}
+    return html`<section class="plain-block tch-review-board">
+      <div class="plain-head">
+        <div class="plain-title">诊断复核</div>
+        <div class="plain-actions">
+          <span class="tiny muted">按“待复核 → 初步判断”排序，记录多的在前</span>
+        </div>
+      </div>
       ${filterBar}
       ${listHtml}
-    </div>`;
+    </section>`;
   }
 
   /* ---------------- 批阅复核入口 ---------------- */
-  function statHtml(label, value, sub, tone, icon) {
-    return html`<div class="tch-stat${raw(tone ? ' is-' + tone : '')}">
-      <div class="tch-stat-label">${ui.icon(icon, 14)}<span>${label}</span></div>
-      <div class="tch-stat-value num">${value}</div>
-      <div class="tch-stat-sub">${sub}</div>
-    </div>`;
-  }
-
   function reviewedAnswers(state) {
     var out = [];
     (state.answers || []).forEach(function (a) {
@@ -258,72 +284,54 @@
   }
 
   function renderGradeTab(state) {
-    var counts = ZWZ.grader.countByStatus(state, classAnswers(state));
-    var pending = (counts.suggested || 0) + (counts.unjudged || 0);
+    var info = countOf(state);
     var reviewed = reviewedAnswers(state);
-
-    var entry = ui.card({
-      title: '批阅复核入口',
-      desc: '本 Tab 只提供入口与数量说明；具体给分与复核在「作业批阅」页完成。',
-      body: html`<div class="stack-sm">
-        <div class="tch-stat-grid is-3">
-          ${statHtml('建议复核', counts.suggested || 0, '过程题等，需教师给分', 'warn', 'clock')}
-          ${statHtml('暂无法判阅', counts.unjudged || 0, '识别质量低 / 空白，需核对', 'neutral', 'help')}
-          ${statHtml('教师已复核', counts.reviewed || 0, '已完成人工复核', 'success', 'shield')}
-        </div>
-        <div class="help">待复核批阅共 ${pending} 条，不计入一次正确率与错误率统计；过程题不自动定分，系统不承诺 100% 自动批改。</div>
-        <div class="row-sm row-wrap">
-          ${ui.button({ label: '进入作业批阅', tone: 'primary', icon: 'clipboard', attrs: 'data-go="#/teacher/grading"' })}
-          ${ui.button({ label: '只看暂无法判阅', tone: 'secondary', icon: 'filter', attrs: 'data-go="#/teacher/grading?status=unjudged"' })}
-        </div>
-      </div>`
-    });
 
     var reviewedTable = ui.table({
       className: 'is-compact',
       columns: [
         {
-          key: 'student',
-          label: '学生',
-          width: '150px',
+          key: 'student', label: '学生', width: '140px',
           render: function (r) { return html`<div class="tch-diag-student">${ui.avatar(r.student.name, { size: 'sm', seed: r.student.id })}<span class="cell-strong">${r.student.name}</span></div>`; }
         },
         {
-          key: 'question',
-          label: '题目',
-          width: '180px',
+          key: 'question', label: '题目', width: '170px',
           render: function (r) { return r.question ? '第 ' + r.question.code + ' 题 · ' + (diagnosis.TYPE_LABELS[r.question.type] || '题目') : '—'; }
         },
         {
-          key: 'score',
-          label: '教师给分',
-          width: '110px',
-          align: 'right',
+          key: 'score', label: '教师给分', width: '100px', align: 'right',
           render: function (r) {
             return raw('<span class="num strong">' + (r.answer.score === null || r.answer.score === undefined ? '—' : r.answer.score) + '</span> / <span class="num">' + (r.answer.maxScore || '—') + '</span>');
           }
         },
         { key: 'note', label: '复核备注', render: function (r) { return r.answer.reviewedNote || '—'; } },
-        {
-          key: 'at',
-          label: '复核时间',
-          width: '150px',
-          render: function (r) { return fmt.datetime(r.answer.reviewedAt); }
-        }
+        { key: 'at', label: '复核时间', width: '140px', render: function (r) { return fmt.datetime(r.answer.reviewedAt); } }
       ],
       rows: reviewed,
       empty: ui.empty({ compact: true, icon: 'clipboard', title: '暂无已复核批阅记录', desc: '在「作业批阅」中完成给分复核后，记录会显示在这里。' })
     });
 
-    return html`<div class="stack">
-      ${entry}
-      ${ui.card({
-        title: '最近复核批阅记录',
-        desc: '来自 state.reviews 对应作答的教师给分结果，最多显示最近 10 条。',
-        pad: false,
+    return html`<section class="plain-block tch-review-board">
+      <div class="plain-head">
+        <div class="plain-title">批阅复核</div>
+        <div class="plain-actions"><span class="tiny muted">具体给分与复核在「作业批阅」页完成</span></div>
+      </div>
+      <div class="tch-review-entry">
+        <div class="tch-review-entry-text">
+          <div>待复核批阅 <b class="num">${info.pendingGrades}</b> 条（建议复核 <span class="num">${info.counts.suggested || 0}</span> · 暂无法判阅 <span class="num">${info.counts.unjudged || 0}</span>）；已复核 <b class="num">${info.reviewedGrades}</b> 条。</div>
+          <div class="tiny muted">过程题不自动定分；识别质量低的作答需核对原始作答后再给分。待复核批阅不计入一次正确率与错误类型统计。</div>
+        </div>
+        <div class="row-sm row-wrap">
+          ${ui.button({ label: '进入作业批阅', tone: 'primary', icon: 'clipboard', attrs: 'data-go="#/teacher/grading"' })}
+          ${ui.button({ label: '只看暂无法判阅', tone: 'secondary', icon: 'filter', attrs: 'data-go="#/teacher/grading?status=unjudged"' })}
+        </div>
+      </div>
+      ${ui.disclosure({
+        summary: '已复核批阅记录',
+        count: reviewed.length + ' 条',
         body: reviewedTable
       })}
-    </div>`;
+    </section>`;
   }
 
   /* ---------------- 复核记录时间线 ---------------- */
@@ -344,13 +352,12 @@
       }
       var st = answer ? sel.student(state, answer.studentId) : null;
       var q = answer ? sel.question(state, answer.questionId) : null;
-      var actionLabel = r.action === 'confirm' ? '确认判分' : '修改判分';
       items.push({
         at: r.at,
         kind: 'grade',
         title: '批阅复核 · ' + (st ? st.name : '记录') + (q ? ' · 第 ' + q.code + ' 题' : ''),
         by: userById(state, r.by).name,
-        action: actionLabel,
+        action: r.action === 'confirm' ? '确认判分' : '修改判分',
         before: gradeStateText(r.before),
         after: gradeStateText(r.after),
         note: r.note || ''
@@ -359,7 +366,6 @@
     (state.diagnosisReviews || []).forEach(function (r) {
       var st = sel.student(state, r.studentId);
       var kp = sel.kp(state, r.kpId);
-      var actionLabel = r.action === 'mark-undetermined' ? '标记暂无法判断' : (r.action === 'modify' ? '修正诊断' : '确认诊断');
       var statusLabel = (diagnosis.STATUS[r.status] || {}).label || r.status || '—';
       var perfLabel = r.performance ? ((diagnosis.PERFORMANCE[r.performance] || {}).label || r.performance) : null;
       items.push({
@@ -367,7 +373,7 @@
         kind: 'diagnosis',
         title: '诊断复核 · ' + (st ? st.name : r.studentId) + ' · ' + (kp ? kp.name : r.kpId),
         by: userById(state, r.by).name,
-        action: actionLabel,
+        action: r.action === 'mark-undetermined' ? '标记暂无法判断' : (r.action === 'modify' ? '修正诊断' : '确认诊断'),
         before: '系统派生诊断',
         after: '状态 ' + statusLabel + (perfLabel ? ' · ' + perfLabel : '') + (r.errorTypes && r.errorTypes.length ? ' · 错误类型 ' + r.errorTypes.length + ' 项' : ''),
         note: r.note || ''
@@ -384,7 +390,7 @@
         compact: true,
         icon: 'clock',
         title: '暂无复核记录',
-        desc: '在诊断复核或作业批阅中完成一次操作后，这里会按时间倒序显示记录。'
+        desc: '完成一次诊断复核或批阅复核后，这里会按时间倒序显示。'
       });
     } else {
       body = html`<div class="timeline tch-timeline">
@@ -401,11 +407,24 @@
         })}
       </div>`;
     }
-    return ui.card({
-      title: '复核记录时间线',
-      desc: '合并批阅复核与诊断复核记录，按时间倒序显示最近 20 条。',
-      actions: raw(ui.badge('共 ' + items.length + ' 条', 'neutral').value),
+    return ui.disclosure({
+      summary: '复核记录时间线',
+      count: items.length + ' 条',
       body: body
+    });
+  }
+
+  function renderNotes() {
+    return ui.disclosure({
+      summary: '复核口径与审计说明',
+      count: '5 条',
+      body: html`<ul class="ana-bullets">
+        <li>诊断由规则引擎派生：单条记录不下结论；可判读记录少时为“初步判断”，识别异常或证据不足为“待复核”。</li>
+        <li>确认 / 修正 / 标记暂无法判断均写入复核记录（reviews / diagnosisReviews）与审计日志，并即时同步到班级分析与个体档案。</li>
+        <li>“暂无法判断”不会作为正式结论使用，也不会计为答错；待复核批阅不计入一次正确率与错误类型统计。</li>
+        <li>“证据充分”仅建议在记录足够时选择；过程题不自动定分，系统不承诺 100% 自动批改。</li>
+        <li>本页为虚构模拟数据，仅用于产品演示；复核结论可随新记录再次调整。</li>
+      </ul>`
     });
   }
 
@@ -442,28 +461,25 @@
     if (!row) { ui.toast('诊断记录已更新，请刷新后重试', 'warn'); return; }
     var d = row.diag;
     var form = readForm(diagId);
-    var patch;
     if (action === 'mark-undetermined') {
       ZWZ.store.actions.markUndetermined(diagId, form.note || '教师标记为暂无法判断，需补充记录。');
       ui.toast('已标记为暂无法判断：' + d.kpName, 'info');
     } else if (action === 'modify') {
       if (!form.performance) { ui.toast('请选择表现判断', 'warn'); return; }
-      patch = {
+      ZWZ.store.actions.confirmDiagnosis(diagId, {
         action: 'modify',
         status: form.status,
         performance: form.performance,
         errorTypes: form.errorTypes,
         note: form.note || '教师修正了该诊断的表现判断。'
-      };
-      ZWZ.store.actions.confirmDiagnosis(diagId, patch);
+      });
       ui.toast('诊断已修正：' + d.kpName, 'success');
     } else {
-      patch = {
+      ZWZ.store.actions.confirmDiagnosis(diagId, {
         action: 'confirm',
         status: form.status,
         note: form.note || '教师已确认该诊断结论。'
-      };
-      ZWZ.store.actions.confirmDiagnosis(diagId, patch);
+      });
       ui.toast('诊断已确认：' + d.kpName + ' · ' + ((diagnosis.STATUS[form.status] || {}).label || form.status), 'success');
     }
     S.expandedId = null;
@@ -473,7 +489,7 @@
   /* ---------------- 页面注册 ---------------- */
   ZWZ.pages.register('teacher/review', {
     title: '复核中心',
-    subtitle: '七年级(3)班 · 诊断复核与批阅复核',
+    subtitle: '七年级(3)班 · 待办优先',
 
     render: function (ctx) {
       if (S._fresh) {
@@ -481,21 +497,12 @@
         applyInitial(ctx);
       }
       var state = ctx.state;
-      var diagRows = allDiagnoses(state);
-      var pendingCount = diagRows.filter(function (r) { return r.diag.status === 'pending'; }).length;
-      var prelimCount = diagRows.filter(function (r) { return r.diag.status === 'preliminary'; }).length;
-      var counts = ZWZ.grader.countByStatus(state, classAnswers(state));
-      var pendingGrades = (counts.suggested || 0) + (counts.unjudged || 0);
+      var info = countOf(state);
 
       var head = html`<div class="page-head">
         <div class="page-head-main">
-          <div class="page-title">复核中心</div>
-          <div class="page-desc">诊断复核与批阅复核的统一入口：确认 / 修正 / 标记暂无法判断，所有操作写入复核记录与审计日志，并即时同步到班级分析与个体档案。</div>
-          <div class="row-sm row-wrap tch-head-tags">
-            ${ui.badge('待复核诊断 ' + pendingCount + ' 项', 'warn')}
-            ${ui.badge('初步判断 ' + prelimCount + ' 项', 'primary')}
-            ${ui.badge('待复核批阅 ' + pendingGrades + ' 条', 'warn')}
-          </div>
+          <h1 class="page-title">复核中心</h1>
+          <div class="page-desc">待复核记录优先展示；处理结果即时同步到班级分析与个体档案。</div>
         </div>
         <div class="page-actions">
           ${ui.button({ label: '去作业批阅', tone: 'secondary', icon: 'clipboard', attrs: 'data-go="#/teacher/grading"' })}
@@ -503,27 +510,48 @@
         </div>
       </div>`;
 
+      var statStrip = ui.statStrip([
+        {
+          label: '待复核诊断',
+          value: info.pending,
+          unit: '项',
+          sub: '另有 ' + info.prelim + ' 项初步判断可一并复核',
+          tone: info.pending ? 'warn' : 'teal'
+        },
+        {
+          label: '待复核批阅',
+          value: info.pendingGrades,
+          unit: '条',
+          sub: '建议复核 ' + (info.counts.suggested || 0) + ' · 暂无法判阅 ' + (info.counts.unjudged || 0),
+          tone: info.pendingGrades ? 'warn' : 'teal'
+        },
+        {
+          label: '已处理复核',
+          value: info.reviewedTotal,
+          unit: '条',
+          sub: '批阅 ' + info.reviewedGrades + ' · 诊断 ' + info.reviewedDiags
+        }
+      ]);
+
       var tabs = ui.tabs({
         name: 'tch-review-tabs',
         active: S.tab,
         items: [
-          { key: 'diag', label: '诊断复核', badge: diagRows.length },
-          { key: 'grade', label: '批阅复核', badge: pendingGrades }
+          { key: 'diag', label: '诊断复核' },
+          { key: 'grade', label: '批阅复核' }
         ]
       });
 
       var content = S.tab === 'grade' ? renderGradeTab(state) : renderDiagTab(state);
 
-      return html`<div class="page">
+      return html`<div class="page tch-review-page">
         ${head}
-        <div class="card">
-          <div class="tch-tabbar">${tabs}</div>
-          <div class="tch-tabbody">${content}</div>
-        </div>
-        ${renderTimeline(state)}
-        <div class="row-sm tiny muted">
-          ${ui.icon('shield', 13)}
-          <span>审计说明：复核操作通过 store.actions 写入 state.reviews / state.diagnosisReviews 与 auditLogs；诊断结论由 selectors 实时派生，页面不硬编码任何结论数字。演示数据，不代表真实学情。</span>
+        ${statStrip}
+        ${tabs}
+        ${content}
+        <div class="tch-review-details">
+          ${renderTimeline(state)}
+          ${renderNotes()}
         </div>
       </div>`;
     },
@@ -607,3 +635,4 @@
     }
   });
 })();
+
