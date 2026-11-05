@@ -414,3 +414,46 @@
   .tch-tabbody { padding: var(--s-3); }
   .tch-timeline .tl-body { font-size: var(--fs-xs); }
 }
+
+/* ============================================================
+   第一轮 UI 优化 · 教师工作台（2026-11-05）
+   ============================================================ */
+.tch-focus-v2 { grid-template-columns: minmax(0, 1fr) 340px; gap: var(--s-5); }
+.tch-main-card .card-body { padding-bottom: var(--s-5); }
+.tch-action-list { display: flex; flex-direction: column; }
+.tch-block-divider { margin: var(--s-4) 0 var(--s-3); }
+.tch-ongoing-block { display: flex; flex-direction: column; gap: var(--s-2); }
+.tch-block-head { display: flex; align-items: center; gap: var(--s-2); flex-wrap: wrap; }
+.tch-block-kicker {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: .05em;
+  color: var(--text-3);
+}
+.tch-ongoing-block .tch-ongoing-title { font-size: var(--fs-md); }
+.tch-metric-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-4); margin-top: 2px; }
+.tch-side-block { gap: var(--s-3); }
+.tch-error-mini { display: flex; flex-direction: column; gap: 10px; }
+.tch-error-mini-row { display: flex; align-items: center; gap: var(--s-2); font-size: var(--fs-sm); }
+.tch-error-mini-rank { width: 14px; color: var(--text-3); font-size: var(--fs-xs); flex: 0 0 auto; }
+.tch-error-mini-label {
+  width: 96px;
+  flex: 0 0 auto;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tch-error-mini-bar { flex: 1 1 auto; min-width: 36px; }
+.tch-error-mini-bar .progress { height: 6px; }
+.tch-error-mini-count { flex: 0 0 auto; color: var(--navy); font-weight: 600; }
+.tch-footer-note { margin-top: var(--s-2); }
+.tch-dashboard .stat-strip { margin-bottom: 0; }
+
+@media (max-width: 1080px) {
+  .tch-focus-v2 { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 760px) {
+  .tch-metric-row { grid-template-columns: minmax(0, 1fr); }
+  .tch-error-mini-label { width: 84px; }
+}
