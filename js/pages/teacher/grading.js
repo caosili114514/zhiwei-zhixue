@@ -1,4 +1,4 @@
-/* ============================================================
+﻿/* ============================================================
    教师端 · 作业批阅（左侧队列 + 右侧详情，过程题人工给分复核）
    ------------------------------------------------------------
    - 队列来自 sel.pendingReviews(state,{classId:'c1'}).grades；
@@ -118,24 +118,24 @@
     var a = row.answer;
     var q = row.question;
     var st = row.student;
-    var task = sel.task(state, a.taskId);
     var scoreText = (a.score !== null && a.score !== undefined) ? a.score + ' / ' + (a.maxScore || '—') : '未定分';
     return html`<button type="button" class="tch-queue-item${raw(selected ? ' is-selected' : '')}" data-answer-id="${a.id}">
       <div class="row-between">
         <span class="tch-queue-name">${st.name}</span>
-        ${ui.statusBadge(a.gradeStatus)}
+        <span class="row-sm">
+          ${a.recognition === 'low' ? ui.badge('低识别', 'warn') : ''}
+          ${ui.statusBadge(a.gradeStatus)}
+        </span>
       </div>
       <div class="tch-queue-meta">第 ${q ? q.code : '?'} 题 · ${q ? typeLabel(q.type) : '题目缺失'}</div>
       <div class="row-between tch-queue-foot">
-        <span class="tiny muted truncate">${task ? task.title : '—'}</span>
-        <span class="tiny muted">${fmt.rel(a.submittedAt)}</span>
+        <span class="tiny muted">${fmt.rel(a.submittedAt)}提交</span>
+        ${a.gradeStatus === 'reviewed'
+          ? html`<span class="tch-queue-score">给分 <span class="num">${scoreText}</span></span>`
+          : ''}
       </div>
-      ${a.gradeStatus === 'reviewed'
-        ? html`<div class="tch-queue-score">教师给分 <span class="num">${scoreText}</span> 分</div>`
-        : ''}
     </button>`;
   }
-
   function queueListHtml(state, list) {
     if (!list.length) {
       var filtering = S.status !== 'all' || S.taskId !== 'all' || !!S.search;
@@ -207,72 +207,95 @@
       ? (a.reviewedScore !== undefined && a.reviewedScore !== null ? a.reviewedScore : (a.score === null || a.score === undefined ? '' : a.score))
       : '';
     var prefillNote = a.reviewedNote || '';
-    var hintText = (a.hintLevels && a.hintLevels.length) ? '使用提示 ' + a.hintLevels.length + ' 次' : '未使用提示';
+    var hintText = (a.hintLevels && a.hintLevels.length) ? '提示 ' + a.hintLevels.length + ' 次' : '未使用提示';
     var task = sel.task(state, a.taskId);
+    var scoreText = (a.score === null || a.score === undefined) ? '未定分' : a.score + ' / ' + max;
+    var evidenceItems = (a.gradeEvidence && a.gradeEvidence.length) ? a.gradeEvidence.slice() : ['系统暂无判读依据。'];
+    var basisLabel = isReviewed ? '当前判分 ' + scoreText : '系统建议 ' + scoreText;
 
-    var questionPanel = html`<div class="tch-panel">
-      <div class="tch-panel-head">
-        <span class="tch-panel-title">题目信息</span>
+    var navInfo = html`<div class="tch-detail-head">
+      <div class="tch-detail-head-row">
+        ${ui.avatar(st.name, { size: 'sm', seed: st.id })}
+        <div class="tch-detail-id">
+          <div class="tch-detail-name">${st.name}</div>
+          <div class="tiny muted">${task ? task.title : '—'} · 第 ${idx + 1} / ${list.length} 份</div>
+        </div>
         <div class="row-sm row-wrap">
-          ${q ? ui.badge('第 ' + q.code + ' 题', 'neutral') : ''}
+          ${ui.statusBadge(a.gradeStatus)}
+          <span class="tag tag-primary">${S.tab === 'reviewed' ? '已复核记录' : '待复核'}</span>
+        </div>
+        <div class="row-sm tch-detail-nav">
+          ${ui.button({ label: '上一份', tone: 'ghost', size: 'sm', icon: 'chevronLeft', attrs: 'data-act="prev"' })}
+          ${ui.button({ label: '下一份', tone: 'ghost', size: 'sm', icon: 'chevronRight', attrs: 'data-act="next"' })}
+          <span class="tiny muted">←/→ 切换</span>
+        </div>
+      </div>
+    </div>`;
+
+    var qaPanel = html`<div class="tch-panel tch-qa-panel">
+      <div class="tch-panel-head">
+        <span class="tch-panel-title">当前题目与学生作答</span>
+        <div class="row-sm row-wrap">
           ${q ? ui.badge(typeLabel(q.type), 'neutral') : ''}
           ${q ? html`<span class="tag">${q.difficulty || '—'}</span>` : ''}
-          ${q ? html`<span class="tiny muted">满分 ${(q.scoring && q.scoring.max) || max} 分</span>` : ''}
+          <span class="tiny muted">满分 ${max} 分</span>
         </div>
       </div>
-      ${q
-        ? html`<div class="question-stem">${q.stem}</div>
-            ${optionsHtml(q)}
-            <div class="tch-q-meta">
-              <div class="tch-meta-item"><span class="k">参考答案</span><span class="v${q.answer ? '' : ' is-warn'}">${q.answer || '待确认'}</span></div>
-              <div class="tch-meta-item"><span class="k">知识点</span><span class="v">${(q.kpNames || []).join('、') || '—'}</span></div>
-              <div class="tch-meta-item"><span class="k">任务</span><span class="v">${task ? task.title : '—'}</span></div>
-            </div>`
-        : ui.banner({ tone: 'danger', compact: true, title: '题目数据缺失', body: '无法读取题目信息，请检查数据或重置演示数据。' })}
+      <div class="tch-qa-grid">
+        <div class="tch-qa-block">
+          <div class="tch-qa-label">题目</div>
+          ${q
+            ? html`<div class="question-stem">${q.stem}</div>
+                ${optionsHtml(q)}
+                <div class="tch-q-meta">
+                  <div class="tch-meta-item"><span class="k">参考答案</span><span class="v${q.answer ? '' : ' is-warn'}">${q.answer || '待确认'}</span></div>
+                  <div class="tch-meta-item"><span class="k">知识点</span><span class="v">${(q.kpNames || []).join('、') || '—'}</span></div>
+                  <div class="tch-meta-item"><span class="k">任务</span><span class="v">${task ? task.title : '—'}</span></div>
+                </div>`
+            : ui.banner({ tone: 'danger', compact: true, title: '题目数据缺失', body: '无法读取题目信息，请检查数据或重置演示数据。' })}
+        </div>
+        <div class="tch-qa-block">
+          <div class="tch-qa-label">学生作答</div>
+          ${a.recognition === 'low'
+            ? ui.banner({
+                tone: 'warn',
+                compact: true,
+                title: '识别质量低，请核对原始作答',
+                body: '系统不会猜测低识别质量的内容，也不会据此自动定分；以下文本可能不完整，请对照原始书写核对后再给分。'
+              })
+            : ''}
+          <div class="tch-answer-box${raw(a.rawAnswer && String(a.rawAnswer).trim() ? '' : ' is-empty')}">${a.rawAnswer && String(a.rawAnswer).trim() ? a.rawAnswer : '（未检测到有效作答内容）'}</div>
+          <div class="tch-qa-meta">提交于 ${fmt.datetime(a.submittedAt)} · ${hintText} · 尝试 ${a.attempts || 1} 次 · 用时 ${fmt.duration(a.durationSec)}</div>
+        </div>
+      </div>
     </div>`;
 
-    var recognitionWarn = a.recognition === 'low'
-      ? ui.banner({
-          tone: 'warn',
-          title: '识别质量低，请核对原始作答',
-          body: '系统不会猜测低识别质量的内容，也不会据此自动定分。请对照试卷原始书写核对后再给分；以下文本可能不完整。'
-        })
+    var evidenceDisclosure = ui.disclosure({
+      summary: '判分依据',
+      count: basisLabel + ' · ' + evidenceItems.length + ' 条',
+      body: html`<div class="stack-sm">
+        ${ui.evidence({ title: '系统判读依据', items: evidenceItems, status: a.gradeStatus })}
+        <div class="row-between tch-system-score">
+          <span class="small muted">${isReviewed ? '教师复核给分' : '系统建议分'}</span>
+          <span class="num strong${(a.score === null || a.score === undefined) ? ' muted' : ''}">${(a.score === null || a.score === undefined) ? '未定分' : a.score + ' / ' + max}</span>
+        </div>
+        ${a.gradeNote ? html`<div class="help">${a.gradeNote}</div>` : ''}
+        ${q && q.type === 'process'
+          ? ui.aiNote('过程题按步骤给分，系统不做自动定分；下方分数由教师确认后生效。')
+          : ''}
+      </div>`
+    });
+
+    var gradeHint = q && q.type === 'process'
+      ? html`<div class="tch-inline-warn">${ui.icon('info', 13)}<span>过程题不自动定分：请按步骤给分，系统建议仅供参考。</span></div>`
       : '';
-
-    var answerPanel = html`<div class="tch-panel">
-      <div class="tch-panel-head">
-        <span class="tch-panel-title">学生作答</span>
-        <div class="row-sm row-wrap">
-          ${a.recognition === 'low' ? ui.badge('识别质量低', 'warn') : ''}
-          <span class="tiny muted">提交于 ${fmt.datetime(a.submittedAt)} · ${hintText} · 尝试 ${a.attempts || 1} 次 · 用时 ${fmt.duration(a.durationSec)}</span>
-        </div>
-      </div>
-      ${recognitionWarn}
-      <div class="tch-answer-box${raw(a.rawAnswer && String(a.rawAnswer).trim() ? '' : ' is-empty')}">${a.rawAnswer && String(a.rawAnswer).trim() ? a.rawAnswer : '（未检测到有效作答内容）'}</div>
-    </div>`;
-
-    var evidenceItems = (a.gradeEvidence && a.gradeEvidence.length) ? a.gradeEvidence.slice() : ['系统暂无判读依据。'];
-    var evidencePanel = html`<div class="tch-panel">
-      <div class="tch-panel-head">
-        <span class="tch-panel-title">判分依据</span>
-        ${ui.statusBadge(a.gradeStatus)}
-      </div>
-      ${ui.evidence({ title: '系统判读依据', items: evidenceItems, status: a.gradeStatus })}
-      <div class="row-between tch-system-score">
-        <span class="small muted">${isReviewed ? '教师复核给分' : '系统建议分'}</span>
-        <span class="num strong${(a.score === null || a.score === undefined) ? ' muted' : ''}">${(a.score === null || a.score === undefined) ? '未定分' : a.score + ' / ' + max}</span>
-      </div>
-      ${a.gradeNote ? html`<div class="help">${a.gradeNote}</div>` : ''}
-      ${q && q.type === 'process'
-        ? ui.aiNote('过程题按步骤给分，系统不做自动定分；下方分数由教师确认后生效。')
-        : ''}
-    </div>`;
 
     var gradePanel = html`<div class="tch-panel tch-grade-panel">
       <div class="tch-panel-head">
         <span class="tch-panel-title">教师复核</span>
         <span class="tiny muted">待复核批阅不计入一次正确率与错误率统计</span>
       </div>
+      ${gradeHint}
       <div class="tch-grade-form">
         <div class="form-grid">
           <div class="field">
@@ -291,51 +314,52 @@
           <span>原始作答已人工核对（如识别质量低，勾选后可正常判分）</span>
         </label>
         <div class="tch-wizard-actions">
-          <div class="row-sm row-wrap">
-            ${ui.button({ label: '上一份', tone: 'ghost', size: 'sm', icon: 'chevronLeft', attrs: 'data-act="prev"' })}
-            ${ui.button({ label: '下一份', tone: 'ghost', size: 'sm', icon: 'chevronRight', attrs: 'data-act="next"' })}
-            <span class="tiny muted">支持 ↑ / ↓ 或 ← / → 切换（输入框内不响应）</span>
-          </div>
           <div class="spacer"></div>
           ${S.tab === 'pending'
             ? ui.button({ label: '标记暂无法判阅', tone: 'secondary', size: 'sm', icon: 'help', attrs: 'data-act="mark-unjudged"' })
             : ''}
           ${ui.button({
-            label: isReviewed ? '更新复核分数' : '确认判分并复核',
+            label: isReviewed ? '更新复核分数（修正判分）' : '确认给分并复核',
             tone: 'primary',
             icon: 'check',
             attrs: 'data-act="grade-confirm"'
           })}
         </div>
+        ${isReviewed
+          ? html`<div class="help">已有复核记录：修改分数后点击「更新复核分数」即可修正判分，历史记录保留在下方。</div>`
+          : ''}
       </div>
     </div>`;
 
-    var navInfo = html`<div class="tch-detail-head">
-      <div class="row-sm row-wrap">
-        ${ui.avatar(st.name, { size: 'lg', seed: st.id })}
-        <div class="tch-detail-id">
-          <div class="tch-detail-name">${st.name}</div>
-          <div class="tiny muted">${task ? task.title : '—'} · 第 ${idx + 1} / ${list.length} 份</div>
-        </div>
-        <div class="spacer"></div>
-        <div class="row-sm row-wrap">
-          ${ui.statusBadge(a.gradeStatus)}
-          <span class="tag tag-primary">${S.tab === 'reviewed' ? '已复核记录' : '待复核'}</span>
-        </div>
-      </div>
-    </div>`;
+    var historyList = (state.reviews || []).filter(function (r) { return r.targetId === a.id; })
+      .sort(function (x, y) { return new Date(y.at) - new Date(x.at); });
+    var historyDisclosure = historyList.length
+      ? ui.disclosure({
+          summary: '历史复核记录',
+          count: historyList.length + ' 条',
+          body: html`<div class="tch-history-list">
+            ${historyList.map(function (r) {
+              var user = sel.userById(state, r.by) || { name: r.by };
+              var before = r.before && r.before.status ? (ZWZ.grader.STATUS_LABELS[r.before.status] || r.before.status) + ' · ' + (r.before.score === null || r.before.score === undefined ? '未定分' : r.before.score + ' 分') : '—';
+              var after = r.after && r.after.status ? (ZWZ.grader.STATUS_LABELS[r.after.status] || r.after.status) + ' · ' + (r.after.score === null || r.after.score === undefined ? '未定分' : r.after.score + ' 分') : '—';
+              return html`<div class="tch-history-item">
+                <div class="row-between">
+                  <span class="small strong">${r.action === 'confirm' ? '确认判分' : (r.action === 'modify' ? '修正判分' : '教师复核')}</span>
+                  <span class="tiny muted">${fmt.datetime(r.at)} · ${user.name}</span>
+                </div>
+                <div class="tiny muted">${before} → ${after}${r.note ? ' · 备注：' + r.note : ''}</div>
+              </div>`;
+            })}
+          </div>`
+        })
+      : '';
 
     return html`<div class="stack">
       ${navInfo}
-      ${ui.banner({
-        tone: 'info',
-        compact: true,
-        body: '过程题不自动定分，系统只提供判分依据；本页不会承诺 100% 自动批改。确认判分后会写入复核记录，并同步到班级分析与个体档案。'
-      })}
-      ${questionPanel}
-      ${answerPanel}
-      ${evidencePanel}
+      ${qaPanel}
+      ${evidenceDisclosure}
       ${gradePanel}
+      ${historyDisclosure}
     </div>`;
   }
 
@@ -426,15 +450,6 @@
     ctx.refresh();
   }
 
-  /* ---------------- 顶部统计 ---------------- */
-  function statHtml(label, value, sub, tone, icon) {
-    return html`<div class="tch-stat${raw(tone ? ' is-' + tone : '')}">
-      <div class="tch-stat-label">${ui.icon(icon, 14)}<span>${label}</span></div>
-      <div class="tch-stat-value num">${value}</div>
-      <div class="tch-stat-sub">${sub}</div>
-    </div>`;
-  }
-
   /* ---------------- 页面注册 ---------------- */
   ZWZ.pages.register('teacher/grading', {
     title: '作业批阅',
@@ -456,16 +471,15 @@
         S.selectedId = list.length ? list[0].answer.id : null;
       }
       var tasks = sel.tasksOfClass(state, CLASS_ID);
+      var taskLabel = '全部任务';
+      tasks.forEach(function (t) { if (t.id === S.taskId) taskLabel = t.title; });
+      var statusLabel = '全部状态';
+      STATUS_FILTERS.forEach(function (f) { if (f.key === S.status && f.key !== 'all') statusLabel = f.label; });
 
       var head = html`<div class="page-head">
         <div class="page-head-main">
           <div class="page-title">作业批阅</div>
-          <div class="page-desc">七年级(3)班 · 客观题按明确答案自动判分；过程题与识别异常作答进入人工复核队列。待复核批阅不计入一次正确率与错误率统计。</div>
-          <div class="row-sm row-wrap tch-head-tags">
-            ${ui.badge('待复核批阅 ' + pendingAll.length + ' 条', 'warn')}
-            ${ui.badge('教师已复核 ' + reviewedAll + ' 条', 'success')}
-            ${ui.badge('共 ' + classAnswers(state).length + ' 条作答记录', 'neutral')}
-          </div>
+          <div class="page-desc">客观题自动判分；过程题与识别异常作答进入人工复核，待复核不计入正确率与错误率。</div>
         </div>
         <div class="page-actions">
           ${ui.button({ label: '去复核中心', tone: 'secondary', icon: 'shield', attrs: 'data-go="#/teacher/review"' })}
@@ -473,19 +487,34 @@
         </div>
       </div>`;
 
-      var statGrid = html`<div class="tch-stat-grid">
-        ${statHtml('自动判分', counts.auto || 0, '客观题，答案明确', 'teal', 'check')}
-        ${statHtml('建议复核', counts.suggested || 0, '过程题等，需教师给分', 'warn', 'clock')}
-        ${statHtml('暂无法判阅', counts.unjudged || 0, '识别质量低 / 空白', 'neutral', 'help')}
-        ${statHtml('教师已复核', counts.reviewed || 0, '已完成人工复核', 'success', 'shield')}
-      </div>`;
+      var statStrip = ui.statStrip([
+        {
+          label: '待复核批阅',
+          value: pendingAll.length,
+          unit: '条',
+          sub: '建议复核 ' + pendingSuggested + ' · 暂无法判阅 ' + pendingUnjudged,
+          tone: 'warn'
+        },
+        {
+          label: '教师已复核',
+          value: reviewedAll,
+          unit: '条',
+          sub: '确认或修正后计入统计',
+          tone: 'teal'
+        },
+        {
+          label: '自动判分',
+          value: counts.auto || 0,
+          unit: '条',
+          sub: '客观题答案明确，自动确认'
+        }
+      ]);
 
       var filterRow = html`<div class="tch-queue-filters">
         ${S.tab === 'pending'
           ? html`<div class="seg">
               ${STATUS_FILTERS.map(function (f) {
-                var count = f.key === 'suggested' ? pendingSuggested : (f.key === 'unjudged' ? pendingUnjudged : pendingAll.length);
-                return html`<button type="button" class="seg-item${raw(S.status === f.key ? ' is-active' : '')}" data-status="${f.key}">${f.label}<span class="tiny muted"> ${count}</span></button>`;
+                return html`<button type="button" class="seg-item${raw(S.status === f.key ? ' is-active' : '')}" data-status="${f.key}">${f.label}</button>`;
               })}
             </div>`
           : ''}
@@ -501,12 +530,17 @@
         </div>
       </div>`;
 
+      var queueCurrent = html`<div class="tch-queue-current">
+        <span>当前筛选：<b>${S.tab === 'pending' ? '待复核' : '已复核'}</b> · ${taskLabel} · ${S.tab === 'pending' ? statusLabel : '全部状态'} · 显示 ${list.length} 条</span>
+        <span class="tiny muted">点击队列项切换当前作答</span>
+      </div>`;
+
       var tabs = ui.tabs({
         name: 'tch-grading-tabs',
         active: S.tab,
         items: [
-          { key: 'pending', label: '待复核', badge: pendingAll.length },
-          { key: 'reviewed', label: '已复核', badge: reviewedAll }
+          { key: 'pending', label: '待复核' },
+          { key: 'reviewed', label: '已复核' }
         ]
       });
 
@@ -514,27 +548,34 @@
         <div class="tch-queue-head">
           ${tabs}
           ${filterRow}
+          ${queueCurrent}
         </div>
         <div class="tch-queue-list" id="tch-queue-list">${queueListHtml(state, list)}</div>
       </aside>`;
 
       var detail = html`<section class="card tch-detail" id="tch-detail-panel">${detailHtml(state, list)}</section>`;
 
+      var rules = ui.disclosure({
+        summary: '评分规则与审计说明',
+        count: '6 条',
+        body: html`<ul class="ana-bullets">
+          <li>自动判分仅适用于答案明确的客观题；过程题不自动定分，系统给出的判分建议仅供参考。</li>
+          <li>识别质量低时系统不猜测作答内容，也不据此自动定分；请核对原始作答后再给分。</li>
+          <li>“建议复核”“暂无法判阅”属于待复核状态，不计入一次正确率与错误率统计；“暂无法判阅”不计为答错。</li>
+          <li>确认给分或修正分数后写入复核记录，复核结果同步到班级分析与个体档案，并写入审计日志。</li>
+          <li>本页不承诺 100% 自动批改；演示数据仅用于产品演示，不代表真实学情。</li>
+          <li>队列按提交时间倒序排列；支持 ↑/↓ 或 ←/→ 切换当前作答（输入框内不响应）。</li>
+        </ul>`
+      });
+
       return html`<div class="page">
         ${head}
-        ${statGrid}
+        ${statStrip}
         <div class="tch-grading">
           ${queue}
           ${detail}
-          <div class="tch-grade-note">
-            ${ui.icon('info', 13)}
-            <span>口径说明：待复核批阅不计入一次正确率与错误类型统计；“暂无法判阅”不计为答错。“过程题不自动定分”“不承诺 100% 自动批改”是本页的固定规则。</span>
-          </div>
         </div>
-        <div class="row-sm tiny muted">
-          ${ui.icon('shield', 13)}
-          <span>复核结果会写入复核记录与审计日志，班级分析、个体档案同步派生更新。演示数据，不代表真实学情。</span>
-        </div>
+        ${rules}
       </div>`;
     },
 
@@ -622,3 +663,4 @@
     return n;
   }
 })();
+

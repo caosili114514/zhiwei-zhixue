@@ -579,3 +579,68 @@
     -webkit-box-orient: vertical;
   }
 }
+
+/* ============================================================
+   Batch 3B · 作业批阅：主面板合并、队列压缩、折叠依据
+   ============================================================ */
+.tch-detail-head-row { display: flex; align-items: center; gap: var(--s-3); flex-wrap: wrap; }
+.tch-detail-head-row .tch-detail-id { flex: 1 1 220px; }
+.tch-detail-nav { margin-left: auto; align-items: center; }
+.tch-qa-panel { gap: var(--s-3); }
+.tch-qa-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--s-4);
+}
+.tch-qa-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  min-width: 0;
+  padding-right: var(--s-4);
+  border-right: 1px solid var(--border);
+}
+.tch-qa-block:last-child { padding-right: 0; border-right: 0; }
+.tch-qa-label {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: .05em;
+  color: var(--text-3);
+}
+.tch-qa-meta { font-size: var(--fs-xs); color: var(--text-3); line-height: 1.6; }
+.tch-queue-current {
+  padding: 0 2px var(--s-2);
+  font-size: var(--fs-xs);
+  color: var(--text-2);
+  line-height: 1.55;
+}
+.tch-queue-current b { color: var(--navy); font-weight: 600; }
+.tch-inline-warn {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: var(--fs-xs);
+  line-height: 1.55;
+  color: var(--warn-hover);
+}
+.tch-inline-warn svg { flex: 0 0 auto; margin-top: 2px; }
+.tch-history-list { display: flex; flex-direction: column; gap: var(--s-3); }
+.tch-history-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 10px;
+  border-left: 2px solid var(--border);
+}
+.tch-history-item .small.strong { font-weight: 600; }
+@media (max-width: 900px) {
+  .tch-qa-grid { grid-template-columns: minmax(0, 1fr); }
+  .tch-qa-block {
+    padding-right: 0;
+    padding-bottom: var(--s-3);
+    border-right: 0;
+    border-bottom: 1px dashed var(--border);
+  }
+  .tch-qa-block:last-child { padding-bottom: 0; border-bottom: 0; }
+  .tch-detail-nav { margin-left: 0; width: 100%; }
+}
