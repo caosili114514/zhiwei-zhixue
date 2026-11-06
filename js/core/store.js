@@ -304,6 +304,9 @@ var OFFICIAL_BACKUP_KEY = 'zwz.db.official.backup.v1';
   actions.setClass = function (classId) {
     var exists = (store.state.classes || []).some(function (c) { return c.id === classId; });
     if (!exists) return null;
+    var user = store.user();
+    if (user && user.role === 'student' && user.classId && user.classId !== classId) return null;
+    if (user && user.role === 'teacher' && user.classIds && user.classIds.length && user.classIds.indexOf(classId) < 0) return null;
     store.session.classId = classId;
     store.saveSession();
     store.emit('class');

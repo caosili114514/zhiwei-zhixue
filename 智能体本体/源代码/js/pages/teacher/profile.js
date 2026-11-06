@@ -56,12 +56,15 @@
   function resolveStudent(ctx, state, classId) {
     var q = (ctx.query && ctx.query.student) || null;
     var students = studentsOf(state, classId);
-    if (q && q !== LAST_QUERY_STUDENT && sel.student(state, q)) {
+    var qStudent = q ? sel.student(state, q) : null;
+    if (q && q !== LAST_QUERY_STUDENT && qStudent && qStudent.classId === classId) {
       STUDENT_ID = q;
       LAST_QUERY_STUDENT = q;
     }
-    if (!STUDENT_ID || !sel.student(state, STUDENT_ID)) {
+    var current = STUDENT_ID ? sel.student(state, STUDENT_ID) : null;
+    if (!current || current.classId !== classId) {
       STUDENT_ID = students.length ? students[0].id : null;
+      LAST_QUERY_STUDENT = null;
     }
     return STUDENT_ID;
   }
@@ -81,7 +84,14 @@
   /* ---------------- 学生切换：压缩为一行 ---------------- */
   function renderStudentBar(state, classId, studentId) {
     var students = studentsOf(state, classId);
+    var classes = sel.classes(state);
     return html`<section class="ana-student-bar is-slim">
+      ${classes.length > 1 ? html`<div class="field ana-student-select">
+        <div class="label">${ui.icon('layers', 14)}班级</div>
+        <select class="select" id="ana-class" aria-label="选择班级">
+          ${classes.map(function (c) { return html`<option value="${c.id}" ${c.id === classId ? 'selected' : ''}>${c.name}</option>`; })}
+        </select>
+      </div>` : ''}
       <div class="field ana-student-select">
         <div class="label">${ui.icon('users', 14)}选择学生（共 ${students.length} 名）</div>
         <select class="select" id="ana-student" aria-label="选择学生">
@@ -738,6 +748,16 @@
     mount: function (root, ctx) {
       var state = ctx.state;
       var classId = classIdOf(ctx);
+      var classSelect = root.querySelector('#ana-class');
+      if (classSelect) {
+        classSelect.addEventListener('change', function () {
+          if (!ZWZ.store.actions.setClass(classSelect.value)) return;
+          STUDENT_ID = null;
+          LAST_QUERY_STUDENT = null;
+          try { history.replaceState(null, '', '#/teacher/profile'); } catch (err) { /* ignore */ }
+          ctx.refresh();
+        });
+      }
       var select = root.querySelector('#ana-student');
       if (select) {
         select.addEventListener('change', function () {

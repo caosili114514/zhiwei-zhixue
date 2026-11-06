@@ -96,9 +96,12 @@
   function session() {
     var s = store.session;
     var user = store.user();
-    var cls = user ? (store.state.classes.filter(function (c) {
+    var classes = store.state.classes || [];
+    var bySession = s.classId ? classes.filter(function (c) { return c.id === s.classId; })[0] : null;
+    var byUser = user ? classes.filter(function (c) {
       return (user.classId && c.id === user.classId) || (user.classIds && user.classIds.indexOf(c.id) >= 0);
-    })[0]) : null;
+    })[0] : null;
+    var cls = bySession || byUser || null;
     return {
       userId: s.userId,
       role: s.role,

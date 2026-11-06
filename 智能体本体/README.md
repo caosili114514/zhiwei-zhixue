@@ -102,7 +102,7 @@ node tests/check-official.mjs    # 官方数据/质量/导入回滚 15 项
 node tests/smoke.mjs             # 12 路由 + 权限 2/2
 node tests/smoke.mjs --print     # 打印 3/3
 cd ../测试与验收
-node 校验源代码.cjs               # 快照 54 个文件哈希
+node 校验源代码.cjs               # 快照 55 个文件哈希
 node 验证迷你数据集.cjs           # 5 名学生结构适配
 ```
 
