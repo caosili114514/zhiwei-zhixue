@@ -608,7 +608,15 @@
     </div>`;
 
     if (!e.role) {
-      body += html`<div class="identity-panel identity-empty">${ui.empty({ icon: 'user', title: '请先选择体验身份', desc: '学生、教师与评委快速体验对应不同的数据范围与页面；不会自动替你选择。' })}</div>`;
+      body += html`<div class="identity-panel identity-welcome">
+        <div class="identity-welcome-title">选择一种体验方式开始</div>
+        <div class="identity-welcome-grid">
+          <div><span class="identity-welcome-dot is-blue"></span><b>学生</b><span>只看自己的档案、诊断与练习记录</span></div>
+          <div><span class="identity-welcome-dot is-teal"></span><b>教师</b><span>看本班学情、授权学生档案与教学建议</span></div>
+          <div><span class="identity-welcome-dot is-amber"></span><b>评委</b><span>直接进入赛题成果与三任务演示</span></div>
+        </div>
+        <div class="tiny muted">不会自动替你选择；进入后可在右上角切换身份或退出体验。</div>
+      </div>`;
     } else if (e.role === 'student') {
       body += html`<div class="identity-panel">
         <div class="identity-panel-head"><div><h2>学生体验</h2><div class="tiny muted">明确选择一个模拟学生；只显示该学生自己的数据。</div></div>

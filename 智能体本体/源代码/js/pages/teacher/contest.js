@@ -73,7 +73,7 @@
         { key: 'themeId', label: '主题', width: '150px', render: function (r) { return html`<div class="cell-strong">${r.themeId} · ${r.themeName}</div><span class="cell-sub">${fmt.trunc(r.goal || '', 38)}</span>`; } },
         { key: 'indicatorId', label: '观察指标', width: '190px', render: function (r) { return html`<div class="cell-strong">${r.indicatorId}</div><span class="cell-sub">${r.indicatorName}</span>`; } },
         { key: 'standard', label: '课标 / 教材出处', width: '190px', render: function (r) { return html`<div class="small">${r.standardRef || '—'} · 课标页 ${r.standardPages || '—'}</div><div class="cell-sub">教材：${r.textbookPages || '—'}</div>`; } },
-        { key: 'q', label: '题目', width: '90px', render: function (r) { return html`<div class="num">${r.questionCount}</div><span class="cell-sub">${r.questionIds || '—'}</span>`; } },
+        { key: 'q', label: '题目', width: '168px', render: function (r) { return html`<div class="num">${r.questionCount}</div><span class="cell-sub">${r.questionIds || '—'}</span>`; } },
         { key: 'materials', label: '配套材料', render: function (r) { return html`<div class="small">学习卡：${r.cards || '—'}</div><div class="cell-sub">教材切片：${r.books || '—'}</div>`; } }
       ],
       rows: rows
