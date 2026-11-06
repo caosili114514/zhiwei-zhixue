@@ -145,6 +145,7 @@
           <div class="page-desc">${cls.name} · 教学范围：${scopeText} · 数据范围：${rangeText}</div>
         </div>
         <div class="page-actions">
+          ${ui.button({ label: '布置作业', tone: 'primary', icon: 'plus', attrs: 'data-go="#/teacher/assign"' })}
           ${ui.button({ label: '导入试卷', tone: 'secondary', icon: 'upload', attrs: 'data-go="#/teacher/import"' })}
           ${ui.button({ label: '查看班级分析', tone: 'ghost', icon: 'chart', attrs: 'data-go="#/teacher/analysis"' })}
         </div>

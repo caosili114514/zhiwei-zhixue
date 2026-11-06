@@ -333,7 +333,8 @@
             <div class="page-desc">按主办方三项任务组织：学习内容与要求 → 个体/群体学情分析 → 个性化建议；数据来源与证据可追溯。</div>
           </div>
           <div class="page-actions">
-            ${ui.button({ label: '导出全部成果包', tone: 'primary', icon: 'download', attrs: 'data-act="export-all"' })}
+            ${ui.button({ label: '布置作业', tone: 'primary', icon: 'plus', attrs: 'data-go="#/teacher/assign"' })}
+            ${ui.button({ label: '导出全部成果包', tone: 'secondary', icon: 'download', attrs: 'data-act="export-all"' })}
             ${ui.button({ label: '数据与报告', tone: 'ghost', icon: 'database', attrs: 'data-go="#/teacher/data"' })}
           </div>
         </div>

@@ -90,7 +90,7 @@ const ROUTES = [
   },
   {
     key: 'teacher-dashboard', route: 'teacher/dashboard', role: 'teacher', label: '教师 · 工作台',
-    navCount: 9,
+    navCount: 10,
     expect: [
       ['班级', '本班', '学生'],
       ['待复核', '待批阅', '批阅', '任务', '待确认']
@@ -98,7 +98,7 @@ const ROUTES = [
   },
   {
     key: 'teacher-analysis', route: 'teacher/analysis', role: 'teacher', label: '教师 · 班级学情分析',
-    navCount: 9,
+    navCount: 10,
     expect: [
       ['知识点', '掌握'],
       ['错误类型', '错误', '错因']
@@ -106,7 +106,7 @@ const ROUTES = [
   },
   {
     key: 'teacher-profile', route: 'teacher/profile', role: 'teacher', label: '教师 · 个体学情档案',
-    navCount: 9,
+    navCount: 10,
     expect: [
       ['个体', '学生', '档案'],
       ['诊断', '证据', '建议']
@@ -114,7 +114,7 @@ const ROUTES = [
   },
   {
     key: 'teacher-import', route: 'teacher/import', role: 'teacher', label: '教师 · 试卷与题目',
-    navCount: 9,
+    navCount: 10,
     expect: [
       ['解析', '上传', '材料', '试卷'],
       ['预览', '知识点']
@@ -122,7 +122,7 @@ const ROUTES = [
   },
   {
     key: 'teacher-grading', route: 'teacher/grading', role: 'teacher', label: '教师 · 作业批阅',
-    navCount: 9,
+    navCount: 10,
     expect: [
       ['批阅', '判分'],
       ['复核', '待复核', '暂无法判阅']
@@ -130,7 +130,7 @@ const ROUTES = [
   },
   {
     key: 'teacher-review', route: 'teacher/review', role: 'teacher', label: '教师 · 复核中心',
-    navCount: 9,
+    navCount: 10,
     expect: [
       ['待复核', '暂无法判断', '待确认'],
       ['诊断', '批阅']
@@ -138,7 +138,7 @@ const ROUTES = [
   },
   {
     key: 'teacher-assistant', route: 'teacher/assistant', role: 'teacher', label: '教师 · 教学助理',
-    navCount: 9,
+    navCount: 10,
     expect: [
       ['助手', '提问', '问答'],
       ['建议', '证据', '依据']
@@ -146,7 +146,7 @@ const ROUTES = [
   },
   {
     key: 'teacher-data', route: 'teacher/data', role: 'teacher', label: '教师 · 数据与报告',
-    navCount: 9,
+    navCount: 10,
     expect: [
       ['导出', '报告'],
       ['导入', '数据']
@@ -742,5 +742,6 @@ main().catch(function (err) {
   console.error('冒烟测试异常退出：', err);
   process.exitCode = 1;
 });
+
 
 

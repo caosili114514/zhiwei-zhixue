@@ -34,6 +34,7 @@
         title: '教学工作台',
         items: [
           { key: 'teacher/dashboard', label: '工作台', icon: 'dashboard' },
+          { key: 'teacher/assign', label: '布置作业', icon: 'plus' },
           { key: 'teacher/analysis', label: '班级学情分析', icon: 'chart' },
           { key: 'teacher/profile', label: '个体学情档案', icon: 'user' }
         ]
@@ -187,6 +188,7 @@
         <div class="topbar-crumb">${subtitle}</div>
       </div>
       <div class="topbar-tools">
+        ${s.role === 'teacher' ? html`<button type="button" class="btn btn-primary btn-sm assign-cta" data-act="assign-homework" title="布置作业">${ui.icon('plus', 14)}<span class="assign-cta-label">布置作业</span></button>` : ''}
         <span class="demo-badge" title="${store.mode === 'official' ? '主办方模拟赛题数据（仅用于比赛）' : '全部数据为虚构演示数据'}">${ui.icon('shield', 12)}${store.mode === 'official' ? '赛题数据' : '演示数据'}</span>
         <div class="role-switch" role="group" aria-label="切换角色">
           <button type="button" class="seg-item ${s.role === 'student' ? 'is-active' : ''}" data-act="role" data-role="student">学生端</button>
@@ -323,6 +325,10 @@
 
     document.querySelectorAll('[data-act="user-menu"]').forEach(function (btn) {
       btn.addEventListener('click', openUserMenu);
+    });
+
+    document.querySelectorAll('[data-act="assign-homework"]').forEach(function (btn) {
+      btn.addEventListener('click', function () { navigate('#/teacher/assign'); });
     });
 
     document.querySelectorAll('[data-act="toggle-sidebar"]').forEach(function (btn) {
